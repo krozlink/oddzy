@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package venue;
+
+service VenueService {
+    rpc Add(AddRequest) returns (AddResponse) {}
+    rpc Get(GetRequest) returns (GetResponse) {}
+    rpc List(ListRequest) returns (ListResponse) {}
+    rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+}
+
+message Venue {
+    string id = 1;
+    string name = 2;
+    string country = 3;
+}
+
+message AddRequest {
+    string name = 1;
+    string country = 2;
+}
+
+message AddResponse {
+    bool created = 1;
+    Venue venue = 2;
+}
+
+message GetRequest { 
+    string id = 1;
+}
+
+message GetResponse {
+    Venue venue = 1;
+}
+
+message ListRequest { }
+
+message ListResponse {
+    repeated Venue venues = 1;
+}
+
+message DeleteRequest {
+    string id = 1;
+}
+
+message DeleteResponse {
+    bool deleted = 1;
+}
