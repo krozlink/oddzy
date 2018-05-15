@@ -4,27 +4,30 @@ services:
     container_name: oddzy.services.venue
     build: ./services/venue
     ports:
-      - "8080:8101"
+      - "8101:8080"
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
+      - MICRO_SERVER_ADDRESS=:8080
     depends_on:
       - consul
   meeting-service:
     container_name: oddzy.services.meeting
     build: ./services/meeting
     ports:
-      - "8080:8102"
+      - "8102:8080"
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
+      - MICRO_SERVER_ADDRESS=:8080
     depends_on:
       - consul
   race-service:
     container_name: oddzy.services.race
     build: ./services/race
     ports:
-      - "8080:8103"
+      - "8103:8080"
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
+      - MICRO_SERVER_ADDRESS=:8080
     depends_on:
       - consul
   consul:

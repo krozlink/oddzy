@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	proto "github.com/krozlink/oddzy/services/race/proto"
+	proto "github.com/krozlink/oddzy/services/meeting/proto"
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
 )
@@ -10,13 +10,13 @@ import (
 func main() {
 	fmt.Println("started")
 	srv := micro.NewService(
-		micro.Name("oddzy.services.race"),
+		micro.Name("oddzy.services.meeting"),
 		micro.Version("latest"),
 	)
 
 	srv.Init()
 
-	proto.RegisterRaceServiceHandler(srv.Server(), &service{})
+	proto.RegisterMeetingServiceHandler(srv.Server(), &service{})
 	if err := srv.Run(); err != nil {
 		fmt.Println(err)
 	}

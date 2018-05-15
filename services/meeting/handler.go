@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	proto "github.com/krozlink/oddzy/services/race/proto"
+	proto "github.com/krozlink/oddzy/services/meeting/proto"
 )
 
 type service struct{}
@@ -20,5 +20,6 @@ func (s *service) Add(ctx context.Context, req *proto.AddRequest, resp *proto.Ad
 }
 
 func (s *service) Delete(ctx context.Context, req *proto.DeleteRequest, resp *proto.DeleteResponse) error {
+	resp.Deleted = true
 	return nil
 }
