@@ -1,30 +1,34 @@
 syntax = "proto3";
 
-package venue;
+package race;
 
-service VenueService {
+service RaceService {
     rpc Add(AddRequest) returns (AddResponse) {}
     rpc Get(GetRequest) returns (GetResponse) {}
     rpc List(ListRequest) returns (ListResponse) {}
     rpc Delete(DeleteRequest) returns (DeleteResponse) {}
 }
 
-message Venue {
+message Race {
     string id = 1;
-    string name = 2;
-    string country = 3;
-    string category = 4;
+    int32 number = 2;
+    string name = 3;
+    int64 scheduled_start = 4;
+    int64 actual_start = 5;
+    string status = 6;
 }
 
 message AddRequest {
-    string name = 1;
-    string country = 2;
-    string category = 3;
+    int32 number = 1;
+    string name = 2;
+    int64 scheduled_start = 3;
+    int64 actual_start = 4;
+    string status = 5;
 }
 
 message AddResponse {
     bool created = 1;
-    Venue venue = 2;
+    Race race = 2;
 }
 
 message GetRequest { 
@@ -32,13 +36,13 @@ message GetRequest {
 }
 
 message GetResponse {
-    Venue venue = 1;
+    Race race = 1;
 }
 
 message ListRequest { }
 
 message ListResponse {
-    repeated Venue venues = 1;
+    repeated Race races = 1;
 }
 
 message DeleteRequest {
