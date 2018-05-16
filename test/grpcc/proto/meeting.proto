@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package meeting;
+
+service MeetingService {
+    rpc Add(AddRequest) returns (AddResponse) {}
+    rpc Get(GetRequest) returns (GetResponse) {}
+    rpc List(ListRequest) returns (ListResponse) {}
+    rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+}
+
+message Meeting {
+    string id = 1;
+    string name = 2;
+    string venue_id = 3;
+    repeated string race_ids = 4;
+    int64 scheduled_start = 5;
+}
+
+message AddRequest {
+    string name = 1;
+    string venue_id = 2;
+    repeated string race_ids = 3;
+    int64 scheduled_start = 4;
+}
+
+message AddResponse {
+    bool created = 1;
+    Meeting meeting = 2;
+}
+
+message GetRequest { 
+    string id = 1;
+}
+
+message GetResponse {
+    Meeting meeting = 1;
+}
+
+message ListRequest { }
+
+message ListResponse {
+    repeated Meeting meetings = 1;
+}
+
+message DeleteRequest {
+    string id = 1;
+}
+
+message DeleteResponse {
+    bool deleted = 1;
+}

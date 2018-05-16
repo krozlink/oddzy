@@ -12,6 +12,13 @@ func (s *service) Get(ctx context.Context, req *proto.GetRequest, resp *proto.Ge
 }
 
 func (s *service) List(ctx context.Context, req *proto.ListRequest, resp *proto.ListResponse) error {
+	resp.Venues = []*proto.Venue{
+		&proto.Venue{
+			Category: "cat1234",
+			Country:  "AUS",
+			Id:       "234523432",
+			Name:     "Test Venue",
+		}}
 	return nil
 }
 
