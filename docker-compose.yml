@@ -1,46 +1,23 @@
 version: "3"
 services:
-  grpcc:
-    container_name: grpcc
-    build: ./test/grpcc
-    command: /bin/bash
-    tty: true
-    stdin_open: true
   venue-service:
-    container_name: oddzy.services.venue
     build: ./services/venue
-    ports:
-      - "8101:8080"
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
+      - DB_HOST=db-mongo
     depends_on:
       - consul
-  venue-cli:
-    container_name: oddzy.cli.venue
-    build: ./cli/venue
-    environment:
-      - MICRO_REGISTRY_ADDRESS=consul:8500
-      - MICRO_SERVER_ADDRESS=:8080
-    depends_on:
-      - consul
-      - venue-service
-    command: ./venue-cli
+      - db-mongo
   meeting-service:
-    container_name: oddzy.services.meeting
     build: ./services/meeting
-    ports:
-      - "8102:8080"
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
     depends_on:
       - consul
   race-service:
-    container_name: oddzy.services.race
     build: ./services/race
-    ports:
-      - "8103:8080"
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
@@ -48,7 +25,6 @@ services:
       - consul
   consul:
     image: consul:latest
-    container_name: consul
     hostname: consul
     ports:
      - "8500:8500"
@@ -56,3 +32,17 @@ services:
     environment:
       - CONSUL_UI_BETA=true
     command: consul agent -dev -client 0.0.0.0
+  micro-web:
+    image: microhq/micro
+    command: web --address=0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    environment:
+      - MICRO_REGISTRY=consul
+      - MICRO_REGISTRY_ADDRESS=consul
+    links:
+      - consul
+  db-mongo:
+    image: mongo
+    ports:
+      - 27017:27017
