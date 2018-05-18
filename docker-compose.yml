@@ -1,7 +1,7 @@
 version: "3"
 services:
   venue-service:
-    build: ./services/venue
+    build: ./services/srv/venue
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
@@ -10,14 +10,14 @@ services:
       - consul
       - db-mongo
   meeting-service:
-    build: ./services/meeting
+    build: ./services/srv/meeting
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
     depends_on:
       - consul
   race-service:
-    build: ./services/race
+    build: ./services/srv/race
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
@@ -44,5 +44,9 @@ services:
       - consul
   db-mongo:
     image: mongo
+    volumes: 
+      - mongodata:/data/db
     ports:
       - 27017:27017
+volumes:
+  mongodata:
