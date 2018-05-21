@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	proto "github.com/krozlink/oddzy/services/race/proto"
+	proto "github.com/krozlink/oddzy/services/srv/race/proto"
 )
 
 type service struct{}

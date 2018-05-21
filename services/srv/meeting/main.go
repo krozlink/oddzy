@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	proto "github.com/krozlink/oddzy/services/meeting/proto"
+	proto "github.com/krozlink/oddzy/services/srv/meeting/proto"
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
 )

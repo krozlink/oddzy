@@ -4,7 +4,7 @@ build:
 	
 localbuild:
 	protoc -I. --proto_path=. --go_out=. --micro_out=. proto/*.proto
-	go build -o ../../bin/meeting-service
+	go build -o ../../../bin/meeting-service
 	
 run:
 	docker run --rm -p 50051:50051 \
@@ -12,4 +12,4 @@ run:
 		meeting-service
 
 localrun:
-	../../bin/meeting-service
+	../../../bin/meeting-service

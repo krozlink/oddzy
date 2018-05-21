@@ -11,9 +11,13 @@ It has these top-level messages:
 	Meeting
 	AddRequest
 	AddResponse
+	AddRangeRequest
+	AddRangeResponse
 	GetRequest
+	GetBySourceIDRequest
 	GetResponse
 	ListRequest
+	ListByDateRequest
 	ListResponse
 	DeleteRequest
 	DeleteResponse
@@ -50,8 +54,11 @@ var _ server.Option
 
 type MeetingService interface {
 	Add(ctx context.Context, in *AddRequest, opts ...client.CallOption) (*AddResponse, error)
+	AddRange(ctx context.Context, in *AddRangeRequest, opts ...client.CallOption) (*AddRangeResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...client.CallOption) (*GetResponse, error)
+	GetBySourceID(ctx context.Context, in *GetBySourceIDRequest, opts ...client.CallOption) (*GetResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...client.CallOption) (*ListResponse, error)
+	ListByDate(ctx context.Context, in *ListByDateRequest, opts ...client.CallOption) (*ListResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...client.CallOption) (*DeleteResponse, error)
 }
 
@@ -83,6 +90,16 @@ func (c *meetingService) Add(ctx context.Context, in *AddRequest, opts ...client
 	return out, nil
 }
 
+func (c *meetingService) AddRange(ctx context.Context, in *AddRangeRequest, opts ...client.CallOption) (*AddRangeResponse, error) {
+	req := c.c.NewRequest(c.name, "MeetingService.AddRange", in)
+	out := new(AddRangeResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *meetingService) Get(ctx context.Context, in *GetRequest, opts ...client.CallOption) (*GetResponse, error) {
 	req := c.c.NewRequest(c.name, "MeetingService.Get", in)
 	out := new(GetResponse)
@@ -93,8 +110,28 @@ func (c *meetingService) Get(ctx context.Context, in *GetRequest, opts ...client
 	return out, nil
 }
 
+func (c *meetingService) GetBySourceID(ctx context.Context, in *GetBySourceIDRequest, opts ...client.CallOption) (*GetResponse, error) {
+	req := c.c.NewRequest(c.name, "MeetingService.GetBySourceID", in)
+	out := new(GetResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *meetingService) List(ctx context.Context, in *ListRequest, opts ...client.CallOption) (*ListResponse, error) {
 	req := c.c.NewRequest(c.name, "MeetingService.List", in)
+	out := new(ListResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingService) ListByDate(ctx context.Context, in *ListByDateRequest, opts ...client.CallOption) (*ListResponse, error) {
+	req := c.c.NewRequest(c.name, "MeetingService.ListByDate", in)
 	out := new(ListResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -117,16 +154,22 @@ func (c *meetingService) Delete(ctx context.Context, in *DeleteRequest, opts ...
 
 type MeetingServiceHandler interface {
 	Add(context.Context, *AddRequest, *AddResponse) error
+	AddRange(context.Context, *AddRangeRequest, *AddRangeResponse) error
 	Get(context.Context, *GetRequest, *GetResponse) error
+	GetBySourceID(context.Context, *GetBySourceIDRequest, *GetResponse) error
 	List(context.Context, *ListRequest, *ListResponse) error
+	ListByDate(context.Context, *ListByDateRequest, *ListResponse) error
 	Delete(context.Context, *DeleteRequest, *DeleteResponse) error
 }
 
 func RegisterMeetingServiceHandler(s server.Server, hdlr MeetingServiceHandler, opts ...server.HandlerOption) {
 	type meetingService interface {
 		Add(ctx context.Context, in *AddRequest, out *AddResponse) error
+		AddRange(ctx context.Context, in *AddRangeRequest, out *AddRangeResponse) error
 		Get(ctx context.Context, in *GetRequest, out *GetResponse) error
+		GetBySourceID(ctx context.Context, in *GetBySourceIDRequest, out *GetResponse) error
 		List(ctx context.Context, in *ListRequest, out *ListResponse) error
+		ListByDate(ctx context.Context, in *ListByDateRequest, out *ListResponse) error
 		Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error
 	}
 	type MeetingService struct {
@@ -144,12 +187,24 @@ func (h *meetingServiceHandler) Add(ctx context.Context, in *AddRequest, out *Ad
 	return h.MeetingServiceHandler.Add(ctx, in, out)
 }
 
+func (h *meetingServiceHandler) AddRange(ctx context.Context, in *AddRangeRequest, out *AddRangeResponse) error {
+	return h.MeetingServiceHandler.AddRange(ctx, in, out)
+}
+
 func (h *meetingServiceHandler) Get(ctx context.Context, in *GetRequest, out *GetResponse) error {
 	return h.MeetingServiceHandler.Get(ctx, in, out)
 }
 
+func (h *meetingServiceHandler) GetBySourceID(ctx context.Context, in *GetBySourceIDRequest, out *GetResponse) error {
+	return h.MeetingServiceHandler.GetBySourceID(ctx, in, out)
+}
+
 func (h *meetingServiceHandler) List(ctx context.Context, in *ListRequest, out *ListResponse) error {
 	return h.MeetingServiceHandler.List(ctx, in, out)
+}
+
+func (h *meetingServiceHandler) ListByDate(ctx context.Context, in *ListByDateRequest, out *ListResponse) error {
+	return h.MeetingServiceHandler.ListByDate(ctx, in, out)
 }
 
 func (h *meetingServiceHandler) Delete(ctx context.Context, in *DeleteRequest, out *DeleteResponse) error {

@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	proto "github.com/krozlink/oddzy/services/venue/proto"
+	proto "github.com/krozlink/oddzy/services/srv/venue/proto"
 	"gopkg.in/mgo.v2"
 )
 
