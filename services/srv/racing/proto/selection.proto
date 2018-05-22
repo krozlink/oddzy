@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package racing;
+
+service SelectionService {
+    rpc ListForRace(ListForRaceRequest) returns (ListForRaceResponse) {}
+    rpc Get(GetRequest) returns (GetResponse) {}
+    rpc GetByCompetitorID (GetByCompetitorIDRequest) returns (GetByCompetitorIDResponse);
+    rpc Add (AddRequest) returns (AddResponse);
+    rpc AddRange (AddRangeRequest) returns (AddRangeResponse);
+    rpc Update (UpdateRequest) returns (UpdateResponse);
+    rpc Delete (DeleteRequest) returns (DeleteResponse);
+}
+
+message Selection {
+    string selection_id = 1;
+    string source_id = 2;
+    string competitor_id = 3;
+    string name = 4;
+    string jockey = 5;
+    int32 number = 6;
+    int32 barrier_number = 7;
+}
+

@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package racing;
+
+service RaceService {
+    rpc ListForMeeting(ListForMeetingRequest) returns (ListForMeetingResponse) {}
+    rpc Get(GetRequest) returns (GetResponse) {}
+    rpc GetByCompetitorID(GetByCompetitorIDRequest) returns (GetByCompetitorIDResponse) {}   
+    rpc Add(AddRequest) returns (AddResponse) {}
+    rpc AddRange(AddRangeRequest) returns (AddRangeResponse) {}
+    rpc Update (UpdateRequest) returns (UpdateResponse);
+    rpc Delete (DeleteRequest) returns (DeleteResponse);
+}
+
+message Race {
+    string race_id = 1;
+    string source_id = 2;
+    int32 number = 3;
+    string name = 4;
+    int64 scheduled_start = 5;
+    int64 actual_start = 6;
+    string status = 7;
+    repeated int32 results = 8;
+}
+
+message ListForMeetingRequest {
+    string meeting_id = 1;
+}
+
+message ListForMeetingResponse {
+    repeated Race races = 1;
+}
+
+message AddRequest {
+    Race race = 1;
+}
+
+message AddResponse {
+    bool created = 1;
+}
+
+message AddRangeRequest {
+    repeated Race racess = 1;
+}
+
+message AddRangeResponse {
+    repeated AddResponse responses = 1;
+}
+
+message GetRequest { 
+    string race_id = 1;
+}
+
+message GetResponse {
+    Race race = 1;
+}
+
+message GetByCompetitorIDRequest { 
+    string competitor_id = 1;
+}
+
+message GetByCompetitorIDResponse {
+    Race race = 1;
+}
+
+message UpdateRequest {
+    Race race = 1;
+}
+
+message UpdateResponse {
+    bool updated = 1;
+}
+
+message DeleteRequest {
+    string race_id = 1;
+}
+
+message DeleteResponse {
+    bool deleted = 1;
+}

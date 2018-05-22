@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package scraper;
+
+service ScraperService {
+    rpc GetWorkQueue(GetWorkQueueRequest) returns (GetWorkQueueResponse) {}
+}
+
+message ScrapeItem {
+    string url = 1;
+}
+
+message GetWorkQueueRequest {
+
+}
+
+message GetWorkQueueResponse {
+    repeated ScrapeItem items = 1;
+}
