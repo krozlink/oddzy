@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package scraper;
+
+service ScraperService {
+    rpc GetWorkQueue(GetWorkQueueRequest) returns (GetWorkQueueResponse) {}
+    rpc GetWorkHistory(GetWorkHistoryRequest) returns (GetWorkHistoryResponse) {}
+    rpc GetStatus(GetStatusRequest) returns (GetStatusResponse) {}
+}
+
+message ScrapeItem {
+    string url = 1;
+}
+
+message ScrapeHistoryItem {
+    string timestamp = 1;
+    string url = 2;
+}
+
+message GetWorkQueueRequest {
+
+}
+
+message GetWorkQueueResponse {
+    repeated ScrapeItem items = 1;
+}
+
+message GetStatusRequest {
+
+}
+
+message GetStatusResponse {
+    string status = 1;
+}
+
+message GetWorkHistoryRequest {
+    
+}
+
+message GetWorkHistoryResponse {
+    repeated ScrapeHistoryItem items = 1;
+}
+
