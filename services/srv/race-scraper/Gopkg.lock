@@ -45,6 +45,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/krozlink/oddzy"
+  packages = ["services/srv/racing/proto"]
+  revision = "d528fd0d08a2f065b11fdf890817a2aa255feb4f"
+
+[[projects]]
+  branch = "master"
   name = "github.com/micro/cli"
   packages = ["."]
   revision = "3d2263bb092286dde294a31049c92665f8373820"
@@ -174,6 +180,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f19dc3d7c16cc43d1ac2247db3624b78f469be920ea662110bb7c6142b4ea93b"
+  inputs-digest = "6c5e5ccebd6942fec261371bdc96808ec25846a9320bf8b8f7e9133d20bed6a6"
   solver-name = "gps-cdcl"
   solver-version = 1

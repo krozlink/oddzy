@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package racing;
+
+service RacingService {
+    rpc ListMeetingsByDate (ListMeetingsByDateRequest) returns (ListMeetingsByDateResponse) {}
+    rpc ListRacesByMeetingDate (ListRacesByMeetingDateRequest) returns (ListRacesByMeetingDateResponse) {}
+    rpc AddMeetings (AddMeetingsRequest) returns (AddMeetingsResponse);
+    rpc AddRaces (AddRacesRequest) returns (AddRacesResponse);
+    rpc UpdateRace (UpdateRaceRequest) returns (UpdateRaceResponse);
+}
+
+message ListMeetingsByDateRequest {
+    string start_date = 1; //yyyy-MM-dd
+    string end_date = 2; //yyyy-MM-dd
+}
+
+message ListMeetingsByDateResponse {
+    repeated Meeting meetings = 1;
+}
+
+message ListRacesByMeetingDateRequest {
+    string start_date = 1; //yyyy-MM-dd
+    string end_date = 2; //yyyy-MM-dd
+}
+
+message ListRacesByMeetingDateResponse {
+    repeated Race races = 1;
+}
+
+message AddRacesRequest {
+    string meeting_id = 1;
+    repeated Race races = 2;
+}
+
+message AddRacesResponse {
+    repeated bool created = 1;
+}
+
+message AddMeetingsRequest {
+    string meeting_id = 1;
+    repeated Meeting meetings = 2;
+}
+
+message AddMeetingsResponse {
+    repeated bool created = 1;
+}
+
+message UpdateRaceRequest {
+    Race race = 1;
+    repeated Selection selections = 2;
+}
+
+message UpdateRaceResponse {
+    bool updated = 1;
+}
+
+message Meeting {
+    string meeting_id = 1;
+    string source_id = 2;
+    string name = 3;
+    string country = 4;
+    string race_type = 5;
+    int64 scheduled_start = 6;
+    repeated string race_ids = 7;
+}
+
+message Competitor {
+    string competitor_id = 1;
+    string source_id = 2;
+    string name = 3;
+    string date_of_birth = 4;
+    string country = 5;
+    string trainer = 6;
+    string gender = 7;
+    string image_url = 8;
+}
+
+message Selection {
+    string selection_id = 1;
+    string source_id = 2;
+    string competitor_id = 3;
+    string name = 4;
+    string jockey = 5;
+    int32 number = 6;
+    int32 barrier_number = 7;
+}
+
+message Race {
+    string race_id = 1;
+    string source_id = 2;
+    int32 number = 3;
+    string name = 4;
+    int64 scheduled_start = 5;
+    int64 actual_start = 6;
+    string status = 7;
+    repeated int32 results = 8;
+}

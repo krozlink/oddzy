@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/race-scraper/proto"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
@@ -23,7 +24,7 @@ type meetingData struct {
 }
 
 var (
-	status   = "INITIALISING"
+	status   string
 	meetings map[string]string
 	done     = make(chan bool)
 )
@@ -31,7 +32,7 @@ var (
 func main() {
 	registerService()
 
-	scrapeMissingRaceData()
+	addMissingRaceData()
 
 	monitorUpcomingRaces()
 
@@ -39,7 +40,7 @@ func main() {
 }
 
 func registerService() {
-	status := "INITIALISING"
+	status = "INITIALISING"
 	srv := micro.NewService(
 		micro.Name("oddzy.services.race-scraper"),
 		micro.Version("latest"),
@@ -56,7 +57,7 @@ func registerService() {
 	}()
 }
 
-func scrapeMissingRaceData() {
+func addMissingRaceData() {
 	status = "SETUP"
 
 	// intData := readInternalMeetingData()
@@ -69,16 +70,16 @@ func readInternalMeetingData() {
 	// ListRacesByMeetingDate(date_range)
 }
 
-func scrapeExternalMeetingData() (<-chan bool) {
+func scrapeExternalMeetingData() <-chan bool {
 
 	result := make(chan bool)
 	go func() {
 		log.Println("Scraping meeting data")
 
-		for i, url := range meetingUrls() {
+		for i, url := range calendarUrls() {
 			if i > 0 {
 				<-time.After(1 * time.Second)
-				scrapeMeeting(url)
+				scrapeCalendar(url)
 			}
 		}
 
@@ -92,11 +93,23 @@ func startRaceUpdater() {
 
 }
 
-func scrapeMeeting(url string) {
-	// scrape the url
+func scrapeCalendar(url string) (*raceCalendar, error) {
+	encodedResponse := getResponse(url)
+	odds := oddsResponse{}
+	json.Unmarshal(encodedResponse, odds)
+	calendar := &raceCalendar{}
+	err := json.Unmarshal([]byte(odds.r), calendar)
+
+	if err != nil {
+		fmt.Println("Unable to decode response into race calendar")
+		fmt.Println(odds.r)
+		return nil, err
+	}
+
+	return calendar, nil
 }
 
-func meetingUrls() []string {
+func calendarUrls() []string {
 	dates := []string{
 		time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
 		time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
@@ -119,5 +132,6 @@ func meetingUrls() []string {
 }
 
 func monitorUpcomingRaces() {
+	status = "RACE_MONITORING"
 
 }
