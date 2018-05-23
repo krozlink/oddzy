@@ -16,21 +16,30 @@ const (
 )
 
 type meetingData struct {
-	meetings    []meeting.Meeting
-	races       []race
-	selections  []selection
-	competitors []competitor
+	meetings    []racing.Meeting
+	races       []racing.Race
+	selections  []racing.Selection
+	competitors []racing.Competitor
 }
 
+var (
+	status   = "INITIALISING"
+	meetings map[string]string
+	done     = make(chan bool)
+)
+
 func main() {
+	registerService()
 
-	intData := readInternalMeetingData()
-	extData := scrapeExternalMeetingData()
-	eventIds := getMissingEvents(intData, extData)
-	scrapeMissingRaceData(eventIds)
+	scrapeMissingRaceData()
 
-	startRaceUpdater()
+	monitorUpcomingRaces()
 
+	<-done
+}
+
+func registerService() {
+	status := "INITIALISING"
 	srv := micro.NewService(
 		micro.Name("oddzy.services.race-scraper"),
 		micro.Version("latest"),
@@ -39,28 +48,44 @@ func main() {
 	srv.Init()
 
 	proto.RegisterScraperServiceHandler(srv.Server(), &service{})
-	if err := srv.Run(); err != nil {
-		fmt.Println(err)
-	}
-}
 
-func readInternalMeetingData() {
-	// read all meetings, races, selections and competitors for yesterday, today, tomorrow, and the following day
+	go func() {
+		if err := srv.Run(); err != nil {
+			log.Fatalln(err)
+		}
+	}()
 }
 
 func scrapeMissingRaceData() {
+	status = "SETUP"
 
+	// intData := readInternalMeetingData()
+	// extData := scrapeExternalMeetingData()
+	// eventIds := getMissingEvents(intData, extData)
 }
 
-func scrapeExternalMeetingData() {
-	log.Println("Scraping meeting data")
+func readInternalMeetingData() {
+	// ListMeetingsByDate(date_range)
+	// ListRacesByMeetingDate(date_range)
+}
 
-	for i, url := range meetingUrls() {
-		if i > 0 {
-			<-time.After(1 * time.Second)
-			scrapeMeeting(url)
+func scrapeExternalMeetingData() (<-chan bool) {
+
+	result := make(chan bool)
+	go func() {
+		log.Println("Scraping meeting data")
+
+		for i, url := range meetingUrls() {
+			if i > 0 {
+				<-time.After(1 * time.Second)
+				scrapeMeeting(url)
+			}
 		}
-	}
+
+		result <- true
+	}()
+
+	return result
 }
 
 func startRaceUpdater() {
@@ -91,4 +116,8 @@ func meetingUrls() []string {
 	}
 
 	return urls
+}
+
+func monitorUpcomingRaces() {
+
 }

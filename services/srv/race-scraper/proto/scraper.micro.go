@@ -9,8 +9,13 @@ It is generated from these files:
 
 It has these top-level messages:
 	ScrapeItem
+	ScrapeHistoryItem
 	GetWorkQueueRequest
 	GetWorkQueueResponse
+	GetStatusRequest
+	GetStatusResponse
+	GetWorkHistoryRequest
+	GetWorkHistoryResponse
 */
 package scraper
 
@@ -44,6 +49,8 @@ var _ server.Option
 
 type ScraperService interface {
 	GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, opts ...client.CallOption) (*GetWorkQueueResponse, error)
+	GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, opts ...client.CallOption) (*GetWorkHistoryResponse, error)
+	GetStatus(ctx context.Context, in *GetStatusRequest, opts ...client.CallOption) (*GetStatusResponse, error)
 }
 
 type scraperService struct {
@@ -74,15 +81,39 @@ func (c *scraperService) GetWorkQueue(ctx context.Context, in *GetWorkQueueReque
 	return out, nil
 }
 
+func (c *scraperService) GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, opts ...client.CallOption) (*GetWorkHistoryResponse, error) {
+	req := c.c.NewRequest(c.name, "ScraperService.GetWorkHistory", in)
+	out := new(GetWorkHistoryResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *scraperService) GetStatus(ctx context.Context, in *GetStatusRequest, opts ...client.CallOption) (*GetStatusResponse, error) {
+	req := c.c.NewRequest(c.name, "ScraperService.GetStatus", in)
+	out := new(GetStatusResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for ScraperService service
 
 type ScraperServiceHandler interface {
 	GetWorkQueue(context.Context, *GetWorkQueueRequest, *GetWorkQueueResponse) error
+	GetWorkHistory(context.Context, *GetWorkHistoryRequest, *GetWorkHistoryResponse) error
+	GetStatus(context.Context, *GetStatusRequest, *GetStatusResponse) error
 }
 
 func RegisterScraperServiceHandler(s server.Server, hdlr ScraperServiceHandler, opts ...server.HandlerOption) {
 	type scraperService interface {
 		GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, out *GetWorkQueueResponse) error
+		GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, out *GetWorkHistoryResponse) error
+		GetStatus(ctx context.Context, in *GetStatusRequest, out *GetStatusResponse) error
 	}
 	type ScraperService struct {
 		scraperService
@@ -97,4 +128,12 @@ type scraperServiceHandler struct {
 
 func (h *scraperServiceHandler) GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, out *GetWorkQueueResponse) error {
 	return h.ScraperServiceHandler.GetWorkQueue(ctx, in, out)
+}
+
+func (h *scraperServiceHandler) GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, out *GetWorkHistoryResponse) error {
+	return h.ScraperServiceHandler.GetWorkHistory(ctx, in, out)
+}
+
+func (h *scraperServiceHandler) GetStatus(ctx context.Context, in *GetStatusRequest, out *GetStatusResponse) error {
+	return h.ScraperServiceHandler.GetStatus(ctx, in, out)
 }

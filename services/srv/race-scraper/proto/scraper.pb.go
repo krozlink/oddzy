@@ -29,7 +29,7 @@ func (m *ScrapeItem) Reset()         { *m = ScrapeItem{} }
 func (m *ScrapeItem) String() string { return proto.CompactTextString(m) }
 func (*ScrapeItem) ProtoMessage()    {}
 func (*ScrapeItem) Descriptor() ([]byte, []int) {
-	return fileDescriptor_scraper_2228ba1e3e257950, []int{0}
+	return fileDescriptor_scraper_c0c8df4fa505763a, []int{0}
 }
 func (m *ScrapeItem) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ScrapeItem.Unmarshal(m, b)
@@ -56,6 +56,52 @@ func (m *ScrapeItem) GetUrl() string {
 	return ""
 }
 
+type ScrapeHistoryItem struct {
+	Timestamp            string   `protobuf:"bytes,1,opt,name=timestamp" json:"timestamp,omitempty"`
+	Url                  string   `protobuf:"bytes,2,opt,name=url" json:"url,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ScrapeHistoryItem) Reset()         { *m = ScrapeHistoryItem{} }
+func (m *ScrapeHistoryItem) String() string { return proto.CompactTextString(m) }
+func (*ScrapeHistoryItem) ProtoMessage()    {}
+func (*ScrapeHistoryItem) Descriptor() ([]byte, []int) {
+	return fileDescriptor_scraper_c0c8df4fa505763a, []int{1}
+}
+func (m *ScrapeHistoryItem) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ScrapeHistoryItem.Unmarshal(m, b)
+}
+func (m *ScrapeHistoryItem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ScrapeHistoryItem.Marshal(b, m, deterministic)
+}
+func (dst *ScrapeHistoryItem) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScrapeHistoryItem.Merge(dst, src)
+}
+func (m *ScrapeHistoryItem) XXX_Size() int {
+	return xxx_messageInfo_ScrapeHistoryItem.Size(m)
+}
+func (m *ScrapeHistoryItem) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScrapeHistoryItem.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScrapeHistoryItem proto.InternalMessageInfo
+
+func (m *ScrapeHistoryItem) GetTimestamp() string {
+	if m != nil {
+		return m.Timestamp
+	}
+	return ""
+}
+
+func (m *ScrapeHistoryItem) GetUrl() string {
+	if m != nil {
+		return m.Url
+	}
+	return ""
+}
+
 type GetWorkQueueRequest struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -66,7 +112,7 @@ func (m *GetWorkQueueRequest) Reset()         { *m = GetWorkQueueRequest{} }
 func (m *GetWorkQueueRequest) String() string { return proto.CompactTextString(m) }
 func (*GetWorkQueueRequest) ProtoMessage()    {}
 func (*GetWorkQueueRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_scraper_2228ba1e3e257950, []int{1}
+	return fileDescriptor_scraper_c0c8df4fa505763a, []int{2}
 }
 func (m *GetWorkQueueRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWorkQueueRequest.Unmarshal(m, b)
@@ -97,7 +143,7 @@ func (m *GetWorkQueueResponse) Reset()         { *m = GetWorkQueueResponse{} }
 func (m *GetWorkQueueResponse) String() string { return proto.CompactTextString(m) }
 func (*GetWorkQueueResponse) ProtoMessage()    {}
 func (*GetWorkQueueResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_scraper_2228ba1e3e257950, []int{2}
+	return fileDescriptor_scraper_c0c8df4fa505763a, []int{3}
 }
 func (m *GetWorkQueueResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWorkQueueResponse.Unmarshal(m, b)
@@ -124,25 +170,174 @@ func (m *GetWorkQueueResponse) GetItems() []*ScrapeItem {
 	return nil
 }
 
-func init() {
-	proto.RegisterType((*ScrapeItem)(nil), "scraper.ScrapeItem")
-	proto.RegisterType((*GetWorkQueueRequest)(nil), "scraper.GetWorkQueueRequest")
-	proto.RegisterType((*GetWorkQueueResponse)(nil), "scraper.GetWorkQueueResponse")
+type GetStatusRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func init() { proto.RegisterFile("proto/scraper.proto", fileDescriptor_scraper_2228ba1e3e257950) }
+func (m *GetStatusRequest) Reset()         { *m = GetStatusRequest{} }
+func (m *GetStatusRequest) String() string { return proto.CompactTextString(m) }
+func (*GetStatusRequest) ProtoMessage()    {}
+func (*GetStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_scraper_c0c8df4fa505763a, []int{4}
+}
+func (m *GetStatusRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetStatusRequest.Unmarshal(m, b)
+}
+func (m *GetStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetStatusRequest.Marshal(b, m, deterministic)
+}
+func (dst *GetStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetStatusRequest.Merge(dst, src)
+}
+func (m *GetStatusRequest) XXX_Size() int {
+	return xxx_messageInfo_GetStatusRequest.Size(m)
+}
+func (m *GetStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetStatusRequest.DiscardUnknown(m)
+}
 
-var fileDescriptor_scraper_2228ba1e3e257950 = []byte{
-	// 173 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2e, 0x28, 0xca, 0x2f,
-	0xc9, 0xd7, 0x2f, 0x4e, 0x2e, 0x4a, 0x2c, 0x48, 0x2d, 0xd2, 0x03, 0xf3, 0x84, 0xd8, 0xa1, 0x5c,
-	0x25, 0x39, 0x2e, 0xae, 0x60, 0x30, 0xd3, 0xb3, 0x24, 0x35, 0x57, 0x48, 0x80, 0x8b, 0xb9, 0xb4,
-	0x28, 0x47, 0x82, 0x51, 0x81, 0x51, 0x83, 0x33, 0x08, 0xc4, 0x54, 0x12, 0xe5, 0x12, 0x76, 0x4f,
-	0x2d, 0x09, 0xcf, 0x2f, 0xca, 0x0e, 0x2c, 0x4d, 0x2d, 0x4d, 0x0d, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d,
-	0x2e, 0x51, 0x72, 0xe4, 0x12, 0x41, 0x15, 0x2e, 0x2e, 0xc8, 0xcf, 0x2b, 0x4e, 0x15, 0xd2, 0xe4,
-	0x62, 0xcd, 0x2c, 0x49, 0xcd, 0x2d, 0x96, 0x60, 0x54, 0x60, 0xd6, 0xe0, 0x36, 0x12, 0xd6, 0x83,
-	0x59, 0x8b, 0xb0, 0x24, 0x08, 0xa2, 0xc2, 0x28, 0x9e, 0x8b, 0x0f, 0x22, 0x58, 0x14, 0x9c, 0x5a,
-	0x54, 0x96, 0x99, 0x9c, 0x2a, 0xe4, 0xcb, 0xc5, 0x83, 0x6c, 0xa8, 0x90, 0x0c, 0x5c, 0x37, 0x16,
-	0x27, 0x48, 0xc9, 0xe2, 0x90, 0x85, 0xb8, 0x44, 0x89, 0x21, 0x89, 0x0d, 0xec, 0x55, 0x63, 0x40,
-	0x00, 0x00, 0x00, 0xff, 0xff, 0x52, 0x1b, 0xf5, 0xff, 0x01, 0x01, 0x00, 0x00,
+var xxx_messageInfo_GetStatusRequest proto.InternalMessageInfo
+
+type GetStatusResponse struct {
+	Status               string   `protobuf:"bytes,1,opt,name=status" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetStatusResponse) Reset()         { *m = GetStatusResponse{} }
+func (m *GetStatusResponse) String() string { return proto.CompactTextString(m) }
+func (*GetStatusResponse) ProtoMessage()    {}
+func (*GetStatusResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_scraper_c0c8df4fa505763a, []int{5}
+}
+func (m *GetStatusResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetStatusResponse.Unmarshal(m, b)
+}
+func (m *GetStatusResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetStatusResponse.Marshal(b, m, deterministic)
+}
+func (dst *GetStatusResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetStatusResponse.Merge(dst, src)
+}
+func (m *GetStatusResponse) XXX_Size() int {
+	return xxx_messageInfo_GetStatusResponse.Size(m)
+}
+func (m *GetStatusResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetStatusResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetStatusResponse proto.InternalMessageInfo
+
+func (m *GetStatusResponse) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
+type GetWorkHistoryRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetWorkHistoryRequest) Reset()         { *m = GetWorkHistoryRequest{} }
+func (m *GetWorkHistoryRequest) String() string { return proto.CompactTextString(m) }
+func (*GetWorkHistoryRequest) ProtoMessage()    {}
+func (*GetWorkHistoryRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_scraper_c0c8df4fa505763a, []int{6}
+}
+func (m *GetWorkHistoryRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetWorkHistoryRequest.Unmarshal(m, b)
+}
+func (m *GetWorkHistoryRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetWorkHistoryRequest.Marshal(b, m, deterministic)
+}
+func (dst *GetWorkHistoryRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetWorkHistoryRequest.Merge(dst, src)
+}
+func (m *GetWorkHistoryRequest) XXX_Size() int {
+	return xxx_messageInfo_GetWorkHistoryRequest.Size(m)
+}
+func (m *GetWorkHistoryRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetWorkHistoryRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetWorkHistoryRequest proto.InternalMessageInfo
+
+type GetWorkHistoryResponse struct {
+	Items                []*ScrapeHistoryItem `protobuf:"bytes,1,rep,name=items" json:"items,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
+}
+
+func (m *GetWorkHistoryResponse) Reset()         { *m = GetWorkHistoryResponse{} }
+func (m *GetWorkHistoryResponse) String() string { return proto.CompactTextString(m) }
+func (*GetWorkHistoryResponse) ProtoMessage()    {}
+func (*GetWorkHistoryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_scraper_c0c8df4fa505763a, []int{7}
+}
+func (m *GetWorkHistoryResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetWorkHistoryResponse.Unmarshal(m, b)
+}
+func (m *GetWorkHistoryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetWorkHistoryResponse.Marshal(b, m, deterministic)
+}
+func (dst *GetWorkHistoryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetWorkHistoryResponse.Merge(dst, src)
+}
+func (m *GetWorkHistoryResponse) XXX_Size() int {
+	return xxx_messageInfo_GetWorkHistoryResponse.Size(m)
+}
+func (m *GetWorkHistoryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetWorkHistoryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetWorkHistoryResponse proto.InternalMessageInfo
+
+func (m *GetWorkHistoryResponse) GetItems() []*ScrapeHistoryItem {
+	if m != nil {
+		return m.Items
+	}
+	return nil
+}
+
+func init() {
+	proto.RegisterType((*ScrapeItem)(nil), "scraper.ScrapeItem")
+	proto.RegisterType((*ScrapeHistoryItem)(nil), "scraper.ScrapeHistoryItem")
+	proto.RegisterType((*GetWorkQueueRequest)(nil), "scraper.GetWorkQueueRequest")
+	proto.RegisterType((*GetWorkQueueResponse)(nil), "scraper.GetWorkQueueResponse")
+	proto.RegisterType((*GetStatusRequest)(nil), "scraper.GetStatusRequest")
+	proto.RegisterType((*GetStatusResponse)(nil), "scraper.GetStatusResponse")
+	proto.RegisterType((*GetWorkHistoryRequest)(nil), "scraper.GetWorkHistoryRequest")
+	proto.RegisterType((*GetWorkHistoryResponse)(nil), "scraper.GetWorkHistoryResponse")
+}
+
+func init() { proto.RegisterFile("proto/scraper.proto", fileDescriptor_scraper_c0c8df4fa505763a) }
+
+var fileDescriptor_scraper_c0c8df4fa505763a = []byte{
+	// 297 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x92, 0xc1, 0x4a, 0xc3, 0x40,
+	0x10, 0x86, 0x8d, 0xc5, 0x4a, 0x46, 0x29, 0xed, 0xc6, 0xd6, 0x1a, 0x6a, 0x2d, 0x7b, 0xaa, 0x08,
+	0x55, 0xea, 0x13, 0x88, 0x42, 0x55, 0xf0, 0x60, 0x72, 0xf0, 0x1c, 0xcb, 0x1c, 0x82, 0xc6, 0xc4,
+	0xdd, 0x59, 0xc1, 0x57, 0xf7, 0x24, 0xdd, 0xec, 0x26, 0xd9, 0xd0, 0xde, 0x76, 0xe6, 0x9f, 0x7c,
+	0x7c, 0x33, 0x04, 0x82, 0x42, 0xe4, 0x94, 0x5f, 0xcb, 0xb5, 0x48, 0x0a, 0x14, 0x0b, 0x5d, 0xb1,
+	0x43, 0x53, 0xf2, 0x29, 0x40, 0xac, 0x9f, 0x4f, 0x84, 0x19, 0xeb, 0x43, 0x47, 0x89, 0xcf, 0xb1,
+	0x37, 0xf3, 0xe6, 0x7e, 0xb4, 0x79, 0xf2, 0x7b, 0x18, 0x94, 0xf9, 0x63, 0x2a, 0x29, 0x17, 0xbf,
+	0x7a, 0x6c, 0x02, 0x3e, 0xa5, 0x19, 0x4a, 0x4a, 0xb2, 0xc2, 0x0c, 0xd7, 0x0d, 0x0b, 0xd9, 0xaf,
+	0x21, 0x43, 0x08, 0x56, 0x48, 0x6f, 0xb9, 0xf8, 0x78, 0x55, 0xa8, 0x30, 0xc2, 0x6f, 0x85, 0x92,
+	0xf8, 0x1d, 0x9c, 0xb8, 0x6d, 0x59, 0xe4, 0x5f, 0x12, 0xd9, 0x25, 0x1c, 0xa4, 0x84, 0x99, 0x1c,
+	0x7b, 0xb3, 0xce, 0xfc, 0x68, 0x19, 0x2c, 0xac, 0x7b, 0x6d, 0x1a, 0x95, 0x13, 0x9c, 0x41, 0x7f,
+	0x85, 0x14, 0x53, 0x42, 0x4a, 0x5a, 0xec, 0x15, 0x0c, 0x1a, 0x3d, 0xc3, 0x1c, 0x41, 0x57, 0xea,
+	0x8e, 0xf1, 0x35, 0x15, 0x3f, 0x85, 0xa1, 0x71, 0x30, 0x0b, 0x5a, 0xca, 0x33, 0x8c, 0xda, 0x81,
+	0x41, 0xdd, 0xb8, 0x7a, 0x61, 0x4b, 0xaf, 0x71, 0x28, 0x63, 0xb9, 0xfc, 0xf3, 0xa0, 0x57, 0x86,
+	0x22, 0x46, 0xf1, 0x93, 0xae, 0x91, 0xbd, 0xc0, 0x71, 0x73, 0x77, 0x36, 0xa9, 0x28, 0x5b, 0x2e,
+	0x15, 0x9e, 0xef, 0x48, 0x4b, 0x23, 0xbe, 0xc7, 0x62, 0xe8, 0xb9, 0xb6, 0x6c, 0xda, 0xfe, 0xc4,
+	0xdd, 0x2f, 0xbc, 0xd8, 0x99, 0x57, 0xd0, 0x07, 0xf0, 0xab, 0x43, 0xb2, 0xb3, 0xe6, 0xbc, 0x73,
+	0xf0, 0x30, 0xdc, 0x16, 0x59, 0xca, 0x7b, 0x57, 0xff, 0x71, 0xb7, 0xff, 0x01, 0x00, 0x00, 0xff,
+	0xff, 0xc7, 0xd2, 0xc2, 0x5c, 0x88, 0x02, 0x00, 0x00,
 }
