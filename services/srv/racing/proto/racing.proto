@@ -79,10 +79,11 @@ message Selection {
     string selection_id = 1;
     string source_id = 2;
     string competitor_id = 3;
-    string name = 4;
-    string jockey = 5;
-    int32 number = 6;
-    int32 barrier_number = 7;
+    string source_competitor_id = 4;
+    string name = 5;
+    string jockey = 6;
+    int32 number = 7;
+    int32 barrier_number = 8;
 }
 
 message Race {
@@ -93,5 +94,6 @@ message Race {
     int64 scheduled_start = 5;
     int64 actual_start = 6;
     string status = 7;
-    repeated int32 results = 8;
+    string results = 8;
+    int64 meeting_start = 9;
 }
