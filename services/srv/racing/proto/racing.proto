@@ -38,8 +38,7 @@ message AddRacesResponse {
 }
 
 message AddMeetingsRequest {
-    string meeting_id = 1;
-    repeated Meeting meetings = 2;
+    repeated Meeting meetings = 1;
 }
 
 message AddMeetingsResponse {
