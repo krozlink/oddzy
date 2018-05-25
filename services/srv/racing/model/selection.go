@@ -9,6 +9,7 @@ type Selection struct {
 	SourceID           string `bson:"source_id"`
 	CompetitorID       string `bson:"competitor_id"`
 	SourceCompetitorID string `bson:"source_competitor_id"`
+	RaceID             string `bson:"race_id"`
 	Name               string `bson:"name"`
 	Jockey             string `bson:"jockey"`
 	Number             int32  `bson:"number"`
@@ -21,6 +22,7 @@ func SelectionProtoToModel(p *proto.Selection) *Selection {
 		SourceID:           p.SourceId,
 		CompetitorID:       p.CompetitorId,
 		SourceCompetitorID: p.SourceCompetitorId,
+		RaceID:             p.RaceId,
 		Name:               p.Name,
 		Jockey:             p.Jockey,
 		Number:             p.Number,
@@ -34,6 +36,7 @@ func SelectionModelToProto(s Selection) *proto.Selection {
 		SourceId:           s.SourceID,
 		CompetitorId:       s.CompetitorID,
 		SourceCompetitorId: s.SourceCompetitorID,
+		RaceId:             s.RaceID,
 		Name:               s.Name,
 		Jockey:             s.Jockey,
 		Number:             s.Number,
