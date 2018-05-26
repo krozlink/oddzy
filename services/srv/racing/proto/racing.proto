@@ -99,4 +99,5 @@ message Race {
     string status = 7;
     string results = 8;
     int64 meeting_start = 9;
+    int64 last_updated = 10;
 }

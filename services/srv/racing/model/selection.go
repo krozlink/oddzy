@@ -43,3 +43,11 @@ func SelectionModelToProto(s Selection) *proto.Selection {
 		BarrierNumber:      s.BarrierNumber,
 	}
 }
+
+func SelectionProtoToModelCollection(p []*proto.Selection) []*Selection {
+	return genericMap(p, SelectionProtoToModel).([]*Selection)
+}
+
+func SelectionModelToProtoCollection(p []*Selection) []*proto.Selection {
+	return genericMap(p, SelectionModelToProto).([]*proto.Selection)
+}

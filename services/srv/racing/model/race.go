@@ -15,6 +15,7 @@ type Race struct {
 	Status         string    `bson:"status"`
 	Results        string    `bson:"results"`
 	MeetingStart   time.Time `bson:"meeting_start"`
+	LastUpdated    time.Time `bson:"last_updated"`
 }
 
 func RaceProtoToModel(p *proto.Race) *Race {
@@ -28,6 +29,7 @@ func RaceProtoToModel(p *proto.Race) *Race {
 		Status:         p.Status,
 		Results:        p.Results,
 		MeetingStart:   time.Unix(p.MeetingStart, 0),
+		LastUpdated:    time.Unix(p.LastUpdated, 0),
 	}
 }
 
@@ -42,6 +44,7 @@ func RaceModelToProto(r Race) *proto.Race {
 		Status:         r.Status,
 		Results:        r.Results,
 		MeetingStart:   r.MeetingStart.Unix(),
+		LastUpdated:    r.LastUpdated.Unix(),
 	}
 }
 

@@ -6,11 +6,11 @@ import (
 )
 
 type Meeting struct {
-	MeetingID      string `bson:"_id,omitempty"`
-	SourceID       string `bson:"source_id"`
-	Name           string `bson:"name"`
-	Country        string `bson:"country"`
-	RaceType       string `bson:"race_type"`
+	MeetingID      string    `bson:"_id,omitempty"`
+	SourceID       string    `bson:"source_id"`
+	Name           string    `bson:"name"`
+	Country        string    `bson:"country"`
+	RaceType       string    `bson:"race_type"`
 	ScheduledStart time.Time `bson:"scheduled_start"`
 }
 
@@ -25,7 +25,6 @@ func MeetingProtoToModel(p *proto.Meeting) *Meeting {
 	}
 }
 
-
 func MeetingModelToProto(m *Meeting) *proto.Meeting {
 	return &proto.Meeting{
 		MeetingId:      m.MeetingID,
@@ -37,8 +36,6 @@ func MeetingModelToProto(m *Meeting) *proto.Meeting {
 	}
 }
 
-
-
 func MeetingProtoToModelCollection(p []*proto.Meeting) []*Meeting {
 	// collection := make([]*Meeting, len(p), len(p))
 	// for i, v := range p {
@@ -47,7 +44,6 @@ func MeetingProtoToModelCollection(p []*proto.Meeting) []*Meeting {
 	// return collection
 	return genericMap(p, MeetingProtoToModel).([]*Meeting)
 }
-
 
 func MeetingModelToProtoCollection(m []*Meeting) []*proto.Meeting {
 	// collection := make([]*proto.Meeting, len(m), len(m))

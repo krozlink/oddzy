@@ -156,7 +156,7 @@
     "ed25519",
     "ed25519/internal/edwards25519"
   ]
-  revision = "159ae71589f303f9fbfd7528413e0fe944b9c1cb"
+  revision = "a3beeb748656e13e54256fd2cde19e058f41f60f"
 
 [[projects]]
   branch = "master"
@@ -186,6 +186,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "21730a45f3e8fccf631dc984ee0b901097906178ac37cd1db6657dac71f8298d"
+  inputs-digest = "0cd50aea51490d2fadc370e9d3ea2351de235267d6acc83121ac14bedc669120"
   solver-name = "gps-cdcl"
   solver-version = 1

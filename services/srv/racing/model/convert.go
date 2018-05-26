@@ -4,7 +4,6 @@ import (
 	"reflect"
 )
 
-
 func genericMap(arr interface{}, mapFunc interface{}) interface{} {
 	funcValue := reflect.ValueOf(mapFunc)
 	arrValue := reflect.ValueOf(arr)
@@ -17,9 +16,9 @@ func genericMap(arr interface{}, mapFunc interface{}) interface{} {
 	}
 
 	funcType := funcValue.Type()
-	
+
 	// Checking whether the second argument is function or not.
-	// And also checking whether its signature is func ({type A}) {type B}.  
+	// And also checking whether its signature is func ({type A}) {type B}.
 	if funcType.Kind() != reflect.Func || funcType.NumIn() != 1 || funcType.NumOut() != 1 {
 		panic("Second argument must be map function.")
 	}
@@ -31,14 +30,14 @@ func genericMap(arr interface{}, mapFunc interface{}) interface{} {
 
 	// Get slice type corresponding to function's return value's type.
 	resultSliceType := reflect.SliceOf(funcType.Out(0))
-	
+
 	// MakeSlice takes a slice kind type, and makes a slice.
 	resultSlice := reflect.MakeSlice(resultSliceType, 0, arrValue.Len())
 
 	for i := 0; i < arrValue.Len(); i++ {
 		resultSlice = reflect.Append(resultSlice, funcValue.Call([]reflect.Value{arrValue.Index(i)})[0])
 	}
-	
+
 	// Convering resulting slice back to generic interface.
 	return resultSlice.Interface()
 }
