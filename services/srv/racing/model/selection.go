@@ -4,6 +4,9 @@ import (
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 )
 
+// Selection represents an instance of an animal running in a particular race
+// The data is specific to the race itself. Data specific to the animal is stored in the Competitor entity
+// This model is used for storing/retrieving data from mongodb
 type Selection struct {
 	SelectionID        string `bson:"_id,omitempty"`
 	SourceID           string `bson:"source_id"`
@@ -16,6 +19,8 @@ type Selection struct {
 	BarrierNumber      int32  `bson:"barrier_number"`
 }
 
+// SelectionProtoToModel converts a Selection protobuf object used in service communication
+// to a Selection model object used in storage
 func SelectionProtoToModel(p *proto.Selection) *Selection {
 	return &Selection{
 		SelectionID:        p.SelectionId,
@@ -30,6 +35,8 @@ func SelectionProtoToModel(p *proto.Selection) *Selection {
 	}
 }
 
+// SelectionModelToProto converts a Selection model object used in storage to a Selection protobuf object
+// used in service communication
 func SelectionModelToProto(s Selection) *proto.Selection {
 	return &proto.Selection{
 		SelectionId:        s.SelectionID,
@@ -44,10 +51,14 @@ func SelectionModelToProto(s Selection) *proto.Selection {
 	}
 }
 
+// SelectionProtoToModelCollection converts a slice of Selection protobuf objects used in service communication
+// to a slice of Selection model object used in storage
 func SelectionProtoToModelCollection(p []*proto.Selection) []*Selection {
 	return genericMap(p, SelectionProtoToModel).([]*Selection)
 }
 
+// SelectionModelToProtoCollection converts a Selection model object used in storage to a Selection protobuf object
+// used in service communication
 func SelectionModelToProtoCollection(p []*Selection) []*proto.Selection {
 	return genericMap(p, SelectionModelToProto).([]*proto.Selection)
 }

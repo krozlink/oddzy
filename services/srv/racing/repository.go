@@ -17,6 +17,7 @@ const (
 	competitorCollection = "competitors"
 )
 
+// Repository interface used to access racing data
 type Repository interface {
 	ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error)
 	ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error)
@@ -26,10 +27,12 @@ type Repository interface {
 	Close()
 }
 
+// RacingRepository implements the Repository interface to access racing data
 type RacingRepository struct {
 	session *mgo.Session
 }
 
+// ListMeetingsByDate will return all meetings between the provided start and end dates
 func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error) {
 	var results []*model.Meeting
 
@@ -50,6 +53,7 @@ func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Mee
 	return meetings, nil
 }
 
+// ListRacesByMeetingDate will return all races between the provided start and end dates
 func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error) {
 	var results []*model.Race
 
@@ -71,16 +75,19 @@ func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto
 	return races, nil
 }
 
+// AddMeetings will add the provided meetings to the repository
 func (repo *RacingRepository) AddMeetings(meetings []*proto.Meeting) error {
 	m := model.MeetingProtoToModelCollection(meetings)
 	return repo.collection(meetingCollection).Insert(m)
 }
 
+// AddRaces will add the provided races to the repository
 func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 	r := model.RaceProtoToModelCollection(races)
 	return repo.collection(raceCollection).Insert(r)
 }
 
+// UpdateRace will update the race and selection data for the provided race
 func (repo *RacingRepository) UpdateRace(race *proto.Race, selections []*proto.Selection) error {
 
 	err := repo.updateRaceModel(race)
@@ -96,6 +103,7 @@ func (repo *RacingRepository) UpdateRace(race *proto.Race, selections []*proto.S
 	return nil
 }
 
+// Close will close the connection to the repository
 func (repo *RacingRepository) Close() {
 	repo.session.Close()
 }
@@ -147,7 +155,7 @@ func (repo *RacingRepository) updateSelectionModels(raceID string, selections []
 		}
 
 		if v.RaceID == "" {
-			return fmt.Errorf("Expected selection to have race id")			
+			return fmt.Errorf("Expected selection to have race id")
 		}
 	}
 

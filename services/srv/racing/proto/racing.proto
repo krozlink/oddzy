@@ -11,8 +11,8 @@ service RacingService {
 }
 
 message ListMeetingsByDateRequest {
-    string start_date = 1; //yyyy-MM-dd
-    string end_date = 2; //yyyy-MM-dd
+    int64 start_date = 1; 
+    int64 end_date = 2; 
 }
 
 message ListMeetingsByDateResponse {
@@ -20,8 +20,8 @@ message ListMeetingsByDateResponse {
 }
 
 message ListRacesByMeetingDateRequest {
-    string start_date = 1; //yyyy-MM-dd
-    string end_date = 2; //yyyy-MM-dd
+    int64 start_date = 1; 
+    int64 end_date = 2; 
 }
 
 message ListRacesByMeetingDateResponse {
@@ -34,7 +34,7 @@ message AddRacesRequest {
 }
 
 message AddRacesResponse {
-    repeated bool created = 1;
+    bool created = 1;
 }
 
 message AddMeetingsRequest {
@@ -42,7 +42,7 @@ message AddMeetingsRequest {
 }
 
 message AddMeetingsResponse {
-    repeated bool created = 1;
+    bool created = 1;
 }
 
 message UpdateRaceRequest {
@@ -99,5 +99,7 @@ message Race {
     string status = 7;
     string results = 8;
     int64 meeting_start = 9;
-    int64 last_updated = 10;
+
+    int64 date_created = 10;
+    int64 last_updated = 11;
 }

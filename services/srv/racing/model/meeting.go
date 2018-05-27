@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// Meeting represents an series of races held at a particular location on a day.
+// This model is used for storing/retrieving data from mongodb
 type Meeting struct {
 	MeetingID      string    `bson:"_id,omitempty"`
 	SourceID       string    `bson:"source_id"`
@@ -14,6 +16,7 @@ type Meeting struct {
 	ScheduledStart time.Time `bson:"scheduled_start"`
 }
 
+// MeetingProtoToModel converts a Meeting protobuf object used in service communication to a Meeting model object used in storage
 func MeetingProtoToModel(p *proto.Meeting) *Meeting {
 	return &Meeting{
 		MeetingID:      p.MeetingId,
@@ -25,6 +28,8 @@ func MeetingProtoToModel(p *proto.Meeting) *Meeting {
 	}
 }
 
+// MeetingModelToProto converts a Meeting model object used in storage to a Meeting protobuf object
+// used in service communication
 func MeetingModelToProto(m *Meeting) *proto.Meeting {
 	return &proto.Meeting{
 		MeetingId:      m.MeetingID,
@@ -36,6 +41,8 @@ func MeetingModelToProto(m *Meeting) *proto.Meeting {
 	}
 }
 
+// MeetingProtoToModelCollection converts a slice of Meeting protobuf objects used in service communication
+// to a slice of Meeting model object used in storage
 func MeetingProtoToModelCollection(p []*proto.Meeting) []*Meeting {
 	// collection := make([]*Meeting, len(p), len(p))
 	// for i, v := range p {
@@ -45,6 +52,8 @@ func MeetingProtoToModelCollection(p []*proto.Meeting) []*Meeting {
 	return genericMap(p, MeetingProtoToModel).([]*Meeting)
 }
 
+// MeetingModelToProtoCollection converts a slice of Meeting model object used in storage
+// to a slice of Meeting protobuf objects used in service communication
 func MeetingModelToProtoCollection(m []*Meeting) []*proto.Meeting {
 	// collection := make([]*proto.Meeting, len(m), len(m))
 	// for i, v := range p {
