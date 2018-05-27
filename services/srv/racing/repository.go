@@ -90,14 +90,18 @@ func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 // UpdateRace will update the race and selection data for the provided race
 func (repo *RacingRepository) UpdateRace(race *proto.Race, selections []*proto.Selection) error {
 
-	err := repo.updateRaceModel(race)
+	raceUpdated, err := repo.updateRaceModel(race)
 	if err != nil {
 		return err
 	}
 
-	err = repo.updateSelectionModels(race.RaceId, selections)
+	selectionsUpdated, err := repo.updateSelectionModels(race.RaceId, selections)
 	if err != nil {
 		return err
+	}
+
+	if raceUpdated || selectionsUpdated {
+		onRaceUpdated(race, selections)
 	}
 
 	return nil
@@ -112,20 +116,15 @@ func (repo *RacingRepository) collection(name string) *mgo.Collection {
 	return repo.session.DB(dbName).C(name)
 }
 
-func (repo *RacingRepository) updateRaceModel(race *proto.Race) error {
-	r := model.RaceProtoToModel(race)
-
-	if r.RaceID == "" {
-		return fmt.Errorf("Expected race to have race id")
-	}
+func (repo *RacingRepository) updateRaceModel(race *proto.Race) (bool, error) {
+	updated := model.RaceProtoToModel(race)
 
 	c := mgo.Change{
 		Update: bson.M{"$set": bson.M{
-			"scheduled_start": r.ScheduledStart,
-			"actual_start":    r.ActualStart,
-			"status":          r.Status,
-			"results":         r.Results,
-			"meeting_start":   r.MeetingStart,
+			"scheduled_start": updated.ScheduledStart,
+			"actual_start":    updated.ActualStart,
+			"status":          updated.Status,
+			"results":         updated.Results,
 			"last_updated":    time.Now().Unix(),
 		},
 		},
@@ -136,28 +135,20 @@ func (repo *RacingRepository) updateRaceModel(race *proto.Race) error {
 
 	if err != nil {
 		fmt.Printf("Failed to update race: %s", err)
-		return err
+		return false, err
 	}
 
-	//compare original to existing
-	//if changes, publish to race updated topic
+	raceUpdated := (original.ScheduledStart != updated.ScheduledStart ||
+		original.ActualStart != updated.ActualStart ||
+		original.Status != updated.Status ||
+		original.Results != updated.Results)
 
-	return nil
+	return raceUpdated, nil
 }
 
-func (repo *RacingRepository) updateSelectionModels(raceID string, selections []*proto.Selection) error {
+func (repo *RacingRepository) updateSelectionModels(raceID string, selections []*proto.Selection) (bool, error) {
 
-	s := model.SelectionProtoToModelCollection(selections)
-
-	for _, v := range s {
-		if v.SelectionID == "" {
-			return fmt.Errorf("Expected selection to have selection id")
-		}
-
-		if v.RaceID == "" {
-			return fmt.Errorf("Expected selection to have race id")
-		}
-	}
+	updated := model.SelectionProtoToModelCollection(selections)
 
 	// lookup selections
 	var existing []model.Selection
@@ -165,21 +156,73 @@ func (repo *RacingRepository) updateSelectionModels(raceID string, selections []
 
 	if err != nil {
 		fmt.Printf("Failed to read selections: %s", err)
-		return err
+		return false, err
 	}
 
+	raceUpdated := false
 	if len(existing) == 0 {
-		err = repo.collection(selectionCollection).Insert(s)
-	} else if len(existing) == len(s) {
+		raceUpdated = true
+		err = repo.collection(selectionCollection).Insert(updated)
+	} else if len(existing) == len(updated) {
+		for _, v := range updated {
+			original := getSelectionByID(v.SelectionID, &existing)
+			if original == nil {
+				return false, fmt.Errorf("Unexpected update of race - selection %v (%v)does not exist", v.SelectionID, v.SourceID)
+			}
 
-		//loop through each item
-		//find its matching existing item
-		//update with existing selection id
-		//compare new to existing
-		//if changes, perform update (and also publish to selection updated topic)
+			if getSelectionBySourceID(v.SourceID, &existing) == nil {
+				return false, fmt.Errorf("Unexpected update of race - selection %v (%v)does not exist", v.SelectionID, v.SourceID)
+			}
+
+			if selectionChanged(original, v) {
+				raceUpdated = true
+
+				c := mgo.Change{
+					Update: bson.M{"$set": bson.M{
+						"barrier_number": v.BarrierNumber,
+						"jockey":         v.Jockey,
+						"name":           v.Name,
+						"number":         v.Number,
+						"last_updated":   time.Now().Unix(),
+					},
+					},
+				}
+
+				repo.collection(selectionCollection).FindId(v.SelectionID).Apply(c, original)
+			}
+		}
 	} else {
-		return fmt.Errorf("Unexpected race update - number of selections has changed from %v to %v", len(existing), len(s))
+		return false, fmt.Errorf("Unexpected race update - number of selections has changed from %v to %v", len(existing), len(updated))
 	}
 
-	return err
+	return raceUpdated, err
+}
+
+func getSelectionByID(selectionID string, selections *[]model.Selection) *model.Selection {
+	for _, v := range *selections {
+		if v.SelectionID == selectionID {
+			return &v
+		}
+	}
+	return nil
+}
+
+func getSelectionBySourceID(sourceID string, selections *[]model.Selection) *model.Selection {
+	for _, v := range *selections {
+		if v.SourceID == sourceID {
+			return &v
+		}
+	}
+	return nil
+}
+
+func selectionChanged(from, to *model.Selection) bool {
+	return from.BarrierNumber != to.BarrierNumber ||
+		from.Jockey != to.Jockey ||
+		from.Name != to.Name ||
+		from.Number != to.Number
+}
+
+func onRaceUpdated(race *proto.Race, selections []*proto.Selection) {
+	// TODO: publish message to Race Updated topic
 }

@@ -199,6 +199,10 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 		errors += fmt.Sprintln("Status not provided for the race")
 	}
 
+	if len(req.Selections) == 0 {
+		errors += fmt.Sprintln("No selections provided for the race")
+	}
+
 	for i, v := range req.Selections {
 		if v.SourceId == "" {
 			errors += fmt.Sprintf("Source id not provided for selection %v\n", i)
