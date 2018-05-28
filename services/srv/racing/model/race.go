@@ -40,7 +40,7 @@ func RaceProtoToModel(p *proto.Race) *Race {
 
 // RaceModelToProto converts a Race model object used in storage to a Race protobuf object
 // used in service communication
-func RaceModelToProto(r Race) *proto.Race {
+func RaceModelToProto(r *Race) *proto.Race {
 	return &proto.Race{
 		RaceId:         r.RaceID,
 		SourceId:       r.SourceID,

@@ -37,7 +37,7 @@ func SelectionProtoToModel(p *proto.Selection) *Selection {
 
 // SelectionModelToProto converts a Selection model object used in storage to a Selection protobuf object
 // used in service communication
-func SelectionModelToProto(s Selection) *proto.Selection {
+func SelectionModelToProto(s *Selection) *proto.Selection {
 	return &proto.Selection{
 		SelectionId:        s.SelectionID,
 		SourceId:           s.SourceID,
