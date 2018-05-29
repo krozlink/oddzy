@@ -54,6 +54,7 @@ func (repo *MockRepo) AddSelections(selections []*proto.Selection) error {
 }
 
 func (repo *MockRepo) UpdateRace(race *proto.Race) error {
+	//TODO: implement mock UpdateRace function
 	return nil
 }
 
