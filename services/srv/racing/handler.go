@@ -168,7 +168,8 @@ func (s *service) UpdateRace(ctx context.Context, req *proto.UpdateRaceRequest, 
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	err = repo.UpdateRace(req.Race, req.Selections)
+	originalRace, err := repo.UpdateRace(req.Race)
+	originalSelections, err := repo.UpdateSelections(req.Selections)
 
 	return err
 }

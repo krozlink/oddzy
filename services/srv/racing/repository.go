@@ -23,7 +23,13 @@ type Repository interface {
 	ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error)
 	AddMeetings(meetings []*proto.Meeting) error
 	AddRaces(races []*proto.Race) error
-	UpdateRace(race *proto.Race, selections []*proto.Selection) error
+	//UpdateRace(race *proto.Race, selections []*proto.Selection) error
+
+	GetRace(raceID string) (*proto.Race, error)
+	GetSelectionsByRaceId(raceID string) ([]*proto.Selection, error)
+	UpdateRace(race *proto.Race) (*proto.Race, error)
+	UpdateSelections(selections []*proto.Selection) ([]*proto.Selection, error)
+
 	Close()
 }
 
@@ -88,7 +94,7 @@ func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 }
 
 // UpdateRace will update the race and selection data for the provided race
-func (repo *RacingRepository) UpdateRace(race *proto.Race, selections []*proto.Selection) error {
+func (repo *RacingRepository) UpdateRace2(race *proto.Race, selections []*proto.Selection) error {
 
 	raceUpdated, err := repo.updateRaceModel(race)
 	if err != nil {
@@ -100,11 +106,51 @@ func (repo *RacingRepository) UpdateRace(race *proto.Race, selections []*proto.S
 		return err
 	}
 
-	if raceUpdated || selectionsUpdated {
-		onRaceUpdated(race, selections)
+	return nil
+}
+
+// GetRace retrieves a race using the provided race id
+func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
+	r := &proto.Race{}
+	err := repo.collection(raceCollection).FindId(raceID).One(r)
+	return r, err
+}
+
+// GetSelectionsByRaceId retrieves all of the selections for the provided race id
+func (repo *RacingRepository) GetSelectionsByRaceId(raceID string) ([]*proto.Selection, error) {
+	var s []*model.Selection
+	err := repo.collection(selectionCollection).Find(bson.M{"race_id": raceID}).All(&s)
+
+	p := model.SelectionModelToProtoCollection(s)
+
+	return p, err
+}
+
+// UpdateRace updates the race record and returns the original value
+func (repo *RacingRepository) UpdateRace(race *proto.Race) (*proto.Race, error) {
+	updated := model.RaceProtoToModel(race)
+
+	change := mgo.Change{
+		Update: bson.M{"$set": bson.M{
+			"scheduled_start": updated.ScheduledStart,
+			"actual_start":    updated.ActualStart,
+			"status":          updated.Status,
+			"results":         updated.Results,
+			"last_updated":    time.Now().Unix(),
+		},
+		},
 	}
 
-	return nil
+	original := &model.Race{}
+	_, err := repo.collection(raceCollection).FindId(race.RaceId).Apply(change, original)
+
+	m := model.RaceModelToProto(original)
+	return m, err
+}
+
+func (repo *RacingRepository) UpdateSelections(selections []*proto.Selection) ([]*proto.Selection, error) {
+	//todo implement this
+	// remove old updaterace function and subfunctions
 }
 
 // Close will close the connection to the repository
@@ -221,8 +267,4 @@ func selectionChanged(from, to *model.Selection) bool {
 		from.Jockey != to.Jockey ||
 		from.Name != to.Name ||
 		from.Number != to.Number
-}
-
-func onRaceUpdated(race *proto.Race, selections []*proto.Selection) {
-	// TODO: publish message to Race Updated topic
 }
