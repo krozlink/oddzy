@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	model "github.com/krozlink/oddzy/services/srv/racing/model"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 	"gopkg.in/mgo.v2"
@@ -23,10 +22,9 @@ type Repository interface {
 	ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error)
 	AddMeetings(meetings []*proto.Meeting) error
 	AddRaces(races []*proto.Race) error
-	//UpdateRace(race *proto.Race, selections []*proto.Selection) error
 
 	GetRace(raceID string) (*proto.Race, error)
-	GetSelectionsByRaceId(raceID string) ([]*proto.Selection, error)
+	GetSelectionsByRaceID(raceID string) ([]*proto.Selection, error)
 	UpdateRace(race *proto.Race) (*proto.Race, error)
 	UpdateSelections(selections []*proto.Selection) ([]*proto.Selection, error)
 
@@ -39,6 +37,7 @@ type RacingRepository struct {
 	session *mgo.Session
 }
 
+// NewSession returns an instance of the repository with a new session
 func (repo *RacingRepository) NewSession() Repository {
 	return &RacingRepository{repo.session.Clone()}
 }
@@ -98,22 +97,6 @@ func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 	return repo.collection(raceCollection).Insert(r)
 }
 
-// UpdateRace will update the race and selection data for the provided race
-func (repo *RacingRepository) UpdateRace2(race *proto.Race, selections []*proto.Selection) error {
-
-	raceUpdated, err := repo.updateRaceModel(race)
-	if err != nil {
-		return err
-	}
-
-	selectionsUpdated, err := repo.updateSelectionModels(race.RaceId, selections)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // GetRace retrieves a race using the provided race id
 func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
 	r := &proto.Race{}
@@ -121,8 +104,8 @@ func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
 	return r, err
 }
 
-// GetSelectionsByRaceId retrieves all of the selections for the provided race id
-func (repo *RacingRepository) GetSelectionsByRaceId(raceID string) ([]*proto.Selection, error) {
+// GetSelectionsByRaceID retrieves all of the selections for the provided race id
+func (repo *RacingRepository) GetSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
 	var s []*model.Selection
 	err := repo.collection(selectionCollection).Find(bson.M{"race_id": raceID}).All(&s)
 
@@ -153,9 +136,11 @@ func (repo *RacingRepository) UpdateRace(race *proto.Race) (*proto.Race, error) 
 	return m, err
 }
 
+// UpdateSelections updates the selections records and returns the original values
 func (repo *RacingRepository) UpdateSelections(selections []*proto.Selection) ([]*proto.Selection, error) {
 	//todo implement this
-	// remove old updaterace function and subfunctions
+	// remove old update race function and subfunctions
+	return nil, nil
 }
 
 // Close will close the connection to the repository
@@ -165,111 +150,4 @@ func (repo *RacingRepository) Close() {
 
 func (repo *RacingRepository) collection(name string) *mgo.Collection {
 	return repo.session.DB(dbName).C(name)
-}
-
-func (repo *RacingRepository) updateRaceModel(race *proto.Race) (bool, error) {
-	updated := model.RaceProtoToModel(race)
-
-	c := mgo.Change{
-		Update: bson.M{"$set": bson.M{
-			"scheduled_start": updated.ScheduledStart,
-			"actual_start":    updated.ActualStart,
-			"status":          updated.Status,
-			"results":         updated.Results,
-			"last_updated":    time.Now().Unix(),
-		},
-		},
-	}
-
-	original := &model.Race{}
-	_, err := repo.collection(raceCollection).FindId(race.RaceId).Apply(c, original)
-
-	if err != nil {
-		fmt.Printf("Failed to update race: %s", err)
-		return false, err
-	}
-
-	raceUpdated := (original.ScheduledStart != updated.ScheduledStart ||
-		original.ActualStart != updated.ActualStart ||
-		original.Status != updated.Status ||
-		original.Results != updated.Results)
-
-	return raceUpdated, nil
-}
-
-func (repo *RacingRepository) updateSelectionModels(raceID string, selections []*proto.Selection) (bool, error) {
-
-	updated := model.SelectionProtoToModelCollection(selections)
-
-	// lookup selections
-	var existing []model.Selection
-	err := repo.collection(selectionCollection).Find(bson.M{"race_id": raceID}).All(&existing)
-
-	if err != nil {
-		fmt.Printf("Failed to read selections: %s", err)
-		return false, err
-	}
-
-	raceUpdated := false
-	if len(existing) == 0 {
-		raceUpdated = true
-		err = repo.collection(selectionCollection).Insert(updated)
-	} else if len(existing) == len(updated) {
-		for _, v := range updated {
-			original := getSelectionByID(v.SelectionID, &existing)
-			if original == nil {
-				return false, fmt.Errorf("Unexpected update of race - selection %v (%v)does not exist", v.SelectionID, v.SourceID)
-			}
-
-			if getSelectionBySourceID(v.SourceID, &existing) == nil {
-				return false, fmt.Errorf("Unexpected update of race - selection %v (%v)does not exist", v.SelectionID, v.SourceID)
-			}
-
-			if selectionChanged(original, v) {
-				raceUpdated = true
-
-				c := mgo.Change{
-					Update: bson.M{"$set": bson.M{
-						"barrier_number": v.BarrierNumber,
-						"jockey":         v.Jockey,
-						"name":           v.Name,
-						"number":         v.Number,
-						"last_updated":   time.Now().Unix(),
-					},
-					},
-				}
-
-				repo.collection(selectionCollection).FindId(v.SelectionID).Apply(c, original)
-			}
-		}
-	} else {
-		return false, fmt.Errorf("Unexpected race update - number of selections has changed from %v to %v", len(existing), len(updated))
-	}
-
-	return raceUpdated, err
-}
-
-func getSelectionByID(selectionID string, selections *[]model.Selection) *model.Selection {
-	for _, v := range *selections {
-		if v.SelectionID == selectionID {
-			return &v
-		}
-	}
-	return nil
-}
-
-func getSelectionBySourceID(sourceID string, selections *[]model.Selection) *model.Selection {
-	for _, v := range *selections {
-		if v.SourceID == sourceID {
-			return &v
-		}
-	}
-	return nil
-}
-
-func selectionChanged(from, to *model.Selection) bool {
-	return from.BarrierNumber != to.BarrierNumber ||
-		from.Jockey != to.Jockey ||
-		from.Name != to.Name ||
-		from.Number != to.Number
 }

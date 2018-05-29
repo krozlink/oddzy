@@ -51,6 +51,10 @@ func (repo *MockRepo) UpdateRace(race *proto.Race, selections []*proto.Selection
 	return nil
 }
 
+func (repo *MockRepo) GetRace(raceID string) (*proto.Race, error) {
+	return nil, nil
+}
+
 func (repo *MockRepo) Close() {}
 
 func (repo *MockRepo) NewSession() Repository {

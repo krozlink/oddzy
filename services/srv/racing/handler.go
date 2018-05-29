@@ -6,10 +6,12 @@ import (
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 )
 
+// RacingService is for interacing with racing data such as meetings and races
 type RacingService struct {
 	repo Repository
 }
 
+// NewRacingService returns a new instance of the service using the provided repository
 func NewRacingService(r Repository) *RacingService {
 	return &RacingService{
 		repo: r,
@@ -176,6 +178,10 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	originalRace, err := repo.UpdateRace(req.Race)
 	originalSelections, err := repo.UpdateSelections(req.Selections)
 
+	if raceChanged(originalRace, req.Race) || selectionsChanged(originalSelections, req.Selections) {
+		//TODO: notify of change
+	}
+
 	return err
 }
 
@@ -251,5 +257,36 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 		return fmt.Errorf(errors)
 	}
 
+	return nil
+}
+
+func raceChanged(from, to *proto.Race) bool {
+	return from.ScheduledStart != to.ScheduledStart ||
+		from.ActualStart != to.ActualStart ||
+		from.Status != to.Status ||
+		from.Results != to.Results
+}
+
+func selectionsChanged(from, to []*proto.Selection) bool {
+	for _, v := range from {
+		u := getSelectionByID(v.SelectionId, to)
+
+		if u.BarrierNumber != v.BarrierNumber ||
+			u.Jockey != v.Jockey ||
+			u.SourceCompetitorId != v.SourceCompetitorId ||
+			u.Number != v.Number {
+			return true
+		}
+	}
+
+	return false
+}
+
+func getSelectionByID(selectionID string, selections []*proto.Selection) *proto.Selection {
+	for _, v := range selections {
+		if v.SelectionId == selectionID {
+			return v
+		}
+	}
 	return nil
 }
