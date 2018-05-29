@@ -18,14 +18,17 @@ const (
 
 // Repository interface used to access racing data
 type Repository interface {
+	AddMeetings(meetings []*proto.Meeting) error
+	GetMeeting(meetingID string) (*proto.Meeting, error)
 	ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error)
 	ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error)
-	AddMeetings(meetings []*proto.Meeting) error
-	AddRaces(races []*proto.Race) error
 
+	AddRaces(races []*proto.Race) error
 	GetRace(raceID string) (*proto.Race, error)
-	GetSelectionsByRaceID(raceID string) ([]*proto.Selection, error)
 	UpdateRace(race *proto.Race) error
+
+	AddSelections(races []*proto.Selection) error
+	ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error)
 	UpdateSelection(selection *proto.Selection) error
 
 	Close()
@@ -97,6 +100,12 @@ func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 	return repo.collection(raceCollection).Insert(r)
 }
 
+// AddSelections will add the provided selections to the repository
+func (repo *RacingRepository) AddSelections(selections []*proto.Selection) error {
+	s := model.SelectionProtoToModelCollection(selections)
+	return repo.collection(selectionCollection).Insert(s)
+}
+
 // GetRace retrieves a race using the provided race id
 func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
 	r := &proto.Race{}
@@ -104,8 +113,15 @@ func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
 	return r, err
 }
 
-// GetSelectionsByRaceID retrieves all of the selections for the provided race id
-func (repo *RacingRepository) GetSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
+// GetMeeting retrieves a meeting using the provided meeting id
+func (repo *RacingRepository) GetMeeting(meetingID string) (*proto.Meeting, error) {
+	m := &proto.Meeting{}
+	err := repo.collection(meetingCollection).FindId(meetingID).One(m)
+	return m, err
+}
+
+// ListSelectionsByRaceID retrieves all of the selections for the provided race id
+func (repo *RacingRepository) ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
 	var s []*model.Selection
 	err := repo.collection(selectionCollection).Find(bson.M{"race_id": raceID}).All(&s)
 

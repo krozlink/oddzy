@@ -185,24 +185,34 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 		err = repo.UpdateRace(req.Race)
 	}
 
-	originalSelections, err := repo.GetSelectionsByRaceID(req.Race.RaceId)
+	originalSelections, err := repo.ListSelectionsByRaceID(req.Race.RaceId)
 	if err != nil {
 		return err
 	}
 
 	selectionUpdated := false
 
-	for _, v := range req.Selections {
-		o := getSelectionByID(v.SelectionId, originalSelections)
-		if o == nil {
-			return fmt.Errorf("Expected to find selection %v", v.SelectionId)
+	if len(originalSelections) == 0 {
+		err = repo.AddSelections(req.Selections)
+		if err != nil {
+			return err
 		}
+		selectionUpdated = true
+	} else if len(originalSelections) != len(req.Selections) {
+		return fmt.Errorf("Number of selections unexpectedly changed from %v to %v", len(originalSelections), len(req.Selections))
+	} else {
+		for _, v := range req.Selections {
+			o := getSelectionByID(v.SelectionId, originalSelections)
+			if o == nil {
+				return fmt.Errorf("Expected to find selection %v", v.SelectionId)
+			}
 
-		if hasSelectionChanged(o, v) {
-			selectionUpdated = true
-			err = repo.UpdateSelection(v)
-			if err != nil {
-				return err
+			if hasSelectionChanged(o, v) {
+				selectionUpdated = true
+				err = repo.UpdateSelection(v)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

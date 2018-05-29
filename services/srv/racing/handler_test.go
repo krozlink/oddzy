@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 	"testing"
 )
@@ -21,7 +22,7 @@ func (repo *MockRepo) ListMeetingsByDate(start, end int64) ([]*proto.Meeting, er
 		}
 	}
 
-	return nil, nil
+	return result, nil
 }
 
 func (repo *MockRepo) ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error) {
@@ -47,12 +48,51 @@ func (repo *MockRepo) AddRaces(races []*proto.Race) error {
 	return nil
 }
 
-func (repo *MockRepo) UpdateRace(race *proto.Race, selections []*proto.Selection) error {
+func (repo *MockRepo) AddSelections(selections []*proto.Selection) error {
+	repo.selections = append(repo.selections, selections...)
+	return nil
+}
+
+func (repo *MockRepo) UpdateRace(race *proto.Race) error {
 	return nil
 }
 
 func (repo *MockRepo) GetRace(raceID string) (*proto.Race, error) {
-	return nil, nil
+
+	for _, v := range repo.races {
+		if v.RaceId == raceID {
+			return v, nil
+		}
+	}
+
+	return nil, fmt.Errorf("No race found with id %v", raceID)
+}
+
+func (repo *MockRepo) GetMeeting(meetingID string) (*proto.Meeting, error) {
+
+	for _, v := range repo.meetings {
+		if v.MeetingId == meetingID {
+			return v, nil
+		}
+	}
+
+	return nil, fmt.Errorf("No meeting found with id %v", meetingID)
+}
+
+func (repo *MockRepo) ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
+
+	var result []*proto.Selection
+	for _, v := range repo.selections {
+		if v.RaceId == raceID {
+			result = append(result, v)
+		}
+	}
+
+	return result, nil
+}
+
+func (repo *MockRepo) UpdateSelection(selection *proto.Selection) error {
+	return nil
 }
 
 func (repo *MockRepo) Close() {}
