@@ -175,14 +175,43 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	originalRace, err := repo.UpdateRace(req.Race)
-	originalSelections, err := repo.UpdateSelections(req.Selections)
+	originalRace, err := repo.GetRace(req.Race.RaceId)
+	if err != nil {
+		return err
+	}
 
-	if raceChanged(originalRace, req.Race) || selectionsChanged(originalSelections, req.Selections) {
+	raceUpdated := hasRaceChanged(originalRace, req.Race)
+	if raceUpdated {
+		err = repo.UpdateRace(req.Race)
+	}
+
+	originalSelections, err := repo.GetSelectionsByRaceID(req.Race.RaceId)
+	if err != nil {
+		return err
+	}
+
+	selectionUpdated := false
+
+	for _, v := range req.Selections {
+		o := getSelectionByID(v.SelectionId, originalSelections)
+		if o == nil {
+			return fmt.Errorf("Expected to find selection %v", v.SelectionId)
+		}
+
+		if hasSelectionChanged(o, v) {
+			selectionUpdated = true
+			err = repo.UpdateSelection(v)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if raceUpdated || selectionUpdated {
 		//TODO: notify of change
 	}
 
-	return err
+	return nil
 }
 
 func validateRace(req *proto.UpdateRaceRequest) error {
@@ -260,26 +289,18 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 	return nil
 }
 
-func raceChanged(from, to *proto.Race) bool {
+func hasRaceChanged(from, to *proto.Race) bool {
 	return from.ScheduledStart != to.ScheduledStart ||
 		from.ActualStart != to.ActualStart ||
 		from.Status != to.Status ||
 		from.Results != to.Results
 }
 
-func selectionsChanged(from, to []*proto.Selection) bool {
-	for _, v := range from {
-		u := getSelectionByID(v.SelectionId, to)
-
-		if u.BarrierNumber != v.BarrierNumber ||
-			u.Jockey != v.Jockey ||
-			u.SourceCompetitorId != v.SourceCompetitorId ||
-			u.Number != v.Number {
-			return true
-		}
-	}
-
-	return false
+func hasSelectionChanged(from, to *proto.Selection) bool {
+	return from.BarrierNumber != to.BarrierNumber ||
+		from.Jockey != to.Jockey ||
+		from.SourceCompetitorId != to.SourceCompetitorId ||
+		from.Number != to.Number
 }
 
 func getSelectionByID(selectionID string, selections []*proto.Selection) *proto.Selection {

@@ -25,8 +25,8 @@ type Repository interface {
 
 	GetRace(raceID string) (*proto.Race, error)
 	GetSelectionsByRaceID(raceID string) ([]*proto.Selection, error)
-	UpdateRace(race *proto.Race) (*proto.Race, error)
-	UpdateSelections(selections []*proto.Selection) ([]*proto.Selection, error)
+	UpdateRace(race *proto.Race) error
+	UpdateSelection(selection *proto.Selection) error
 
 	Close()
 	NewSession() Repository
@@ -114,8 +114,8 @@ func (repo *RacingRepository) GetSelectionsByRaceID(raceID string) ([]*proto.Sel
 	return p, err
 }
 
-// UpdateRace updates the race record and returns the original value
-func (repo *RacingRepository) UpdateRace(race *proto.Race) (*proto.Race, error) {
+// UpdateRace updates the race record
+func (repo *RacingRepository) UpdateRace(race *proto.Race) error {
 	updated := model.RaceProtoToModel(race)
 
 	change := mgo.Change{
@@ -132,15 +132,30 @@ func (repo *RacingRepository) UpdateRace(race *proto.Race) (*proto.Race, error) 
 	original := &model.Race{}
 	_, err := repo.collection(raceCollection).FindId(race.RaceId).Apply(change, original)
 
-	m := model.RaceModelToProto(original)
-	return m, err
+	return err
 }
 
-// UpdateSelections updates the selections records and returns the original values
-func (repo *RacingRepository) UpdateSelections(selections []*proto.Selection) ([]*proto.Selection, error) {
-	//todo implement this
-	// remove old update race function and subfunctions
-	return nil, nil
+// UpdateSelection updates the selection record
+func (repo *RacingRepository) UpdateSelection(s *proto.Selection) error {
+
+	updated := model.SelectionProtoToModel(s)
+
+	change := mgo.Change{
+		Update: bson.M{"$set": bson.M{
+			"barrier_number":       updated.BarrierNumber,
+			"jockey":               updated.Jockey,
+			"number":               updated.Number,
+			"source_competitor_id": updated.SourceCompetitorID,
+			"name":                 updated.Name,
+			"last_updated":         time.Now().Unix(),
+		},
+		},
+	}
+
+	o := &model.Selection{}
+	_, err := repo.collection(selectionCollection).FindId(s.SelectionId).Apply(change, o)
+
+	return err
 }
 
 // Close will close the connection to the repository
