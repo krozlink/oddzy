@@ -40,7 +40,10 @@ func main() {
 
 	srv.Init()
 
-	proto.RegisterRacingServiceHandler(srv.Server(), &service{session})
+	repo := &RacingRepository{session}
+	racing := NewRacingService(repo)
+
+	proto.RegisterRacingServiceHandler(srv.Server(), racing)
 	if err := srv.Run(); err != nil {
 		fmt.Println(err)
 	}
