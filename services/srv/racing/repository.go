@@ -25,11 +25,16 @@ type Repository interface {
 	AddRaces(races []*proto.Race) error
 	UpdateRace(race *proto.Race, selections []*proto.Selection) error
 	Close()
+	NewSession() Repository
 }
 
 // RacingRepository implements the Repository interface to access racing data
 type RacingRepository struct {
 	session *mgo.Session
+}
+
+func (repo *RacingRepository) NewSession() Repository {
+	return &RacingRepository{repo.session.Clone()}
 }
 
 // ListMeetingsByDate will return all meetings between the provided start and end dates

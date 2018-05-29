@@ -4,20 +4,25 @@ import (
 	"context"
 	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
-	"gopkg.in/mgo.v2"
 )
 
-type service struct {
-	session *mgo.Session
+type RacingService struct {
+	repo Repository
+}
+
+func NewRacingService(r Repository) *RacingService {
+	return &RacingService{
+		repo: r,
+	}
 }
 
 // GetRepo returns the repository to be used when accessing racing data
-func (s *service) GetRepo() Repository {
-	return &RacingRepository{s.session.Clone()}
+func (s *RacingService) GetRepo() Repository {
+	return s.repo.NewSession()
 }
 
 // ListMeetingsByDate will return all meetings between the provided start and end dates
-func (s *service) ListMeetingsByDate(ctx context.Context, req *proto.ListMeetingsByDateRequest, resp *proto.ListMeetingsByDateResponse) error {
+func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListMeetingsByDateRequest, resp *proto.ListMeetingsByDateResponse) error {
 	if req.StartDate == 0 {
 		return fmt.Errorf("Start date is a mandatory field")
 	}
@@ -40,7 +45,7 @@ func (s *service) ListMeetingsByDate(ctx context.Context, req *proto.ListMeeting
 }
 
 // ListRacesByMeetingDate will return races between the provided start and end dates
-func (s *service) ListRacesByMeetingDate(ctx context.Context, req *proto.ListRacesByMeetingDateRequest, resp *proto.ListRacesByMeetingDateResponse) error {
+func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.ListRacesByMeetingDateRequest, resp *proto.ListRacesByMeetingDateResponse) error {
 	if req.StartDate == 0 {
 		return fmt.Errorf("Start date is a mandatory field")
 	}
@@ -63,7 +68,7 @@ func (s *service) ListRacesByMeetingDate(ctx context.Context, req *proto.ListRac
 }
 
 // AddMeetings will save the provided meetings
-func (s *service) AddMeetings(ctx context.Context, req *proto.AddMeetingsRequest, resp *proto.AddMeetingsResponse) error {
+func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsRequest, resp *proto.AddMeetingsResponse) error {
 	errors := ""
 	for i, v := range req.Meetings {
 		if v.MeetingId == "" {
@@ -105,7 +110,7 @@ func (s *service) AddMeetings(ctx context.Context, req *proto.AddMeetingsRequest
 }
 
 // AddRaces will save the provided races
-func (s *service) AddRaces(ctx context.Context, req *proto.AddRacesRequest, resp *proto.AddRacesResponse) error {
+func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest, resp *proto.AddRacesResponse) error {
 	errors := ""
 	for i, v := range req.Races {
 		if v.RaceId == "" {
@@ -159,7 +164,7 @@ func (s *service) AddRaces(ctx context.Context, req *proto.AddRacesRequest, resp
 }
 
 // UpdateRace will update the race and selection data for the provided race
-func (s *service) UpdateRace(ctx context.Context, req *proto.UpdateRaceRequest, resp *proto.UpdateRaceResponse) error {
+func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceRequest, resp *proto.UpdateRaceResponse) error {
 	err := validateRace(req)
 	if err != nil {
 		return err
