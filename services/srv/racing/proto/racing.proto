@@ -96,6 +96,9 @@ message Selection {
     string jockey = 7;
     int32 number = 8;
     int32 barrier_number = 9;
+
+    
+    int64 last_updated = 10;
 }
 
 message Race {

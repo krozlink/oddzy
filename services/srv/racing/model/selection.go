@@ -17,6 +17,7 @@ type Selection struct {
 	Jockey             string `bson:"jockey"`
 	Number             int32  `bson:"number"`
 	BarrierNumber      int32  `bson:"barrier_number"`
+	LastUpdated        int64  `bson:"last_updated"`
 }
 
 // SelectionProtoToModel converts a Selection protobuf object used in service communication
@@ -32,6 +33,7 @@ func SelectionProtoToModel(p *proto.Selection) *Selection {
 		Jockey:             p.Jockey,
 		Number:             p.Number,
 		BarrierNumber:      p.BarrierNumber,
+		LastUpdated:        p.LastUpdated,
 	}
 }
 
@@ -48,6 +50,7 @@ func SelectionModelToProto(s *Selection) *proto.Selection {
 		Jockey:             s.Jockey,
 		Number:             s.Number,
 		BarrierNumber:      s.BarrierNumber,
+		LastUpdated:        s.LastUpdated,
 	}
 }
 
