@@ -151,7 +151,7 @@ func (repo *MockRepo) NewSession() Repository {
 	return repo
 }
 
-func TestCanRetrieveRacesByMeetingDateRange(t *testing.T) {
+func TestListRacesByMeetingDate(t *testing.T) {
 	repo := &MockRepo{
 		races: []*proto.Race{
 			&proto.Race{
@@ -201,7 +201,7 @@ func TestCanRetrieveRacesByMeetingDateRange(t *testing.T) {
 	}
 }
 
-func TestDatesMandatoryForListRacesByMeetingDate(t *testing.T) {
+func TestListRacesByMeetingDateValidation(t *testing.T) {
 	repo := &MockRepo{
 		races: []*proto.Race{
 			&proto.Race{
@@ -250,7 +250,7 @@ func TestDatesMandatoryForListRacesByMeetingDate(t *testing.T) {
 	}
 }
 
-func TestCanRetrieveMeetingsByDateRange(t *testing.T) {
+func TestListMeetingsByDate(t *testing.T) {
 	repo := &MockRepo{
 		meetings: []*proto.Meeting{
 			&proto.Meeting{
@@ -300,7 +300,7 @@ func TestCanRetrieveMeetingsByDateRange(t *testing.T) {
 	}
 }
 
-func TestDatesMandatoryForListMeetingsByDate(t *testing.T) {
+func TestListMeetingsByDateValidation(t *testing.T) {
 	repo := &MockRepo{
 		meetings: []*proto.Meeting{
 			&proto.Meeting{
@@ -448,7 +448,7 @@ func TestAddMeetingsValidation(t *testing.T) {
 	}
 }
 
-func TestAddMeetingsAddsToRepo(t *testing.T) {
+func TestAddMeetings(t *testing.T) {
 	repo := &MockRepo{}
 	ctx := context.Background()
 	srv := NewRacingService(repo)
@@ -674,7 +674,7 @@ func TestAddRacesValidation(t *testing.T) {
 	}
 }
 
-func TestAddRacesAddsToRepo(t *testing.T) {
+func TestAddRaces(t *testing.T) {
 	repo := &MockRepo{}
 	ctx := context.Background()
 	srv := NewRacingService(repo)
