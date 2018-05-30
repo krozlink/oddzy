@@ -10,6 +10,7 @@ import (
 type Race struct {
 	RaceID         string    `bson:"_id,omitempty"`
 	SourceID       string    `bson:"source_id"`
+	MeetingID      string    `bson:"meeting_id"`
 	Number         int32     `bson:"number"`
 	Name           string    `bson:"name"`
 	ScheduledStart time.Time `bson:"scheduled_start"`
@@ -26,6 +27,7 @@ func RaceProtoToModel(p *proto.Race) *Race {
 	return &Race{
 		RaceID:         p.RaceId,
 		SourceID:       p.SourceId,
+		MeetingID:      p.MeetingId,
 		Number:         p.Number,
 		Name:           p.Name,
 		ScheduledStart: time.Unix(p.ScheduledStart, 0),
@@ -44,6 +46,7 @@ func RaceModelToProto(r *Race) *proto.Race {
 	return &proto.Race{
 		RaceId:         r.RaceID,
 		SourceId:       r.SourceID,
+		MeetingId:      r.MeetingID,
 		Number:         r.Number,
 		Name:           r.Name,
 		ScheduledStart: r.ScheduledStart.Unix(),

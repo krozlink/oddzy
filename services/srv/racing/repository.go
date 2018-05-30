@@ -25,6 +25,7 @@ type Repository interface {
 
 	AddRaces(races []*proto.Race) error
 	GetRace(raceID string) (*proto.Race, error)
+	ListRacesByMeetingID(meetingID string) ([]*proto.Race, error)
 	UpdateRace(race *proto.Race) error
 
 	AddSelections(races []*proto.Selection) error
@@ -86,6 +87,17 @@ func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto
 	races := model.RaceModelToProtoCollection(results)
 
 	return races, nil
+}
+
+// ListRacesByMeetingID returns all races for the provided meeting id
+func (repo *RacingRepository) ListRacesByMeetingID(meetingID string) ([]*proto.Race, error) {
+	var results []*model.Race
+	err := repo.collection(raceCollection).Find(bson.M{"meeting_id": meetingID}).All(&results)
+	if err != nil {
+		return nil, err
+	}
+	r := model.RaceModelToProtoCollection(results)
+	return r, nil
 }
 
 // AddMeetings will add the provided meetings to the repository

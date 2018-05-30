@@ -8,6 +8,7 @@ service RacingService {
     rpc AddMeetings (AddMeetingsRequest) returns (AddMeetingsResponse);
     rpc AddRaces (AddRacesRequest) returns (AddRacesResponse);
     rpc UpdateRace (UpdateRaceRequest) returns (UpdateRaceResponse);
+    rpc GetNextRace (GetNextRaceRequest) returns (GetNextRaceResponse);
 }
 
 message ListMeetingsByDateRequest {
@@ -54,6 +55,14 @@ message UpdateRaceResponse {
     bool updated = 1;
 }
 
+message GetNextRaceRequest {
+    string meeting_id = 1;
+}
+
+message GetNextRaceResponse {
+    Race race = 1;
+}
+
 message Meeting {
     string meeting_id = 1;
     string source_id = 2;
@@ -92,14 +101,15 @@ message Selection {
 message Race {
     string race_id = 1;
     string source_id = 2;
-    int32 number = 3;
-    string name = 4;
-    int64 scheduled_start = 5;
-    int64 actual_start = 6;
-    string status = 7;
-    string results = 8;
-    int64 meeting_start = 9;
+    string meeting_id = 3;
+    int32 number = 4;
+    string name = 5;
+    int64 scheduled_start = 6;
+    int64 actual_start = 7;
+    string status = 8;
+    string results = 9;
+    int64 meeting_start = 10;
 
-    int64 date_created = 10;
-    int64 last_updated = 11;
+    int64 date_created = 11;
+    int64 last_updated = 12;
 }

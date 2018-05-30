@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
+	"sort"
 )
 
 // RacingService is for interacing with racing data such as meetings and races
@@ -221,6 +222,30 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 		//TODO: notify of change
 	}
 
+	return nil
+}
+
+// GetNextRace returns the next race which has not completed, or nil if all races have completed
+func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceRequest, resp *proto.GetNextRaceResponse) error {
+	repo := s.GetRepo()
+
+	races, err := repo.ListRacesByMeetingID(req.MeetingId)
+	if err != nil {
+		return err
+	}
+
+	// ensure races are in number order
+	sort.Slice(races, func(i, j int) bool {
+		return races[i].Number < races[j].Number
+	})
+	for _, v := range races {
+		if v.ActualStart == 0 {
+			resp.Race = v
+			return nil
+		}
+	}
+
+	resp.Race = nil
 	return nil
 }
 

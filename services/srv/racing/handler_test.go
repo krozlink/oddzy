@@ -80,6 +80,17 @@ func (repo *MockRepo) GetMeeting(meetingID string) (*proto.Meeting, error) {
 	return nil, fmt.Errorf("No meeting found with id %v", meetingID)
 }
 
+func (repo *MockRepo) ListRacesByMeetingID(meetingID string) ([]*proto.Race, error) {
+	var result []*proto.Race
+	for _, v := range repo.races {
+		if v.MeetingId == meetingID {
+			result = append(result, v)
+		}
+	}
+
+	return result, nil
+}
+
 func (repo *MockRepo) ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
 
 	var result []*proto.Selection
@@ -199,4 +210,52 @@ func TestDatesMandatoryForListRacesByMeetingDate(t *testing.T) {
 			t.Errorf("Expected no error when calling ListRacesByMeetingDate for range %v to %v", v.start, v.end)
 		}
 	}
+}
+
+func TestCanRetrieveMeetingsByDateRange(t *testing.T) {
+	t.Fail()
+}
+
+func TestDatesMandatoryForListMeetingsByDate(t *testing.T) {
+	t.Fail()
+}
+
+func TestAddMeetingsValidation(t *testing.T) {
+	t.Fail()
+}
+
+func TestAddMeetingsAddsToRepo(t *testing.T) {
+	t.Fail()
+}
+
+func TestAddRacesValidation(t *testing.T) {
+	t.Fail()
+}
+
+func TestAddRacesAddsToRepo(t *testing.T) {
+	t.Fail()
+}
+
+func TestUpdateRaceCreatesSelectionsOnInitalCall(t *testing.T) {
+	t.Fail()
+}
+
+func TestUpdateRaceFailsWhenNumberOfSelectionsChange(t *testing.T) {
+	t.Fail()
+}
+
+func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
+	t.Fail()
+}
+
+func TestUpdateRaceNotifiesOnRaceChange(t *testing.T) {
+	t.Fail()
+}
+
+func TestUpdateRaceNotifiesOnSelectionChange(t *testing.T) {
+	t.Fail()
+}
+
+func TestUpdateRaceNoNotificationIfNoChange(t *testing.T) {
+	t.Fail()
 }
