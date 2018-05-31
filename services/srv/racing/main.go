@@ -41,9 +41,10 @@ func main() {
 
 	srv.Init()
 
-	repo := &RacingRepository{session}
-	b := srv.Server().Options().Broker
-	racing := NewRacingService(repo, b)
+	racing := NewRacingService(
+		&RacingRepository{session},
+		srv.Server().Options().Broker,
+	)
 
 	proto.RegisterRacingServiceHandler(srv.Server(), racing)
 	if err := srv.Run(); err != nil {

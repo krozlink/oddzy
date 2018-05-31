@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 	"github.com/micro/go-micro/broker"
@@ -10,150 +11,15 @@ import (
 	"time"
 )
 
-type MockBroker struct {
-	messages []broker.Message
-}
-
 type MockRepo struct {
 	meetings   []*proto.Meeting
 	races      []*proto.Race
 	selections []*proto.Selection
 }
 
-func (repo *MockRepo) ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error) {
-
-	var result []*proto.Meeting
-	for _, v := range repo.meetings {
-		if v.ScheduledStart >= start && v.ScheduledStart <= end {
-			result = append(result, v)
-		}
-	}
-
-	return result, nil
-}
-
-func (repo *MockRepo) ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error) {
-
-	var result []*proto.Race
-	for _, v := range repo.races {
-		if v.MeetingStart >= start && v.MeetingStart <= end {
-			result = append(result, v)
-		}
-	}
-
-	return result, nil
-}
-
-func (repo *MockRepo) AddMeetings(meetings []*proto.Meeting) error {
-
-	repo.meetings = append(repo.meetings, meetings...)
-	return nil
-}
-
-func (repo *MockRepo) AddRaces(races []*proto.Race) error {
-	repo.races = append(repo.races, races...)
-	return nil
-}
-
-func (repo *MockRepo) AddSelections(selections []*proto.Selection) error {
-	repo.selections = append(repo.selections, selections...)
-	return nil
-}
-
-func (repo *MockRepo) UpdateRace(race *proto.Race) error {
-
-	var existing *proto.Race
-	for _, v := range repo.races {
-		if v.RaceId == race.RaceId {
-			existing = v
-		}
-	}
-
-	if existing == nil {
-		return fmt.Errorf("Expected race id %v does not exist", race.RaceId)
-	}
-
-	existing.ScheduledStart = race.ScheduledStart
-	existing.ActualStart = race.ActualStart
-	existing.Status = race.Status
-	existing.Results = race.Results
-	existing.LastUpdated = time.Now().Unix()
-
-	return nil
-}
-
-func (repo *MockRepo) GetRace(raceID string) (*proto.Race, error) {
-
-	for _, v := range repo.races {
-		if v.RaceId == raceID {
-			return v, nil
-		}
-	}
-
-	return nil, fmt.Errorf("No race found with id %v", raceID)
-}
-
-func (repo *MockRepo) GetMeeting(meetingID string) (*proto.Meeting, error) {
-
-	for _, v := range repo.meetings {
-		if v.MeetingId == meetingID {
-			return v, nil
-		}
-	}
-
-	return nil, fmt.Errorf("No meeting found with id %v", meetingID)
-}
-
-func (repo *MockRepo) ListRacesByMeetingID(meetingID string) ([]*proto.Race, error) {
-	var result []*proto.Race
-	for _, v := range repo.races {
-		if v.MeetingId == meetingID {
-			result = append(result, v)
-		}
-	}
-
-	return result, nil
-}
-
-func (repo *MockRepo) ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
-
-	var result []*proto.Selection
-	for _, v := range repo.selections {
-		if v.RaceId == raceID {
-			result = append(result, v)
-		}
-	}
-
-	return result, nil
-}
-
-func (repo *MockRepo) UpdateSelection(selection *proto.Selection) error {
-
-	var existing *proto.Selection
-	for _, v := range repo.selections {
-		if v.SelectionId == selection.SelectionId {
-			existing = v
-		}
-	}
-
-	if existing == nil {
-		return fmt.Errorf("No selection found with id %v", selection.SelectionId)
-	}
-
-	existing.BarrierNumber = selection.BarrierNumber
-	existing.Jockey = selection.Jockey
-	existing.Number = selection.Number
-	existing.SourceCompetitorId = selection.SourceCompetitorId
-	existing.Name = selection.Name
-	existing.LastUpdated = time.Now().Unix()
-
-	return nil
-}
-
-func (repo *MockRepo) Close() {}
-
-func (repo *MockRepo) NewSession() Repository {
-	return repo
+func getTestRacingService(repo *MockRepo) *RacingService {
+	b := &MockBroker{}
+	return NewRacingService(repo, b)
 }
 
 func TestListRacesByMeetingDate(t *testing.T) {
@@ -173,7 +39,7 @@ func TestListRacesByMeetingDate(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var tests = []struct {
 		start    int64
@@ -223,7 +89,7 @@ func TestListRacesByMeetingDateValidation(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var tests = []struct {
 		start int64
@@ -272,7 +138,7 @@ func TestListMeetingsByDate(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var tests = []struct {
 		start    int64
@@ -322,7 +188,7 @@ func TestListMeetingsByDateValidation(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var tests = []struct {
 		start int64
@@ -358,7 +224,7 @@ func TestAddMeetingsValidation(t *testing.T) {
 
 	repo := &MockRepo{}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var testValues = []struct {
 		meetings    []*proto.Meeting
@@ -456,7 +322,7 @@ func TestAddMeetingsValidation(t *testing.T) {
 func TestAddMeetings(t *testing.T) {
 	repo := &MockRepo{}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var meetings = []*proto.Meeting{
 		&proto.Meeting{
@@ -506,7 +372,7 @@ func TestAddMeetings(t *testing.T) {
 func TestAddRacesValidation(t *testing.T) {
 	repo := &MockRepo{}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var testValues = []struct {
 		races       []*proto.Race
@@ -682,7 +548,7 @@ func TestAddRacesValidation(t *testing.T) {
 func TestAddRaces(t *testing.T) {
 	repo := &MockRepo{}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var races = []*proto.Race{
 		&proto.Race{
@@ -759,7 +625,7 @@ func TestUpdateRaceValidatesRace(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var testValues = []struct {
 		race        *proto.Race
@@ -933,7 +799,7 @@ func TestUpdateRaceValidatesSelections(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var testValues = []struct {
 		selection   *proto.Selection
@@ -1169,7 +1035,7 @@ func TestUpdateRaceCreatesSelectionsOnInitalCall(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	// Update Race 1 with 2 selections
 	req := &proto.UpdateRaceRequest{
@@ -1300,7 +1166,7 @@ func TestUpdateRaceFailsWhenNumberOfSelectionsChange(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	// Update 3 selections in Race 2
 	req := &proto.UpdateRaceRequest{
@@ -1428,7 +1294,7 @@ func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	// Update the two selections in Race 2
 	req := &proto.UpdateRaceRequest{
@@ -1500,15 +1366,338 @@ func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
 }
 
 func TestUpdateRaceNotifiesOnRaceChange(t *testing.T) {
-	t.Fail()
+	// Create 1 race with 2 selections
+	repo := &MockRepo{
+		races: []*proto.Race{
+			&proto.Race{
+				RaceId:         "race-2",
+				ActualStart:    1000,
+				DateCreated:    2000,
+				LastUpdated:    3000,
+				MeetingId:      "meeting-1",
+				MeetingStart:   4000,
+				Name:           "Race 1",
+				Number:         2,
+				Results:        "2,3,4",
+				ScheduledStart: 5000,
+				SourceId:       "source-2",
+				Status:         "AWESOME",
+			},
+		},
+		selections: []*proto.Selection{
+			&proto.Selection{
+				SelectionId:        "selection-a",
+				BarrierNumber:      2,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Winx",
+				Number:             3,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-a",
+			},
+			&proto.Selection{
+				SelectionId:        "selection-b",
+				BarrierNumber:      4,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Hartnell",
+				Number:             5,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-b",
+			},
+		},
+	}
+	ctx := context.Background()
+	broker := &MockBroker{}
+	srv := NewRacingService(repo, broker)
+
+	// Update the race but not the selections
+	req := &proto.UpdateRaceRequest{
+		Race: &proto.Race{
+			RaceId:         "race-2",
+			ActualStart:    1000,
+			DateCreated:    2000,
+			LastUpdated:    3000,
+			MeetingId:      "meeting-1",
+			MeetingStart:   4000,
+			Name:           "Race 1",
+			Number:         2,
+			Results:        "2,3,4",
+			ScheduledStart: 6000, // Scheduled start changed from 5000 to 6000
+			SourceId:       "source-2",
+			Status:         "AWESOME",
+		},
+		Selections: []*proto.Selection{
+			&proto.Selection{
+				SelectionId:        "selection-a",
+				BarrierNumber:      2,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Winx",
+				Number:             3,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-a",
+			},
+			&proto.Selection{
+				SelectionId:        "selection-b",
+				BarrierNumber:      4,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Hartnell",
+				Number:             5,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-b",
+			},
+		},
+	}
+
+	resp := &proto.UpdateRaceResponse{}
+
+	if err := srv.UpdateRace(ctx, req, resp); err != nil {
+		t.Error(err)
+	}
+
+	msg := &proto.RaceUpdatedMessage{}
+	err := json.Unmarshal(broker.messages[0].Body, msg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(broker.messages) != 1 {
+		t.Errorf("Expected 1 message but got %v", len(broker.messages))
+	}
+
+	if broker.messages[0].Header["race_id"] != "race-2" {
+		t.Errorf("Expected message with race id %v but got %v", "race-2", broker.messages[0].Header["race_id"])
+	}
+
+	if broker.messages[0].Header["meeting_id"] != "meeting-1" {
+		t.Errorf("Expected message with meeting id %v but got %v", "meeting-1", broker.messages[0].Header["meeting_id"])
+	}
+
+	if msg.Race.SourceId != repo.races[0].SourceId {
+		t.Errorf("Expected message with source id %v but got %v", repo.races[0].SourceId, msg.Race.SourceId)
+	}
+
+	if msg.Selections[0].SelectionId != repo.selections[0].SelectionId {
+		t.Errorf("Expected message with selection id %v but got %v", repo.selections[0].SelectionId, msg.Selections[0].SelectionId)
+	}
 }
 
 func TestUpdateRaceNotifiesOnSelectionChange(t *testing.T) {
-	t.Fail()
+	// Create 1 race with 2 selections
+	repo := &MockRepo{
+		races: []*proto.Race{
+			&proto.Race{
+				RaceId:         "race-2",
+				ActualStart:    1000,
+				DateCreated:    2000,
+				LastUpdated:    3000,
+				MeetingId:      "meeting-1",
+				MeetingStart:   4000,
+				Name:           "Race 1",
+				Number:         2,
+				Results:        "2,3,4",
+				ScheduledStart: 5000,
+				SourceId:       "source-2",
+				Status:         "AWESOME",
+			},
+		},
+		selections: []*proto.Selection{
+			&proto.Selection{
+				SelectionId:        "selection-a",
+				BarrierNumber:      2,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Winx",
+				Number:             3,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-a",
+			},
+			&proto.Selection{
+				SelectionId:        "selection-b",
+				BarrierNumber:      4,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Hartnell",
+				Number:             5,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-b",
+			},
+		},
+	}
+	ctx := context.Background()
+	broker := &MockBroker{}
+	srv := NewRacingService(repo, broker)
+
+	// Update the selections but not the race
+	req := &proto.UpdateRaceRequest{
+		Race: &proto.Race{
+			RaceId:         "race-2",
+			ActualStart:    1000,
+			DateCreated:    2000,
+			LastUpdated:    3000,
+			MeetingId:      "meeting-1",
+			MeetingStart:   4000,
+			Name:           "Race 1",
+			Number:         2,
+			Results:        "2,3,4",
+			ScheduledStart: 5000,
+			SourceId:       "source-2",
+			Status:         "AWESOME",
+		},
+		Selections: []*proto.Selection{
+			&proto.Selection{
+				SelectionId:        "selection-a",
+				BarrierNumber:      22,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Winx",
+				Number:             3,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-a",
+			},
+			&proto.Selection{
+				SelectionId:        "selection-b",
+				BarrierNumber:      44,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Hartnell",
+				Number:             5,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-b",
+			},
+		},
+	}
+
+	resp := &proto.UpdateRaceResponse{}
+
+	if err := srv.UpdateRace(ctx, req, resp); err != nil {
+		t.Error(err)
+	}
+
+	if len(broker.messages) != 1 {
+		t.Fatalf("Expected 1 message but got %v", len(broker.messages))
+	}
+
+	msg := &proto.RaceUpdatedMessage{}
+	err := json.Unmarshal(broker.messages[0].Body, msg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if msg.Selections[0].BarrierNumber != 22 {
+		t.Errorf("Expected message with selection name %v but got %v", 22, msg.Selections[0].Name)
+	}
 }
 
 func TestUpdateRaceNoNotificationIfNoChange(t *testing.T) {
-	t.Fail()
+	// Create 1 race with 2 selections
+	repo := &MockRepo{
+		races: []*proto.Race{
+			&proto.Race{
+				RaceId:         "race-2",
+				ActualStart:    1000,
+				DateCreated:    2000,
+				LastUpdated:    3000,
+				MeetingId:      "meeting-1",
+				MeetingStart:   4000,
+				Name:           "Race 1",
+				Number:         2,
+				Results:        "2,3,4",
+				ScheduledStart: 5000,
+				SourceId:       "source-2",
+				Status:         "AWESOME",
+			},
+		},
+		selections: []*proto.Selection{
+			&proto.Selection{
+				SelectionId:        "selection-a",
+				BarrierNumber:      2,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Winx",
+				Number:             3,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-a",
+			},
+			&proto.Selection{
+				SelectionId:        "selection-b",
+				BarrierNumber:      4,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Hartnell",
+				Number:             5,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-b",
+			},
+		},
+	}
+	ctx := context.Background()
+	broker := &MockBroker{}
+	srv := NewRacingService(repo, broker)
+
+	// Update the selections but not the race
+	req := &proto.UpdateRaceRequest{
+		Race: &proto.Race{
+			RaceId:         "race-2",
+			ActualStart:    1000,
+			DateCreated:    2000,
+			LastUpdated:    3000,
+			MeetingId:      "meeting-1",
+			MeetingStart:   4000,
+			Name:           "Race 1",
+			Number:         2,
+			Results:        "2,3,4",
+			ScheduledStart: 5000,
+			SourceId:       "source-2",
+			Status:         "AWESOME",
+		},
+		Selections: []*proto.Selection{
+			&proto.Selection{
+				SelectionId:        "selection-a",
+				BarrierNumber:      2,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Winx",
+				Number:             3,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-a",
+			},
+			&proto.Selection{
+				SelectionId:        "selection-b",
+				BarrierNumber:      4,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Hartnell",
+				Number:             5,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-b",
+			},
+		},
+	}
+
+	resp := &proto.UpdateRaceResponse{}
+
+	if err := srv.UpdateRace(ctx, req, resp); err != nil {
+		t.Error(err)
+	}
+
+	if len(broker.messages) != 0 {
+		t.Fatalf("Expected no message but got %v", len(broker.messages))
+	}
 }
 
 func TestGetNextRace(t *testing.T) {
@@ -1516,7 +1705,7 @@ func TestGetNextRace(t *testing.T) {
 	repo := &MockRepo{}
 
 	ctx := context.Background()
-	srv := NewRacingService(repo)
+	srv := getTestRacingService(repo)
 
 	var testValues = []struct {
 		races    []*proto.Race
@@ -1599,4 +1788,195 @@ func getTestRace(meetingID string, number int32, actualStart int64) *proto.Race 
 		ActualStart: actualStart,
 		Name:        string(number),
 	}
+}
+
+func (repo *MockRepo) ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error) {
+
+	var result []*proto.Meeting
+	for _, v := range repo.meetings {
+		if v.ScheduledStart >= start && v.ScheduledStart <= end {
+			result = append(result, v)
+		}
+	}
+
+	return result, nil
+}
+
+func (repo *MockRepo) ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error) {
+
+	var result []*proto.Race
+	for _, v := range repo.races {
+		if v.MeetingStart >= start && v.MeetingStart <= end {
+			result = append(result, v)
+		}
+	}
+
+	return result, nil
+}
+
+func (repo *MockRepo) AddMeetings(meetings []*proto.Meeting) error {
+
+	repo.meetings = append(repo.meetings, meetings...)
+	return nil
+}
+
+func (repo *MockRepo) AddRaces(races []*proto.Race) error {
+	repo.races = append(repo.races, races...)
+	return nil
+}
+
+func (repo *MockRepo) AddSelections(selections []*proto.Selection) error {
+	repo.selections = append(repo.selections, selections...)
+	return nil
+}
+
+func (repo *MockRepo) UpdateRace(race *proto.Race) error {
+
+	var existing *proto.Race
+	for _, v := range repo.races {
+		if v.RaceId == race.RaceId {
+			existing = v
+		}
+	}
+
+	if existing == nil {
+		return fmt.Errorf("Expected race id %v does not exist", race.RaceId)
+	}
+
+	existing.ScheduledStart = race.ScheduledStart
+	existing.ActualStart = race.ActualStart
+	existing.Status = race.Status
+	existing.Results = race.Results
+	existing.LastUpdated = time.Now().Unix()
+
+	return nil
+}
+
+func (repo *MockRepo) GetRace(raceID string) (*proto.Race, error) {
+
+	for _, v := range repo.races {
+		if v.RaceId == raceID {
+			return v, nil
+		}
+	}
+
+	return nil, fmt.Errorf("No race found with id %v", raceID)
+}
+
+func (repo *MockRepo) GetMeeting(meetingID string) (*proto.Meeting, error) {
+
+	for _, v := range repo.meetings {
+		if v.MeetingId == meetingID {
+			return v, nil
+		}
+	}
+
+	return nil, fmt.Errorf("No meeting found with id %v", meetingID)
+}
+
+func (repo *MockRepo) ListRacesByMeetingID(meetingID string) ([]*proto.Race, error) {
+	var result []*proto.Race
+	for _, v := range repo.races {
+		if v.MeetingId == meetingID {
+			result = append(result, v)
+		}
+	}
+
+	return result, nil
+}
+
+func (repo *MockRepo) ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
+
+	var result []*proto.Selection
+	for _, v := range repo.selections {
+		if v.RaceId == raceID {
+			result = append(result, v)
+		}
+	}
+
+	return result, nil
+}
+
+func (repo *MockRepo) UpdateSelection(selection *proto.Selection) error {
+
+	var existing *proto.Selection
+	for _, v := range repo.selections {
+		if v.SelectionId == selection.SelectionId {
+			existing = v
+		}
+	}
+
+	if existing == nil {
+		return fmt.Errorf("No selection found with id %v", selection.SelectionId)
+	}
+
+	existing.BarrierNumber = selection.BarrierNumber
+	existing.Jockey = selection.Jockey
+	existing.Number = selection.Number
+	existing.SourceCompetitorId = selection.SourceCompetitorId
+	existing.Name = selection.Name
+	existing.LastUpdated = time.Now().Unix()
+
+	return nil
+}
+
+func (repo *MockRepo) Close() {}
+
+func (repo *MockRepo) NewSession() Repository {
+	return repo
+}
+
+type MockBroker struct {
+	messages []*broker.Message
+}
+
+type MockSubscriber struct {
+	id    string
+	topic string
+}
+
+func (b *MockBroker) Options() broker.Options {
+	return b.Options()
+}
+
+func (b *MockBroker) Address() string {
+	return ""
+}
+
+func (b *MockBroker) String() string {
+	return "mock"
+}
+
+func (b *MockBroker) Connect() error {
+	return nil
+}
+
+func (b *MockBroker) Disconnect() error {
+	return nil
+}
+
+func (b *MockBroker) Init(...broker.Option) error {
+	return nil
+}
+
+func (b *MockBroker) Publish(topic string, message *broker.Message, opts ...broker.PublishOption) error {
+	b.messages = append(b.messages, message)
+	return nil
+}
+
+func (b *MockBroker) Subscribe(topic string, handler broker.Handler, opts ...broker.SubscribeOption) (broker.Subscriber, error) {
+	sub := &MockSubscriber{}
+	return sub, nil
+}
+
+func (m *MockSubscriber) Options() broker.SubscribeOptions {
+	return broker.SubscribeOptions{}
+}
+
+func (m *MockSubscriber) Topic() string {
+	return m.topic
+}
+
+func (m *MockSubscriber) Unsubscribe() error {
+	return nil
 }

@@ -11,6 +11,11 @@ service RacingService {
     rpc GetNextRace (GetNextRaceRequest) returns (GetNextRaceResponse);
 }
 
+message RaceUpdatedMessage {
+    Race race = 1;
+    repeated Selection selections = 2;
+}
+
 message ListMeetingsByDateRequest {
     int64 start_date = 1; 
     int64 end_date = 2; 

@@ -8,6 +8,7 @@ It is generated from these files:
 	racing.proto
 
 It has these top-level messages:
+	RaceUpdatedMessage
 	ListMeetingsByDateRequest
 	ListMeetingsByDateResponse
 	ListRacesByMeetingDateRequest

@@ -225,7 +225,9 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	}
 
 	if raceUpdated || selectionUpdated {
-		//TODO: notify of change
+		if err := s.publishRaceUpdate(req.Race, req.Selections); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -255,18 +257,22 @@ func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceR
 	return nil
 }
 
-func (s *RacingService) publishRaceUpdate(race *proto.Race) error {
-	body, err := json.Marshal(race)
+func (s *RacingService) publishRaceUpdate(race *proto.Race, selections []*proto.Selection) error {
+	body := &proto.RaceUpdatedMessage{
+		Race:       race,
+		Selections: selections,
+	}
+
+	b, err := json.Marshal(body)
 	if err != nil {
 		return err
 	}
-
 	msg := &broker.Message{
 		Header: map[string]string{
 			"race_id":    race.RaceId,
 			"meeting_id": race.MeetingId,
 		},
-		Body: body,
+		Body: b,
 	}
 
 	if err := s.broker.Publish(raceUpdateTopic, msg); err != nil {
