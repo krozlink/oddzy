@@ -6,9 +6,11 @@ services:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
       - DB_HOST=db-mongo
+      - NATS_URI=nats://nats:4222
     depends_on:
       - consul
       - db-mongo
+      - nats
   consul:
     image: consul:latest
     hostname: consul
@@ -34,5 +36,11 @@ services:
       - mongodata:/data/db
     ports:
       - 27017:27017
+  nats:
+    image: nats
+    expose:
+      - "4222"
+    ports:
+      - "8222:8222"
 volumes:
   mongodata:

@@ -87,7 +87,10 @@
 
 [[projects]]
   name = "github.com/micro/go-plugins"
-  packages = ["registry/consul"]
+  packages = [
+    "broker/nats",
+    "registry/consul"
+  ]
   revision = "d220b91b5d89463c86a5bd12435bd34f3f8369a3"
   version = "v0.10.1"
 
@@ -138,6 +141,27 @@
   revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
 
 [[projects]]
+  name = "github.com/nats-io/go-nats"
+  packages = [
+    "encoders/builtin",
+    "util"
+  ]
+  revision = "062418ea1c2181f52dc0f954f6204370519a868b"
+  version = "v1.5.0"
+
+[[projects]]
+  name = "github.com/nats-io/nats"
+  packages = ["."]
+  revision = "062418ea1c2181f52dc0f954f6204370519a868b"
+  version = "v1.5.0"
+
+[[projects]]
+  name = "github.com/nats-io/nuid"
+  packages = ["."]
+  revision = "289cccf02c178dc782430d534e3c1f5b72af807f"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/pborman/uuid"
   packages = ["."]
   revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
@@ -186,6 +210,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0cd50aea51490d2fadc370e9d3ea2351de235267d6acc83121ac14bedc669120"
+  inputs-digest = "86fe59279184c033371770b118617f5c7a92a3da975f923d2e1948b141e281c3"
   solver-name = "gps-cdcl"
   solver-version = 1
