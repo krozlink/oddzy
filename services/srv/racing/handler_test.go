@@ -4,10 +4,15 @@ import (
 	"context"
 	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
+	"github.com/micro/go-micro/broker"
 	"strings"
 	"testing"
 	"time"
 )
+
+type MockBroker struct {
+	messages []broker.Message
+}
 
 type MockRepo struct {
 	meetings   []*proto.Meeting
