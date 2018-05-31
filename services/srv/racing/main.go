@@ -4,6 +4,7 @@ import (
 	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 	micro "github.com/micro/go-micro"
+	_ "github.com/micro/go-plugins/broker/nats"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"log"
 	"os"
@@ -40,8 +41,10 @@ func main() {
 
 	srv.Init()
 
-	repo := &RacingRepository{session}
-	racing := NewRacingService(repo)
+	racing := NewRacingService(
+		&RacingRepository{session},
+		srv.Server().Options().Broker,
+	)
 
 	proto.RegisterRacingServiceHandler(srv.Server(), racing)
 	if err := srv.Run(); err != nil {

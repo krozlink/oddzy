@@ -2,20 +2,26 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
+	"github.com/micro/go-micro/broker"
 	"sort"
 )
 
 // RacingService is for interacing with racing data such as meetings and races
 type RacingService struct {
-	repo Repository
+	repo   Repository
+	broker broker.Broker
 }
 
+const raceUpdateTopic = "race.updated"
+
 // NewRacingService returns a new instance of the service using the provided repository
-func NewRacingService(r Repository) *RacingService {
+func NewRacingService(r Repository, b broker.Broker) *RacingService {
 	return &RacingService{
-		repo: r,
+		repo:   r,
+		broker: b,
 	}
 }
 
@@ -219,7 +225,9 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	}
 
 	if raceUpdated || selectionUpdated {
-		//TODO: notify of change
+		if err := s.publishRaceUpdate(req.Race, req.Selections); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -246,6 +254,31 @@ func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceR
 	}
 
 	resp.Race = nil
+	return nil
+}
+
+func (s *RacingService) publishRaceUpdate(race *proto.Race, selections []*proto.Selection) error {
+	body := &proto.RaceUpdatedMessage{
+		Race:       race,
+		Selections: selections,
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	msg := &broker.Message{
+		Header: map[string]string{
+			"race_id":    race.RaceId,
+			"meeting_id": race.MeetingId,
+		},
+		Body: b,
+	}
+
+	if err := s.broker.Publish(raceUpdateTopic, msg); err != nil {
+		return fmt.Errorf("Publish failed: %v", err)
+	}
+
 	return nil
 }
 
