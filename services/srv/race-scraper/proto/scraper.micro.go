@@ -45,34 +45,34 @@ var _ context.Context
 var _ client.Option
 var _ server.Option
 
-// Client API for ScraperService service
+// Client API for MonitorService service
 
-type ScraperService interface {
+type MonitorService interface {
 	GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, opts ...client.CallOption) (*GetWorkQueueResponse, error)
 	GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, opts ...client.CallOption) (*GetWorkHistoryResponse, error)
 	GetStatus(ctx context.Context, in *GetStatusRequest, opts ...client.CallOption) (*GetStatusResponse, error)
 }
 
-type scraperService struct {
+type monitorService struct {
 	c    client.Client
 	name string
 }
 
-func NewScraperService(name string, c client.Client) ScraperService {
+func NewMonitorService(name string, c client.Client) MonitorService {
 	if c == nil {
 		c = client.NewClient()
 	}
 	if len(name) == 0 {
 		name = "scraper"
 	}
-	return &scraperService{
+	return &monitorService{
 		c:    c,
 		name: name,
 	}
 }
 
-func (c *scraperService) GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, opts ...client.CallOption) (*GetWorkQueueResponse, error) {
-	req := c.c.NewRequest(c.name, "ScraperService.GetWorkQueue", in)
+func (c *monitorService) GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, opts ...client.CallOption) (*GetWorkQueueResponse, error) {
+	req := c.c.NewRequest(c.name, "MonitorService.GetWorkQueue", in)
 	out := new(GetWorkQueueResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -81,8 +81,8 @@ func (c *scraperService) GetWorkQueue(ctx context.Context, in *GetWorkQueueReque
 	return out, nil
 }
 
-func (c *scraperService) GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, opts ...client.CallOption) (*GetWorkHistoryResponse, error) {
-	req := c.c.NewRequest(c.name, "ScraperService.GetWorkHistory", in)
+func (c *monitorService) GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, opts ...client.CallOption) (*GetWorkHistoryResponse, error) {
+	req := c.c.NewRequest(c.name, "MonitorService.GetWorkHistory", in)
 	out := new(GetWorkHistoryResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -91,8 +91,8 @@ func (c *scraperService) GetWorkHistory(ctx context.Context, in *GetWorkHistoryR
 	return out, nil
 }
 
-func (c *scraperService) GetStatus(ctx context.Context, in *GetStatusRequest, opts ...client.CallOption) (*GetStatusResponse, error) {
-	req := c.c.NewRequest(c.name, "ScraperService.GetStatus", in)
+func (c *monitorService) GetStatus(ctx context.Context, in *GetStatusRequest, opts ...client.CallOption) (*GetStatusResponse, error) {
+	req := c.c.NewRequest(c.name, "MonitorService.GetStatus", in)
 	out := new(GetStatusResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -101,39 +101,39 @@ func (c *scraperService) GetStatus(ctx context.Context, in *GetStatusRequest, op
 	return out, nil
 }
 
-// Server API for ScraperService service
+// Server API for MonitorService service
 
-type ScraperServiceHandler interface {
+type MonitorServiceHandler interface {
 	GetWorkQueue(context.Context, *GetWorkQueueRequest, *GetWorkQueueResponse) error
 	GetWorkHistory(context.Context, *GetWorkHistoryRequest, *GetWorkHistoryResponse) error
 	GetStatus(context.Context, *GetStatusRequest, *GetStatusResponse) error
 }
 
-func RegisterScraperServiceHandler(s server.Server, hdlr ScraperServiceHandler, opts ...server.HandlerOption) {
-	type scraperService interface {
+func RegisterMonitorServiceHandler(s server.Server, hdlr MonitorServiceHandler, opts ...server.HandlerOption) {
+	type monitorService interface {
 		GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, out *GetWorkQueueResponse) error
 		GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, out *GetWorkHistoryResponse) error
 		GetStatus(ctx context.Context, in *GetStatusRequest, out *GetStatusResponse) error
 	}
-	type ScraperService struct {
-		scraperService
+	type MonitorService struct {
+		monitorService
 	}
-	h := &scraperServiceHandler{hdlr}
-	s.Handle(s.NewHandler(&ScraperService{h}, opts...))
+	h := &monitorServiceHandler{hdlr}
+	s.Handle(s.NewHandler(&MonitorService{h}, opts...))
 }
 
-type scraperServiceHandler struct {
-	ScraperServiceHandler
+type monitorServiceHandler struct {
+	MonitorServiceHandler
 }
 
-func (h *scraperServiceHandler) GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, out *GetWorkQueueResponse) error {
-	return h.ScraperServiceHandler.GetWorkQueue(ctx, in, out)
+func (h *monitorServiceHandler) GetWorkQueue(ctx context.Context, in *GetWorkQueueRequest, out *GetWorkQueueResponse) error {
+	return h.MonitorServiceHandler.GetWorkQueue(ctx, in, out)
 }
 
-func (h *scraperServiceHandler) GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, out *GetWorkHistoryResponse) error {
-	return h.ScraperServiceHandler.GetWorkHistory(ctx, in, out)
+func (h *monitorServiceHandler) GetWorkHistory(ctx context.Context, in *GetWorkHistoryRequest, out *GetWorkHistoryResponse) error {
+	return h.MonitorServiceHandler.GetWorkHistory(ctx, in, out)
 }
 
-func (h *scraperServiceHandler) GetStatus(ctx context.Context, in *GetStatusRequest, out *GetStatusResponse) error {
-	return h.ScraperServiceHandler.GetStatus(ctx, in, out)
+func (h *monitorServiceHandler) GetStatus(ctx context.Context, in *GetStatusRequest, out *GetStatusResponse) error {
+	return h.MonitorServiceHandler.GetStatus(ctx, in, out)
 }

@@ -1,46 +1,42 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/race-scraper/proto"
-	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
+	// racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"log"
-	"time"
 )
 
-const (
-	meetingDataURL = "https://www.odds.com.au/api/web/public/Racing/getUpcomingRaces/?sport=%s&date=%s"
-	raceDataURL    = "https://www.odds.com.au/api/web/public/Odds/getOddsComparisonCacheable/?eventId=%s&includeTAB=1&includeOdds=1&arrangeOdds=0&betType=FixedWin&includeTote=true&allowGet=true"
-)
+var process scrapeProcess
 
-type meetingData struct {
-	meetings    []racing.Meeting
-	races       []racing.Race
-	selections  []racing.Selection
-	competitors []racing.Competitor
+type scrapeProcess struct {
+	status string
+	done   chan bool
+	http   handler
 }
-
-var (
-	status   string
-	meetings map[string]string
-	done     = make(chan bool)
-)
 
 func main() {
-	registerService()
 
-	addMissingRaceData()
+	process = newScrapeProcess()
+	registerProcessMonitor()
 
-	monitorUpcomingRaces()
+	start()
 
-	<-done
+	<-process.done
 }
 
-func registerService() {
-	status = "INITIALISING"
+func newScrapeProcess() scrapeProcess {
+	return scrapeProcess{
+		status: "INITIALISING",
+		done:   make(chan bool),
+		http:   handler{},
+	}
+}
+
+func registerProcessMonitor() {
+	monitor := newMonitor(&process)
+
 	srv := micro.NewService(
 		micro.Name("oddzy.services.race-scraper"),
 		micro.Version("latest"),
@@ -48,7 +44,7 @@ func registerService() {
 
 	srv.Init()
 
-	proto.RegisterScraperServiceHandler(srv.Server(), &service{})
+	proto.RegisterMonitorServiceHandler(srv.Server(), monitor)
 
 	go func() {
 		if err := srv.Run(); err != nil {
@@ -57,81 +53,36 @@ func registerService() {
 	}()
 }
 
-func addMissingRaceData() {
-	status = "SETUP"
+func start() {
+	// STATUS - SETUP
 
-	// intData := readInternalMeetingData()
-	// extData := scrapeExternalMeetingData()
-	// eventIds := getMissingEvents(intData, extData)
-}
+	// read all internal meeting data for scraping period (yesterday to 2 days from now)
+	//		ListMeetingsByDate
+	//		ListRacesByMeetingDate
 
-func readInternalMeetingData() {
-	// ListMeetingsByDate(date_range)
-	// ListRacesByMeetingDate(date_range)
-}
+	// read race calendars from scraping period
+	//		ScrapeCalendar
 
-func scrapeExternalMeetingData() <-chan bool {
+	// for each external meeting
+	// 		if the meeting doesnt exist internally (look up source id), create meeting id and add to new meetings list
 
-	result := make(chan bool)
-	go func() {
-		log.Println("Scraping meeting data")
+	// for each race
+	// 		if the race doesnt exist internally (look up source id) create a race id and add to new races list
 
-		for i, url := range calendarUrls() {
-			if i > 0 {
-				<-time.After(1 * time.Second)
-				scrapeCalendar(url)
-			}
-		}
+	// update new meeting list with their race ids
+	// call AddMeetings with new meetings list
+	// call AddRaces with  new races list (leave last_updated as null)
 
-		result <- true
-	}()
+	// Add all existing races with a null last_updated as well as all new races to a missingEvents queue
 
-	return result
-}
+	// STATUS - RACE_CREATION
+	// For each item on the missingEvents queue
+	//	Scrape the race
+	// 	Update the race - UpdateRace
 
-func startRaceUpdater() {
-
-}
-
-func scrapeCalendar(url string) (*raceCalendar, error) {
-	encodedResponse := getResponse(url)
-	odds := oddsResponse{}
-	json.Unmarshal(encodedResponse, odds)
-	calendar := &raceCalendar{}
-	err := json.Unmarshal([]byte(odds.r), calendar)
-
-	if err != nil {
-		fmt.Println("Unable to decode response into race calendar")
-		fmt.Println(odds.r)
-		return nil, err
-	}
-
-	return calendar, nil
-}
-
-func calendarUrls() []string {
-	dates := []string{
-		time.Now().AddDate(0, 0, -1).Format("2006-01-02"),
-		time.Now().AddDate(0, 0, 0).Format("2006-01-02"),
-		time.Now().AddDate(0, 0, 1).Format("2006-01-02"),
-		time.Now().AddDate(0, 0, 2).Format("2006-01-02"),
-	}
-
-	types := []string{"horse-racing", "greyhounds", "harness"}
-
-	urls := make([]string, 0, 12)
-
-	for _, d := range dates {
-		for _, t := range types {
-			u := fmt.Sprintf(meetingDataURL, t, d)
-			urls = append(urls, u)
-		}
-	}
-
-	return urls
-}
-
-func monitorUpcomingRaces() {
-	status = "RACE_MONITORING"
-
+	// STATUS - RACE MONITORING
+	// Process 1
+	//		Monitor time until race and race status and push required races to queue if they are not already on there
+	//		Only needs to run at most every 30 seconds. It can determine its own sleep duration depending on upcoming races
+	// Process 2 - Periodically take items off the queue and scrape them. Ensure minimum interval to avoid overloading server
 }
