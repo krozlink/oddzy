@@ -8,11 +8,17 @@ service RacingService {
     rpc AddMeetings (AddMeetingsRequest) returns (AddMeetingsResponse);
     rpc AddRaces (AddRacesRequest) returns (AddRacesResponse);
     rpc UpdateRace (UpdateRaceRequest) returns (UpdateRaceResponse);
+    rpc GetNextRace (GetNextRaceRequest) returns (GetNextRaceResponse);
+}
+
+message RaceUpdatedMessage {
+    Race race = 1;
+    repeated Selection selections = 2;
 }
 
 message ListMeetingsByDateRequest {
-    string start_date = 1; //yyyy-MM-dd
-    string end_date = 2; //yyyy-MM-dd
+    int64 start_date = 1; 
+    int64 end_date = 2; 
 }
 
 message ListMeetingsByDateResponse {
@@ -20,8 +26,8 @@ message ListMeetingsByDateResponse {
 }
 
 message ListRacesByMeetingDateRequest {
-    string start_date = 1; //yyyy-MM-dd
-    string end_date = 2; //yyyy-MM-dd
+    int64 start_date = 1; 
+    int64 end_date = 2; 
 }
 
 message ListRacesByMeetingDateResponse {
@@ -34,16 +40,15 @@ message AddRacesRequest {
 }
 
 message AddRacesResponse {
-    repeated bool created = 1;
+    bool created = 1;
 }
 
 message AddMeetingsRequest {
-    string meeting_id = 1;
-    repeated Meeting meetings = 2;
+    repeated Meeting meetings = 1;
 }
 
 message AddMeetingsResponse {
-    repeated bool created = 1;
+    bool created = 1;
 }
 
 message UpdateRaceRequest {
@@ -53,6 +58,14 @@ message UpdateRaceRequest {
 
 message UpdateRaceResponse {
     bool updated = 1;
+}
+
+message GetNextRaceRequest {
+    string meeting_id = 1;
+}
+
+message GetNextRaceResponse {
+    Race race = 1;
 }
 
 message Meeting {
@@ -79,20 +92,32 @@ message Competitor {
 message Selection {
     string selection_id = 1;
     string source_id = 2;
+
     string competitor_id = 3;
-    string name = 4;
-    string jockey = 5;
-    int32 number = 6;
-    int32 barrier_number = 7;
+    string source_competitor_id = 4;
+
+    string race_id = 5;
+    string name = 6;
+    string jockey = 7;
+    int32 number = 8;
+    int32 barrier_number = 9;
+
+    
+    int64 last_updated = 10;
 }
 
 message Race {
     string race_id = 1;
     string source_id = 2;
-    int32 number = 3;
-    string name = 4;
-    int64 scheduled_start = 5;
-    int64 actual_start = 6;
-    string status = 7;
-    repeated int32 results = 8;
+    string meeting_id = 3;
+    int32 number = 4;
+    string name = 5;
+    int64 scheduled_start = 6;
+    int64 actual_start = 7;
+    string status = 8;
+    string results = 9;
+    int64 meeting_start = 10;
+
+    int64 date_created = 11;
+    int64 last_updated = 12;
 }

@@ -7,6 +7,8 @@ import (
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,7 +22,7 @@ type scrapeProcess struct {
 	endDate   time.Time
 }
 
-var raceTypes = []string{"horses", "harness", "greyhounds"}
+var raceTypes = []string{"horse-racing", "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
 
@@ -63,20 +65,38 @@ func newScrapeProcess() scrapeProcess {
 func setup(p *scrapeProcess) {
 	p.status = "SETUP"
 	p.startDate, p.endDate = getDateRange()
-	m, r, err := readInternal(p)
-	cal, err := readExternal(p)
+	intM, intR, err := readInternal(p)
+	if err != nil {
+		fmt.Printf("An error occurred reading internal racing data - %v", err)
+	}
+	extM, extR, err := readExternal(p)
+	if err != nil {
+		fmt.Printf("An error occurred reading external racing data - %v", err)
+	}
 
-	//TODO: what is unique meeting id on racecard response?? is meetingName unique??
-	// should readExternal also convert race calendar to []meeting and []races?
+	var newMeetings map[string]*racing.Meeting
+	var newRaces map[string]*racing.Race
 
+	for _, m := range extM {
+		if meetingExists(m.SourceId, intM) {
+			m.MeetingId = newId()
+			newMeetings[m.MeetingId] = m
+		}
+	}
+
+	for _, r := range extR {
+		if raceExists(r.SourceId, intR) {
+			r.RaceId = newId()
+			newRaces[r.RaceId] = r
+		}
+	}
 	// STATUS - SETUP
 	// read all internal meeting data for scraping period (yesterday to 2 days from now)
 	//		ListMeetingsByDate
 	//		ListRacesByMeetingDate
-
+	// read all external meeting data for scraping period (yesterday to 2 days from now)
 	// for each external meeting
 	// 		if the meeting doesnt exist internally (look up source id), create meeting id and add to new meetings list
-
 	// for each race
 	// 		if the race doesnt exist internally (look up source id) create a race id and add to new races list
 
@@ -88,8 +108,10 @@ func setup(p *scrapeProcess) {
 
 }
 
-func readExternal(p *scrapeProcess) ([]*RaceCalendar, error) {
-	calendars := make([]*RaceCalendar, len(raceTypes)*4)
+func readExternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
+	meetings := make([]*racing.Meeting, 1)
+	races := make([]*racing.Race, 1)
+
 	// read race calendars from scraping period
 	for _, t := range raceTypes {
 		for d := p.startDate; d.Before(p.endDate) || d.Equal(p.endDate); d = d.Add(time.Hour * 24) {
@@ -98,14 +120,20 @@ func readExternal(p *scrapeProcess) ([]*RaceCalendar, error) {
 			}
 			cal, err := p.scraper.ScrapeRaceCalendar(t, d.Format("2006-01-02"))
 			if err != nil {
-				return nil, fmt.Errorf("Unable to read race calendar for %v on %v - %v", t, d, err)
+				return nil, nil, fmt.Errorf("Unable to read race calendar for %v on %v - %v", t, d, err)
 			}
 
-			calendars = append(calendars, cal)
+			m, r, err := parseRaceCalendar(d, t, cal)
+			if err != nil {
+				return nil, nil, fmt.Errorf("Unable to parse race calendar for %v on %v - %v", t, d, err)
+			}
+
+			meetings = append(meetings, m...)
+			races = append(races, r...)
 		}
 	}
 
-	return calendars, nil
+	return meetings, races, nil
 }
 
 func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
@@ -114,8 +142,8 @@ func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
 	//		ListRacesByMeetingDate
 	ctx := context.Background()
 	mReq := &racing.ListMeetingsByDateRequest{
-		StartDate: p.startDate.Format("2006-01-02"),
-		EndDate:   p.endDate.Format("2006-01-02"),
+		StartDate: p.startDate.Unix(),
+		EndDate:   p.endDate.Unix(),
 	}
 	mResp, err := p.racing.ListMeetingsByDate(ctx, mReq)
 	if err != nil {
@@ -123,8 +151,8 @@ func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
 	}
 
 	rReq := &racing.ListRacesByMeetingDateRequest{
-		StartDate: p.startDate.Format("2006-01-02"),
-		EndDate:   p.endDate.Format("2006-01-02"),
+		StartDate: p.startDate.Unix(),
+		EndDate:   p.endDate.Unix(),
 	}
 	rResp, err := p.racing.ListRacesByMeetingDate(ctx, rReq)
 	if err != nil {
@@ -134,10 +162,113 @@ func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
 	return mResp.Meetings, rResp.Races, nil
 }
 
-func parseRaceCalendar(c *RaceCalendar) ([]*racing.Meeting, []*racing.Race, error) {
-	//TODO parse race calendar
+func parseRaceCalendar(date time.Time, eventType string, c *RaceCalendar) ([]*racing.Meeting, []*racing.Race, error) {
+	meetings := make([]*racing.Meeting, 1)
+	races := make([]*racing.Race, 1)
+
+	for _, rg := range c.RegionGroups {
+		for _, m := range rg.Meetings {
+			firstEvent := m.Events[0]
+
+			sourceID, err := getMeetingSourceID(firstEvent.DateWithYear, firstEvent.EventURL)
+			if err != nil {
+				return nil, nil, fmt.Errorf("unable to create source id for date %v and url %v", firstEvent.DateWithYear, firstEvent.EventURL)
+			}
+			meeting := &racing.Meeting{
+				Name:           m.MeetingName,
+				ScheduledStart: firstEvent.StartTime,
+				RaceType:       eventType,
+				Country:        m.RegionDescription,
+				SourceId:       sourceID,
+			}
+
+			meetings = append(meetings, meeting)
+
+			for _, e := range m.Events {
+				race := &racing.Race{
+					Name:           e.EventName,
+					Number:         e.EventNumber,
+					Results:        e.Results,
+					ScheduledStart: e.StartTime,
+					Status:         getRaceStatusFromCalendar(e.IsAbandoned, e.Resulted, e.Results),
+					SourceId:       string(e.EventID),
+				}
+
+				races = append(races, race)
+			}
+		}
+	}
+
+	return meetings, races, nil
 }
 
-func parseRaceCard(c *RaceCard) ([]*racing.Meeting, []*racing.Race, error) {
-	//TODO parse race card
+func parseRaceCard(c *RaceCard) ([]*racing.Selection, error) {
+	selections := make([]*racing.Selection, len(c.Selections))
+	for _, v := range c.Selections {
+
+		number, err := strconv.Atoi(v.CompetitorNumber)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to parse competitor number '%v'", v.CompetitorNumber)
+		}
+
+		barrier, err := strconv.Atoi(v.BarrierNumber)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to parse barrier number '%v'", v.BarrierNumber)
+		}
+
+		s := &racing.Selection{
+			SourceId:           v.SelectionID,
+			BarrierNumber:      int32(barrier),
+			Jockey:             v.JockeyName,
+			Number:             int32(number),
+			SourceCompetitorId: v.CompetitorID,
+		}
+
+		selections = append(selections, s)
+	}
+
+	return selections, nil
+}
+
+func getResults(rStr string) ([]int32, error) {
+	if rStr == "" {
+		return nil, nil
+	}
+
+	results := make([]int32, 1)
+	for _, v := range strings.Split(rStr, ",") {
+		r, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, int32(r))
+	}
+
+	return results, nil
+}
+
+func getMeetingSourceID(date, url string) (string, error) {
+	// url is in the format '\/horse-racing\/bendigo\/race-1\/'
+	// date is in the format '20 May 2018'
+	// This should return a source id of '20180520-bendigo-horse-racing'
+
+	u := strings.Split(url, "\\/")
+	d, err := time.Parse("02 Jan 2016", date)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%v-%v-%v", u[0], u[1], d), nil
+}
+
+func getRaceStatusFromCalendar(isAbandoned int32, resulted int32, results string) string {
+	if isAbandoned == 1 {
+		return "ABANDONED"
+	} else if resulted == 1 && results != "" {
+		return "INTERIM"
+	} else if resulted == 1 {
+		return "CLOSED"
+	}
+
+	return "OPEN"
 }
