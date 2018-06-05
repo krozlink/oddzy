@@ -199,26 +199,28 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 
 	selectionUpdated := false
 
-	if len(originalSelections) == 0 {
-		err = repo.AddSelections(req.Selections)
-		if err != nil {
-			return err
-		}
-		selectionUpdated = true
-	} else if len(originalSelections) != len(req.Selections) {
-		return fmt.Errorf("Number of selections unexpectedly changed from %v to %v", len(originalSelections), len(req.Selections))
-	} else {
-		for _, v := range req.Selections {
-			o := getSelectionByID(v.SelectionId, originalSelections)
-			if o == nil {
-				return fmt.Errorf("Expected to find selection %v", v.SelectionId)
+	if len(req.Selections) > 0 { // May not include selection data in an update
+		if len(originalSelections) == 0 { // Add selections if included and none already exist
+			err = repo.AddSelections(req.Selections)
+			if err != nil {
+				return err
 			}
+			selectionUpdated = true
+		} else if len(originalSelections) != len(req.Selections) {
+			return fmt.Errorf("Number of selections unexpectedly changed from %v to %v", len(originalSelections), len(req.Selections))
+		} else {
+			for _, v := range req.Selections {
+				o := getSelectionByID(v.SelectionId, originalSelections)
+				if o == nil {
+					return fmt.Errorf("Expected to find selection %v", v.SelectionId)
+				}
 
-			if hasSelectionChanged(o, v) {
-				selectionUpdated = true
-				err = repo.UpdateSelection(v)
-				if err != nil {
-					return err
+				if hasSelectionChanged(o, v) {
+					selectionUpdated = true
+					err = repo.UpdateSelection(v)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
