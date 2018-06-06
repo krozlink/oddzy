@@ -12,6 +12,8 @@ import (
 
 const (
 	defaultHost = "localhost:27017"
+	serviceName = "oddzy.services.racing"
+	serviceVersion = "latest"
 )
 
 func main() {
@@ -35,8 +37,8 @@ func main() {
 	}
 
 	srv := micro.NewService(
-		micro.Name("oddzy.services.racing"),
-		micro.Version("latest"),
+		micro.Name(serviceName),
+		micro.Version(serviceVersion),
 	)
 
 	srv.Init()

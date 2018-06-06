@@ -47,7 +47,7 @@
   branch = "master"
   name = "github.com/krozlink/oddzy"
   packages = ["services/srv/racing/proto"]
-  revision = "d528fd0d08a2f065b11fdf890817a2aa255feb4f"
+  revision = "2be708fd10b2c52d7b158e417f147a90c9bd0c22"
 
 [[projects]]
   branch = "master"
@@ -129,7 +129,7 @@
   branch = "master"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
-  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+  revision = "3864e76763d94a6df2f9960b16a20a33da9f9a66"
 
 [[projects]]
   branch = "master"
@@ -156,13 +156,19 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
     "ed25519",
     "ed25519/internal/edwards25519"
   ]
-  revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
+  revision = "df8d4716b3472e4a531c33cedbe537dae921a1a9"
 
 [[projects]]
   branch = "master"
@@ -175,11 +181,11 @@
     "ipv4",
     "ipv6"
   ]
-  revision = "8e0cdda24ed423affc8f35c241e5e9b16180338e"
+  revision = "1e491301e022f8f977054da4c2d852decd59571f"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6c5e5ccebd6942fec261371bdc96808ec25846a9320bf8b8f7e9133d20bed6a6"
+  inputs-digest = "843392b39bbd08952cae4d5c5f1e5acef5a5c575867fbe6f7283e8aec93f965f"
   solver-name = "gps-cdcl"
   solver-version = 1
