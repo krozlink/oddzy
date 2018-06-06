@@ -38,8 +38,7 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 	url := fmt.Sprintf(meetingDataURL, eventType, date)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
-		fmt.Printf("Error retrieving race calendar response - %v \n", err)
-		return nil, err
+		return nil, fmt.Errorf("error retrieving race calendar response - %v", err)
 	}
 
 	odds := response{}
@@ -48,9 +47,7 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 	err = json.Unmarshal([]byte(odds.r), calendar)
 
 	if err != nil {
-		fmt.Println("Unable to decode response into race calendar")
-		fmt.Println(odds.r)
-		return nil, err
+		return nil, fmt.Errorf("unable to decode response into race calendar\n%v", odds.r, err)
 	}
 
 	return calendar, nil

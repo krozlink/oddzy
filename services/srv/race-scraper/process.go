@@ -8,6 +8,7 @@ import (
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"github.com/satori/go.uuid"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,15 +16,11 @@ import (
 )
 
 type scrapeProcess struct {
-	status    string
-	done      chan bool
-	http      handler
-	racing    racing.RacingService
-	scraper   Scraper
-	startDate time.Time
-	endDate   time.Time
-
-	unscrapedRaces []*racing.Race
+	status  string
+	done    chan bool
+	http    handler
+	racing  racing.RacingService
+	scraper Scraper
 
 	meetingsByID     map[string]*racing.Meeting
 	meetingsBySource map[string]*racing.Meeting
@@ -42,74 +39,90 @@ var raceTypes = []string{"horse-racing", "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
 
-	setup(p)
+	r := getMissingRaces(p)
+	scrapeRaces(p, r)
 
-	scrapeUnscrapedRaces(p)
-
-	// STATUS - RACE MONITORING
-	// Process 1
-	//		Monitor time until race and race status and push required races to queue if they are not already on there
-	//		Only needs to run at most every 30 seconds. It can determine its own sleep duration depending on upcoming races
-	// Process 2 - Periodically take items off the queue and scrape them. Ensure minimum interval to avoid overloading server
 	monitorUpcomingRaces(p)
 }
 
-func scrapeUnscrapedRaces(p *scrapeProcess) {
+func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 	// STATUS - RACE_CREATION
 	p.status = "RACE_CREATION"
 
+	// queue all races that require scraping
 	scrape := make(chan *racing.Race, 1000)
 	go func() {
-		for _, r := range p.unscrapedRaces {
+		for _, r := range missing {
 			scrape <- r
 		}
 		close(scrape)
 	}()
 
 	update := make(chan *racing.UpdateRaceRequest, 1000)
-	first := true
-	for r := range scrape {
-		if !first {
-			<-time.After(1 * time.Second)
+	var lock = &sync.Mutex{}
+	var errors []error
+
+	// scrape each race and queue for updates
+	go func() {
+		first := true
+		for r := range scrape {
+			if !first { // add 1 second delay between requests
+				<-time.After(1 * time.Second)
+			}
+
+			card, err := p.scraper.ScrapeRaceCard(r.SourceId)
+			if err != nil {
+				lock.Lock()
+				errors = append(errors, err)
+				lock.Unlock()
+			}
+			selections, err := parseRaceCard(card)
+			if err != nil {
+				lock.Lock()
+				errors = append(errors, err)
+				lock.Unlock()
+			}
+
+			req := &racing.UpdateRaceRequest{
+				Race:       r,
+				Selections: selections,
+			}
+			update <- req
+
+			first = false
 		}
+		close(update)
+	}()
 
-		card, err := p.scraper.ScrapeRaceCard(r.SourceId)
-		// TODO error handling
-		selections, err := parseRaceCard(card)
-		// TODO error handling
-
-		req := &racing.UpdateRaceRequest{
-			Race:       r,
-			Selections: selections,
-		}
-		update <- req
-
-		first = false
-	}
-	close(update)
-
+	// Updated scraped races
 	ctx := context.Background()
 	for r := range update {
 		_, err := p.racing.UpdateRace(ctx, r)
-		// TODO error handling
+		if err != nil {
+			lock.Lock()
+			errors = append(errors, err)
+			lock.Unlock()
+		}
 	}
 
-	// go routine to take items off the list in a loop
-	// (wait 1 second if not the first)
-	// scrape race
-	// push to update channel
-
-	// second goroutine to read update channel
-	//call UpdateRace
-	// return when channel closed
-
-	// For each unscraped race
-	//	Scrape the race
-	// 	Update the race - UpdateRace
+	err := merge(errors)
+	return err
 }
 
 func monitorUpcomingRaces(p *scrapeProcess) {
+	p.status = "RACE_MONITORING"
 
+	// Process 1
+	//		Monitor time until race and race status and push required races to queue if they are not already on there
+	//		Only needs to run at most every 30 seconds. It can determine its own sleep duration depending on upcoming races
+	go func() {
+
+	}()
+
+	// Process 2 - Periodically take items off the queue and scrape them. Ensure minimum interval to avoid overloading server
+	go func() {
+
+	}()
 }
 
 func getDateRange() (time.Time, time.Time) {
@@ -133,15 +146,14 @@ func newScrapeProcess() scrapeProcess {
 	}
 }
 
-func setup(p *scrapeProcess) {
+func getMissingRaces(p *scrapeProcess) []*racing.Race {
 	// STATUS - SETUP
 	p.status = "SETUP"
 
 	// read all internal meeting data for scraping period (yesterday to 2 days from now)
-	p.startDate, p.endDate = getDateRange()
 	meetings, races, err := readInternal(p)
 	if err != nil {
-		fmt.Printf("An error occurred reading internal racing data - %v", err)
+		log.Fatalf("An error occurred reading internal racing data - %v", err)
 	}
 
 	for _, m := range meetings {
@@ -157,11 +169,11 @@ func setup(p *scrapeProcess) {
 	// read all external meeting data for scraping period (yesterday to 2 days from now)
 	data, err := readExternal(p)
 	if err != nil {
-		fmt.Printf("An error occurred reading external racing data - %v", err)
+		log.Fatalf("An error occurred reading external racing data - %v", err)
 	}
 
 	// update all existing meetings that have changed
-	uMeetings := make([]*racing.Meeting, 1)
+	uMeetings := make([]*racing.Meeting, 0)
 	for _, m := range data.existingMeetings {
 		current := p.meetingsByID[m.MeetingId]
 		if meetingChanged(current, m) {
@@ -170,8 +182,10 @@ func setup(p *scrapeProcess) {
 	}
 	updateExistingMeetings(p.racing, uMeetings)
 
+	unscraped := make([]*racing.Race, 0)
+
 	// update all existing races that have changed
-	uRaces := make([]*racing.Race, 1)
+	uRaces := make([]*racing.Race, 0)
 	for _, r := range data.existingRaces {
 		current := p.racesByID[r.RaceId]
 		if raceChanged(current, r) {
@@ -180,28 +194,31 @@ func setup(p *scrapeProcess) {
 
 		// flag existing races that have not been individually scraped yet
 		if r.LastUpdated == 0 {
-			p.unscrapedRaces = append(p.unscrapedRaces, r)
+			unscraped = append(unscraped, r)
 		}
 	}
 	updateExistingRaces(p.racing, uRaces)
 
 	// Create new meetings and races
-	err = createNewMeetings(p.racing, data.newMeetings)
-	err = createNewRaces(p.racing, data.newRaces)
+	createNewMeetings(p.racing, data.newMeetings)
+	createNewRaces(p.racing, data.newRaces)
 
 	// flag new races that have not been individually scraped yet
 	for _, r := range data.newRaces {
-		p.unscrapedRaces = append(p.unscrapedRaces, r)
+		unscraped = append(unscraped, r)
 	}
+
+	return unscraped
 }
 
 func readExternal(p *scrapeProcess) (*externalRaceData, error) {
 	data := &externalRaceData{}
 
+	start, end := getDateRange()
 	// read race calendars from scraping period
 	for _, t := range raceTypes {
-		for d := p.startDate; d.Before(p.endDate) || d.Equal(p.endDate); d = d.Add(time.Hour * 24) {
-			if d != p.startDate {
+		for d := start; d.Before(end) || d.Equal(end); d = d.Add(time.Hour * 24) {
+			if d != start {
 				<-time.After(time.Second * 1)
 			}
 			cal, err := p.scraper.ScrapeRaceCalendar(t, d.Format("2006-01-02"))
@@ -228,10 +245,11 @@ func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
 	// read all internal meeting data for scraping period (yesterday to 2 days from now)
 	//		ListMeetingsByDate
 	//		ListRacesByMeetingDate
+	start, end := getDateRange()
 	ctx := context.Background()
 	mReq := &racing.ListMeetingsByDateRequest{
-		StartDate: p.startDate.Unix(),
-		EndDate:   p.endDate.Unix(),
+		StartDate: start.Unix(),
+		EndDate:   end.Unix(),
 	}
 	mResp, err := p.racing.ListMeetingsByDate(ctx, mReq)
 	if err != nil {
@@ -239,8 +257,8 @@ func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
 	}
 
 	rReq := &racing.ListRacesByMeetingDateRequest{
-		StartDate: p.startDate.Unix(),
-		EndDate:   p.endDate.Unix(),
+		StartDate: start.Unix(),
+		EndDate:   end.Unix(),
 	}
 	rResp, err := p.racing.ListRacesByMeetingDate(ctx, rReq)
 	if err != nil {
@@ -401,36 +419,39 @@ func raceChanged(from, to *racing.Race) bool {
 		from.Results != to.Results
 }
 
-func createNewMeetings(client racing.RacingService, meetings []*racing.Meeting) error {
+func createNewMeetings(client racing.RacingService, meetings []*racing.Meeting) {
 	ctx := context.Background()
 	req := &racing.AddMeetingsRequest{
 		Meetings: meetings,
 	}
-	_, err := client.AddMeetings(ctx, req)
-	return err
+	if _, err := client.AddMeetings(ctx, req); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func createNewRaces(client racing.RacingService, races []*racing.Race) error {
+func createNewRaces(client racing.RacingService, races []*racing.Race) {
 	ctx := context.Background()
 	req := &racing.AddRacesRequest{
 		MeetingId: races[0].MeetingId,
 		Races:     races,
 	}
-	_, err := client.AddRaces(ctx, req)
-	return err
+
+	if _, err := client.AddRaces(ctx, req); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func updateExistingMeetings(client racing.RacingService, meetings []*racing.Meeting) error {
 	return nil // TODO: do meetings get updated??
 }
 
-func updateExistingRaces(client racing.RacingService, races []*racing.Race) error {
+func updateExistingRaces(client racing.RacingService, races []*racing.Race) {
 	ctx := context.Background()
 	var wg sync.WaitGroup
 	wg.Add(len(races))
 	var errLock = &sync.Mutex{}
 
-	errors := make([]error, 1)
+	var errors []error
 
 	for _, v := range races {
 		go func(r *racing.Race) {
@@ -448,7 +469,9 @@ func updateExistingRaces(client racing.RacingService, races []*racing.Race) erro
 	}
 
 	wg.Wait()
-	return merge(errors)
+	if err := merge(errors); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func merge(e []error) error {
