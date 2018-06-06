@@ -43,6 +43,7 @@ type RaceCard struct {
 	Selections       []RaceSelection `json:"selections"`
 }
 
+// RaceSelection is the format odds.com.au uses to represent an entrant in a race
 type RaceSelection struct {
 	Name             string `json:"name"`
 	SelectionID      string `json:"selectionId"`

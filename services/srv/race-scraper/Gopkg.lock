@@ -156,6 +156,12 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
@@ -180,6 +186,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "562aa6f70c38e5bcc46e12018de2661f4588e26a9d5e5fa3ace5eccd53ee5455"
+  inputs-digest = "843392b39bbd08952cae4d5c5f1e5acef5a5c575867fbe6f7283e8aec93f965f"
   solver-name = "gps-cdcl"
   solver-version = 1

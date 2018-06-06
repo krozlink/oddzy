@@ -172,7 +172,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 	return nil
 }
 
-// UpdateRace will update the race and selection data for the provided race
+// UpdateRace will update the race and (optionally) selection data for the provided race
 func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceRequest, resp *proto.UpdateRaceResponse) error {
 	err := validateRace(req)
 	if err != nil {
@@ -192,14 +192,14 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 		err = repo.UpdateRace(req.Race)
 	}
 
-	originalSelections, err := repo.ListSelectionsByRaceID(req.Race.RaceId)
-	if err != nil {
-		return err
-	}
-
 	selectionUpdated := false
 
 	if len(req.Selections) > 0 { // May not include selection data in an update
+		originalSelections, err := repo.ListSelectionsByRaceID(req.Race.RaceId)
+		if err != nil {
+			return err
+		}
+
 		if len(originalSelections) == 0 { // Add selections if included and none already exist
 			err = repo.AddSelections(req.Selections)
 			if err != nil {
