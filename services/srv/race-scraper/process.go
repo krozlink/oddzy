@@ -22,6 +22,8 @@ type scrapeProcess struct {
 	racing  racing.RacingService
 	scraper Scraper
 
+	upcoming []*racing.Race
+
 	meetingsByID     map[string]*racing.Meeting
 	meetingsBySource map[string]*racing.Meeting
 	racesByID        map[string]*racing.Race
@@ -39,10 +41,10 @@ var raceTypes = []string{"horse-racing", "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
 
-	r := getMissingRaces(p)
-	scrapeRaces(p, r)
+	upcoming, missing := readRaces(p)
+	scrapeRaces(p, missing)
 
-	monitorUpcomingRaces(p)
+	monitorUpcomingRaces(p, upcoming)
 }
 
 func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
@@ -109,14 +111,21 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 	return err
 }
 
-func monitorUpcomingRaces(p *scrapeProcess) {
+func monitorUpcomingRaces(p *scrapeProcess, upcoming []*racing.Race) {
 	p.status = "RACE_MONITORING"
 
+	races := make(chan *racing.Race, 100)
 	// Process 1
 	//		Monitor time until race and race status and push required races to queue if they are not already on there
 	//		Only needs to run at most every 30 seconds. It can determine its own sleep duration depending on upcoming races
+	var next *racing.Race
 	go func() {
-
+		// for each race
+		// determine next scrape time (based on now vs scheduled)
+		// need to keep track of last scrape times
+		// this is the only goroutine that should touch upcoming race collection
+		// races should go to a channel when they are ready to be scraped
+		// this goroutine can sleep for that duration (but allow for interrupt so use select)
 	}()
 
 	// Process 2 - Periodically take items off the queue and scrape them. Ensure minimum interval to avoid overloading server
@@ -146,7 +155,7 @@ func newScrapeProcess() scrapeProcess {
 	}
 }
 
-func getMissingRaces(p *scrapeProcess) []*racing.Race {
+func readRaces(p *scrapeProcess) ([]*racing.Race, []*racing.Race) {
 	// STATUS - SETUP
 	p.status = "SETUP"
 
@@ -183,6 +192,7 @@ func getMissingRaces(p *scrapeProcess) []*racing.Race {
 	updateExistingMeetings(p.racing, uMeetings)
 
 	unscraped := make([]*racing.Race, 0)
+	upcoming := make([]*racing.Race, 0)
 
 	// update all existing races that have changed
 	uRaces := make([]*racing.Race, 0)
@@ -196,7 +206,18 @@ func getMissingRaces(p *scrapeProcess) []*racing.Race {
 		if r.LastUpdated == 0 {
 			unscraped = append(unscraped, r)
 		}
+
+		if r.Status == "open" {
+			upcoming = append(upcoming, r)
+		}
 	}
+
+	for _, r := range data.newRaces {
+		if r.Status == "open" {
+			upcoming = append(upcoming, r)
+		}
+	}
+
 	updateExistingRaces(p.racing, uRaces)
 
 	// Create new meetings and races
@@ -208,7 +229,7 @@ func getMissingRaces(p *scrapeProcess) []*racing.Race {
 		unscraped = append(unscraped, r)
 	}
 
-	return unscraped
+	return unscraped, upcoming
 }
 
 func readExternal(p *scrapeProcess) (*externalRaceData, error) {

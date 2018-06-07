@@ -47,7 +47,7 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 	err = json.Unmarshal([]byte(odds.r), calendar)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode response into race calendar\n%v", odds.r, err)
+		return nil, fmt.Errorf("unable to decode response into race calendar - %v", err)
 	}
 
 	return calendar, nil
