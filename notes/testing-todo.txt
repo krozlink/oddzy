@@ -1,0 +1,38 @@
+scraper_test
+	ScrapeRaceCalendar
+		Mock http handler to give custom encoded response
+		Validate returned RaceCalendar matches custom response
+
+	ScrapeRaceCard
+		Mock http handler to give custom encoded response
+		Validate returned Race Card matches custom response
+
+process_test
+	getMissingRaces
+		Custom scrapeProcess
+			Mocked racing client to return custom races/meetings
+			Mocked scraper to return custom race calendar
+		
+		validate AddMeetings called on mock racing client for new meetings
+		validate AddRaces called on mock racing client for new races
+		validate returned unscraped races value
+
+		Test new meetings/races have AddMeetings/AddRaces called
+		Test existing races considered unscraped if no last_update_time
+		Test existing races ignored if scraped	
+		
+	scrapeRaces
+		validate race card scraped for missing races
+		validate UpdateRace called on scraped races
+
+	monitorUpcomingRaces
+
+	parseRaceCard
+		validate race card correctly converted to collection of selections
+	
+	getMeetingSourceID
+		test various combinations of dates/urls to generate meeting source ids
+
+
+
+move delay between requests to the scraper methods so they can be mocked out. no need for delay enforced in process
