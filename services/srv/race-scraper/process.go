@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	// proto "github.com/krozlink/oddzy/services/srv/race-scraper/proto"
 	"fmt"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	micro "github.com/micro/go-micro"
@@ -41,10 +40,10 @@ var raceTypes = []string{"horse-racing", "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
 
-	upcoming, missing := readRaces(p)
+	open, missing := readRaces(p)
 	scrapeRaces(p, missing)
 
-	monitorUpcomingRaces(p, upcoming)
+	monitorOpenRaces(p, open)
 }
 
 func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
@@ -66,12 +65,7 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 
 	// scrape each race and queue for updates
 	go func() {
-		first := true
 		for r := range scrape {
-			if !first { // add 1 second delay between requests
-				<-time.After(1 * time.Second)
-			}
-
 			card, err := p.scraper.ScrapeRaceCard(r.SourceId)
 			if err != nil {
 				lock.Lock()
@@ -90,8 +84,6 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 				Selections: selections,
 			}
 			update <- req
-
-			first = false
 		}
 		close(update)
 	}()
@@ -109,29 +101,6 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 
 	err := merge(errors)
 	return err
-}
-
-func monitorUpcomingRaces(p *scrapeProcess, upcoming []*racing.Race) {
-	p.status = "RACE_MONITORING"
-
-	races := make(chan *racing.Race, 100)
-	// Process 1
-	//		Monitor time until race and race status and push required races to queue if they are not already on there
-	//		Only needs to run at most every 30 seconds. It can determine its own sleep duration depending on upcoming races
-	var next *racing.Race
-	go func() {
-		// for each race
-		// determine next scrape time (based on now vs scheduled)
-		// need to keep track of last scrape times
-		// this is the only goroutine that should touch upcoming race collection
-		// races should go to a channel when they are ready to be scraped
-		// this goroutine can sleep for that duration (but allow for interrupt so use select)
-	}()
-
-	// Process 2 - Periodically take items off the queue and scrape them. Ensure minimum interval to avoid overloading server
-	go func() {
-
-	}()
 }
 
 func getDateRange() (time.Time, time.Time) {
@@ -192,7 +161,7 @@ func readRaces(p *scrapeProcess) ([]*racing.Race, []*racing.Race) {
 	updateExistingMeetings(p.racing, uMeetings)
 
 	unscraped := make([]*racing.Race, 0)
-	upcoming := make([]*racing.Race, 0)
+	open := make([]*racing.Race, 0)
 
 	// update all existing races that have changed
 	uRaces := make([]*racing.Race, 0)
@@ -208,13 +177,13 @@ func readRaces(p *scrapeProcess) ([]*racing.Race, []*racing.Race) {
 		}
 
 		if r.Status == "open" {
-			upcoming = append(upcoming, r)
+			open = append(open, r)
 		}
 	}
 
 	for _, r := range data.newRaces {
 		if r.Status == "open" {
-			upcoming = append(upcoming, r)
+			open = append(open, r)
 		}
 	}
 
@@ -229,9 +198,10 @@ func readRaces(p *scrapeProcess) ([]*racing.Race, []*racing.Race) {
 		unscraped = append(unscraped, r)
 	}
 
-	return unscraped, upcoming
+	return unscraped, open
 }
 
+// readExternal reads race and meeting data from odds.com.au
 func readExternal(p *scrapeProcess) (*externalRaceData, error) {
 	data := &externalRaceData{}
 
@@ -239,9 +209,6 @@ func readExternal(p *scrapeProcess) (*externalRaceData, error) {
 	// read race calendars from scraping period
 	for _, t := range raceTypes {
 		for d := start; d.Before(end) || d.Equal(end); d = d.Add(time.Hour * 24) {
-			if d != start {
-				<-time.After(time.Second * 1)
-			}
 			cal, err := p.scraper.ScrapeRaceCalendar(t, d.Format("2006-01-02"))
 			if err != nil {
 				return nil, fmt.Errorf("Unable to read race calendar for %v on %v - %v", t, d, err)
@@ -262,6 +229,7 @@ func readExternal(p *scrapeProcess) (*externalRaceData, error) {
 	return data, nil
 }
 
+// readInternal reads race and meeting data stored in oddzy
 func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
 	// read all internal meeting data for scraping period (yesterday to 2 days from now)
 	//		ListMeetingsByDate
@@ -332,6 +300,7 @@ func processRaceCalendar(p *scrapeProcess, date time.Time, eventType string, c *
 					ScheduledStart: e.StartTime,
 					Status:         getRaceStatusFromCalendar(e.IsAbandoned, e.Resulted, e.Results),
 					SourceId:       rSource,
+					MeetingStart:   meeting.ScheduledStart,
 				}
 
 				if val, ok := p.racesBySource[rSource]; ok {
@@ -357,6 +326,7 @@ func processRaceCalendar(p *scrapeProcess, date time.Time, eventType string, c *
 	return data, nil
 }
 
+// parseRaceCard parses the selections (horses/greyhounds) from a race card
 func parseRaceCard(c *RaceCard) ([]*racing.Selection, error) {
 	selections := make([]*racing.Selection, len(c.Selections))
 	for _, v := range c.Selections {
@@ -385,6 +355,7 @@ func parseRaceCard(c *RaceCard) ([]*racing.Selection, error) {
 	return selections, nil
 }
 
+// getResults takes a string result in the format "3,1,12" and returns the equivalent slice of ints
 func getResults(rStr string) ([]int32, error) {
 	if rStr == "" {
 		return nil, nil
@@ -402,6 +373,8 @@ func getResults(rStr string) ([]int32, error) {
 	return results, nil
 }
 
+// getMeetingSourceID takes the date and url of an event on odds.com.au and generates a source id
+// this source id is used as the link between the scraped meeting data and the internally stored meeting data
 func getMeetingSourceID(date, url string) (string, error) {
 	// url is in the format '\/horse-racing\/bendigo\/race-1\/'
 	// date is in the format '20 May 2018'

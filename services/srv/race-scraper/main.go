@@ -21,7 +21,7 @@ func main() {
 }
 
 func registerProcessMonitor(process *scrapeProcess) {
-	monitor := newMonitor(process)
+	monitor := newStatusMonitor(process)
 
 	srv := micro.NewService(
 		micro.Name("oddzy.services.race-scraper"),
