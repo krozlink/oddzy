@@ -32,7 +32,3 @@ process_test
 	
 	getMeetingSourceID
 		test various combinations of dates/urls to generate meeting source ids
-
-
-
-move delay between requests to the scraper methods so they can be mocked out. no need for delay enforced in process

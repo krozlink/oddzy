@@ -4,11 +4,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"sync"
+	"time"
 )
 
 const (
-	meetingDataURL = "https://www.odds.com.au/api/web/public/Racing/getUpcomingRaces/?sport=%s&date=%s"
-	raceDataURL    = "https://www.odds.com.au/api/web/public/Odds/getOddsComparisonCacheable/?eventId=%s&includeTAB=1&includeOdds=1&arrangeOdds=0&betType=FixedWin&includeTote=true&allowGet=true"
+	meetingDataURL  = "https://www.odds.com.au/api/web/public/Racing/getUpcomingRaces/?sport=%s&date=%s"
+	raceDataURL     = "https://www.odds.com.au/api/web/public/Odds/getOddsComparisonCacheable/?eventId=%s&includeTAB=1&includeOdds=1&arrangeOdds=0&betType=FixedWin&includeTote=true&allowGet=true"
+	defaultInterval = 1
 )
 
 // Scraper reads racing data from a source
@@ -19,7 +22,10 @@ type Scraper interface {
 
 // OddscomauScraper scrapes racing data from odds.com.au
 type OddscomauScraper struct {
-	http requestHandler
+	http        requestHandler
+	lastRequest time.Time
+	interval    float64
+	mux         *sync.Mutex
 }
 
 type response struct {
@@ -29,12 +35,17 @@ type response struct {
 // NewOddsScraper returns a new odds.com.au scraper that uses the provided request handler
 func NewOddsScraper(h requestHandler) *OddscomauScraper {
 	return &OddscomauScraper{
-		http: h,
+		http:        h,
+		lastRequest: time.Time{},
+		interval:    defaultInterval,
+		mux:         &sync.Mutex{},
 	}
 }
 
 // ScrapeRaceCalendar reads and parses a racing calendar for the provided event type and date
 func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*RaceCalendar, error) {
+	throttle(o)
+
 	url := fmt.Sprintf(meetingDataURL, eventType, date)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
@@ -47,7 +58,7 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 	err = json.Unmarshal([]byte(odds.r), calendar)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode response into race calendar\n%v", odds.r, err)
+		return nil, fmt.Errorf("unable to decode response into race calendar - %v", err)
 	}
 
 	return calendar, nil
@@ -55,7 +66,19 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 
 // ScrapeRaceCard reads and parses a race card for the provided odds.com.au event id
 func (o *OddscomauScraper) ScrapeRaceCard(eventID string) (*RaceCard, error) {
+	throttle(o)
 	return nil, nil
+}
+
+func throttle(o *OddscomauScraper) {
+	o.mux.Lock()
+	diff := time.Since(o.lastRequest)
+	o.lastRequest = time.Now()
+	o.mux.Unlock()
+
+	if diff.Seconds() < o.interval {
+		<-time.After(diff)
+	}
 }
 
 func decode(response []byte) []byte {
