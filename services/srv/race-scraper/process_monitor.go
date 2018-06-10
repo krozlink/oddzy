@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	_ "github.com/micro/go-plugins/registry/consul"
+	"log"
 	"sort"
 	"sync"
 	"time"
@@ -20,7 +20,6 @@ type scheduledScrape struct {
 const (
 	overdueInterval = 30
 )
-
 
 func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) {
 	p.status = "RACE_MONITORING"
@@ -74,12 +73,17 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) {
 
 	go func() {
 		for {
-			r := <-scrapeQueue // next race to scrape
+			r, ok := <-scrapeQueue // next race to scrape
+			if !ok {
+				break
+			}
 			mDate := time.Unix(r.race.MeetingStart, 0).Format("2006-01-02")
 			m := p.meetingsByID[r.race.RaceId]
 			cal, err := p.scraper.ScrapeRaceCalendar(m.RaceType, mDate)
 			if err != nil {
-				fmt.Errorf("Unable to scrape calendar for event type '%v' on %v' - %v", m.RaceType, mDate, err)
+				log.Printf("Unable to scrape calendar for event type '%v' on %v' - %v", m.RaceType, mDate, err)
+				log.Printf("Skipping race %v", r.race.RaceId)
+				continue
 			}
 			updated := getRaceFromCalendar(cal, r.race)
 			p.racesByID[r.race.RaceId] = updated
@@ -92,7 +96,9 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) {
 				}
 				_, err := p.racing.UpdateRace(context.Background(), req)
 				if err != nil {
-					fmt.Errorf("Unable to update race id '%v' - %v", r.race.RaceId, err)
+					log.Printf("Unable to update race id '%v' - %v", r.race.RaceId, err)
+					log.Printf("Skipping race %v", r.race.RaceId)
+					continue
 				}
 			}
 			// if status is still open put back on either overdue or upcoming depending on start time
