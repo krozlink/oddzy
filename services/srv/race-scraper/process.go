@@ -43,7 +43,8 @@ func (p *scrapeProcess) run() {
 	open, missing := readRaces(p)
 	scrapeRaces(p, missing)
 
-	monitorOpenRaces(p, open)
+	_, done := monitorOpenRaces(p, open)
+	<-done
 }
 
 func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
