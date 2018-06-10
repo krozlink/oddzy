@@ -11,7 +11,7 @@ import (
 const (
 	meetingDataURL  = "https://www.odds.com.au/api/web/public/Racing/getUpcomingRaces/?sport=%s&date=%s"
 	raceDataURL     = "https://www.odds.com.au/api/web/public/Odds/getOddsComparisonCacheable/?eventId=%s&includeTAB=1&includeOdds=1&arrangeOdds=0&betType=FixedWin&includeTote=true&allowGet=true"
-	defaultInterval = 1
+	defaultInterval = 1000
 )
 
 // Scraper reads racing data from a source
@@ -24,12 +24,12 @@ type Scraper interface {
 type OddscomauScraper struct {
 	http        requestHandler
 	lastRequest time.Time
-	interval    float64
+	interval    int
 	mux         *sync.Mutex
 }
 
 type response struct {
-	r string
+	Value string `json:"r"`
 }
 
 // NewOddsScraper returns a new odds.com.au scraper that uses the provided request handler
@@ -52,13 +52,22 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 		return nil, fmt.Errorf("error retrieving race calendar response - %v", err)
 	}
 
-	odds := response{}
-	json.Unmarshal(encodedResponse, odds)
+	odds := &response{}
+	err = json.Unmarshal(encodedResponse, odds)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to parse encoded response - %v", err)
+	}
+
+	d, err := decode(odds.Value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to decode response - %v", err)
+	}
+
 	calendar := &RaceCalendar{}
-	err = json.Unmarshal([]byte(odds.r), calendar)
+	err = json.Unmarshal(d, calendar)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode response into race calendar - %v", err)
+		return nil, fmt.Errorf("unable to unmarshal decoded response into race calendar - %v", err)
 	}
 
 	return calendar, nil
@@ -76,20 +85,21 @@ func throttle(o *OddscomauScraper) {
 	o.lastRequest = time.Now()
 	o.mux.Unlock()
 
-	if diff.Seconds() < o.interval {
-		<-time.After(diff)
+	remainingMS := int(diff.Nanoseconds() / 1000000)
+	if remainingMS < o.interval {
+		<-time.After(time.Millisecond * time.Duration(o.interval-remainingMS))
 	}
 }
 
-func decode(response []byte) []byte {
+func decode(response string) ([]byte, error) {
 
-	rot := make([]byte, len(response))
+	rot := make([]rune, len(response))
 	result := make([]byte, len(response))
 	for i, b := range response {
-		rot[i] = b
+		rot[i] = rot13(b)
 	}
-	base64.StdEncoding.Decode(result, rot)
-	return result
+	result, err := base64.StdEncoding.DecodeString(string(rot))
+	return result, err
 }
 
 func rot13(r rune) rune {

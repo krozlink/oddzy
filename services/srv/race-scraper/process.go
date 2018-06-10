@@ -258,11 +258,22 @@ func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
 }
 
 func processRaceCalendar(p *scrapeProcess, date time.Time, eventType string, c *RaceCalendar) (*externalRaceData, error) {
-	newMeetings := make([]*racing.Meeting, 1)
-	newRaces := make([]*racing.Race, 1)
+	newMeetings := make([]*racing.Meeting, 0)
+	newRaces := make([]*racing.Race, 0)
 
-	existingMeetings := make([]*racing.Meeting, 1)
-	existingRaces := make([]*racing.Race, 1)
+	existingMeetings := make([]*racing.Meeting, 0)
+	existingRaces := make([]*racing.Race, 0)
+
+	if !c.HasResults {
+		data := &externalRaceData{
+			existingMeetings,
+			existingRaces,
+			newMeetings,
+			newRaces,
+		}
+
+		return data, nil
+	}
 
 	for _, rg := range c.RegionGroups {
 		for _, m := range rg.Meetings {
