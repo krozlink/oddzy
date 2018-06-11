@@ -2,22 +2,25 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	client "github.com/micro/go-micro/client"
+	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"testing"
 )
 
 func TestReadInternalReturnsData(t *testing.T) {
 
 	meetings := []*racing.Meeting{
-		getTestMeeting("m123", 2),
-		getTestMeeting("m456", 1),
+		getTestMeeting("m123", "source-123", 2),
+		getTestMeeting("m456", "source-456", 1),
 	}
 	races := []*racing.Race{
-		getTestRace(meetings[0], 1),
-		getTestRace(meetings[0], 2),
-		getTestRace(meetings[1], 1),
+		getTestRace(meetings[0], 1001, 1),
+		getTestRace(meetings[0], 1001, 2),
+		getTestRace(meetings[1], 2001, 1),
 	}
 
 	client := &mockRacingClient{
@@ -79,15 +82,125 @@ func TestUpdateExistingRacesHandlesMultipleRaces(t *testing.T) {
 }
 
 func TestProcessRaceCalendarSplitsNewAndExisting(t *testing.T) {
-	t.Fail()
+
+	// Create a mock race calendar with a two meetings each with one event
+	// 1st meeting has a url/date giving it a source id of "20180604-test-park-greyhounds"
+	// 	its event has a source id of 1234
+	// 2nd meeting has a url/date giving it a source id of "20180101-brisbane-greyhounds"
+	// 	its event has a source id of 4567
+
+	meeting1 := Meeting{
+		MeetingName:       "Meeting 1",
+		RegionDescription: "Australia",
+		RegionIconURL:     "www.example.com",
+		Events: []Event{
+			getTestCalendarEvent(1, 1234, "/greyhounds/test-park/race-1/", "04 Jun 2018"),
+		},
+	}
+
+	meeting2 := Meeting{
+		MeetingName:       "Meeting 2",
+		RegionDescription: "Australia",
+		RegionIconURL:     "www.example.com",
+		Events: []Event{
+			getTestCalendarEvent(1, 4567, "/greyhounds/brisbane/race-1/", "01 Jan 2018"),
+		},
+	}
+
+	cal := &RaceCalendar{
+		HasResults: true,
+		RegionGroups: []RegionGroup{
+			{
+				GroupName: "Aussie Horses",
+				Meetings: []Meeting{
+					meeting1,
+					meeting2,
+				},
+			},
+		},
+	}
+
+	// Mock the internal repo to have the first meeting/race but not the second
+	meetings := []*racing.Meeting{
+		getTestMeeting("20180604-test-park-greyhounds", "m123", 2),
+	}
+	races := []*racing.Race{
+		getTestRace(meetings[0], 1234, 1),
+	}
+
+	client := &mockRacingClient{
+		meetings: meetings,
+		races:    races,
+	}
+	p := getTestProcess(client)
+
+	for _, m := range meetings {
+		p.meetingsByID[m.MeetingId] = m
+		p.meetingsBySource[m.SourceId] = m
+	}
+
+	for _, r := range races {
+		p.racesByID[r.RaceId] = r
+		p.racesBySource[r.SourceId] = r
+	}
+
+	data, err := processRaceCalendar(p, "horse-racing", cal)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, 1, len(data.newMeetings), "Unexpected number of new meetings")
+	assert.Equal(t, 1, len(data.existingMeetings), "Unexpected number of existing meetings")
+
+	assert.Equal(t, meeting2.MeetingName, data.newMeetings[0].Name, "Unexpected meeting name")
+	assert.Equal(t, meeting2.RegionDescription, data.newMeetings[0].Country, "Unexpected country")
+	assert.Equal(t, len(meeting2.Events), len(data.newRaces), "Unexpected number of races")
+
+	assert.Equal(t, meeting1.MeetingName, data.existingMeetings[0].Name, "Unexpected meeting name")
+	assert.Equal(t, meeting1.RegionDescription, data.existingMeetings[0].Country, "Unexpected country")
+	assert.Equal(t, len(meeting1.Events), len(data.existingRaces), "Unexpected number of races")
+
+	assert.Equal(t, 1, len(data.newRaces), "Unexpected number of new races")
+	assert.Equal(t, 1, len(data.existingRaces), "Unexpected number of existing races")
 }
 
 func TestGetMeetingSourceID(t *testing.T) {
-	t.Fail()
+
+	var tests = []struct {
+		url      string
+		date     string
+		expected string
+	}{
+		{"/horse-racing/sapphire-coast/race-1/", "10 Jun 2018", "20180610-sapphire-coast-horse-racing"},
+		{"/greyhounds/albion-park/race-1/", "04 Jun 2018", "20180604-albion-park-greyhounds"},
+		{"/harness/wentworth/race-13/", "31 Jan 2022", "20220131-wentworth-harness"},
+	}
+
+	for _, v := range tests {
+		id, err := getMeetingSourceID(v.date, v.url)
+		assert.NoError(t, err)
+		assert.Equal(t, v.expected, id, "Unexpected source id")
+	}
 }
 
 func TestGetRaceStatusFromCalendar(t *testing.T) {
-	t.Fail()
+
+	var tests = []struct {
+		isAbandoned int32
+		resulted    int32
+		results     string
+		expected    string
+	}{
+		{1, 0, "", "ABANDONED"},
+		{0, 1, "", "INTERIM"},
+		{0, 1, "2,4,3", "CLOSED"},
+		{0, 0, "", "OPEN"},
+	}
+
+	for _, v := range tests {
+		result := getRaceStatusFromCalendar(v.isAbandoned, v.resulted, v.results)
+		assert.Equal(t, v.expected, result, "Unexpected race status")
+	}
 }
 
 func TestParseRaceCardReadsSelections(t *testing.T) {
@@ -104,15 +217,19 @@ func TestScrapeRacesUpdatesScrapedRaces(t *testing.T) {
 
 func getTestProcess(c *mockRacingClient) *scrapeProcess {
 	return &scrapeProcess{
-		status:  "TEST",
-		done:    make(chan bool),
-		http:    handler{},
-		racing:  c,
-		scraper: &mockScraper{},
+		status:           "TEST",
+		done:             make(chan bool),
+		http:             handler{},
+		racing:           c,
+		scraper:          &mockScraper{},
+		meetingsByID:     make(map[string]*racing.Meeting),
+		meetingsBySource: make(map[string]*racing.Meeting),
+		racesByID:        make(map[string]*racing.Race),
+		racesBySource:    make(map[string]*racing.Race),
 	}
 }
 
-func getTestMeeting(meetingID string, numRaces int) *racing.Meeting {
+func getTestMeeting(sourceID, meetingID string, numRaces int) *racing.Meeting {
 	raceIds := make([]string, numRaces)
 	for i := 0; i < numRaces; i++ {
 		raceIds[i] = fmt.Sprintf("%v-%v", meetingID, (i + 1))
@@ -125,11 +242,11 @@ func getTestMeeting(meetingID string, numRaces int) *racing.Meeting {
 		RaceIds:        raceIds,
 		RaceType:       "test-type",
 		ScheduledStart: 1234,
-		SourceId:       "source-" + meetingID,
+		SourceId:       sourceID,
 	}
 }
 
-func getTestRace(m *racing.Meeting, number int32) *racing.Race {
+func getTestRace(m *racing.Meeting, eventID, number int32) *racing.Race {
 	var result string
 	var status string
 	if number%2 == 0 {
@@ -147,9 +264,31 @@ func getTestRace(m *racing.Meeting, number int32) *racing.Race {
 		Number:         number,
 		Results:        result,
 		ScheduledStart: int64(number * 1000),
-		SourceId:       m.SourceId + "-1",
+		SourceId:       string(eventID),
 		Status:         status,
 	}
+}
+
+func getTestCalendarEvent(number, eventID int32, url, date string) Event {
+	return Event{
+		EventID:      eventID,
+		DateWithYear: date,
+		EventName:    "Event number " + string(number),
+		EventNumber:  number,
+		EventURL:     url,
+		IsAbandoned:  0,
+		IsImminent:   false,
+		Resulted:     0,
+		Results:      "",
+		StartTime:    1000,
+	}
+}
+
+func readTestRaceCalendar() *RaceCalendar {
+	decoded, _ := ioutil.ReadFile("./testdata/race_calendar_decoded.json")
+	cal := &RaceCalendar{}
+	json.Unmarshal(decoded, cal)
+	return cal
 }
 
 type mockScraper struct {

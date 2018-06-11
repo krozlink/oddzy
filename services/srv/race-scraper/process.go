@@ -215,7 +215,7 @@ func readExternal(p *scrapeProcess) (*externalRaceData, error) {
 				return nil, fmt.Errorf("Unable to read race calendar for %v on %v - %v", t, d, err)
 			}
 
-			d, err := processRaceCalendar(p, d, t, cal)
+			d, err := processRaceCalendar(p, t, cal)
 			if err != nil {
 				return nil, fmt.Errorf("Unable to process race calendar for %v on %v - %v", t, d, err)
 			}
@@ -258,7 +258,7 @@ func readInternal(p *scrapeProcess) ([]*racing.Meeting, []*racing.Race, error) {
 	return mResp.Meetings, rResp.Races, nil
 }
 
-func processRaceCalendar(p *scrapeProcess, date time.Time, eventType string, c *RaceCalendar) (*externalRaceData, error) {
+func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*externalRaceData, error) {
 	newMeetings := make([]*racing.Meeting, 0)
 	newRaces := make([]*racing.Race, 0)
 
@@ -388,23 +388,23 @@ func getResults(rStr string) ([]int32, error) {
 // getMeetingSourceID takes the date and url of an event on odds.com.au and generates a source id
 // this source id is used as the link between the scraped meeting data and the internally stored meeting data
 func getMeetingSourceID(date, url string) (string, error) {
-	// url is in the format '\/horse-racing\/bendigo\/race-1\/'
+	// url is in the format '/horse-racing/bendigo/race-1/'
 	// date is in the format '20 May 2018'
 	// This should return a source id of '20180520-bendigo-horse-racing'
 
-	u := strings.Split(url, "\\/")
-	d, err := time.Parse("02 Jan 2016", date)
+	u := strings.Split(url, "/")
+	d, err := time.Parse("02 Jan 2006", date)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%v-%v-%v", u[0], u[1], d), nil
+	return fmt.Sprintf("%v-%v-%v", d.Format("20060102"), u[2], u[1]), nil
 }
 
 func getRaceStatusFromCalendar(isAbandoned int32, resulted int32, results string) string {
 	if isAbandoned == 1 {
 		return "ABANDONED"
-	} else if resulted == 1 && results != "" {
+	} else if resulted == 1 && results == "" {
 		return "INTERIM"
 	} else if resulted == 1 {
 		return "CLOSED"
