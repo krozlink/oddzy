@@ -6,11 +6,13 @@ type RaceCalendar struct {
 	RegionGroups []RegionGroup `json:"regionGroups"`
 }
 
+// RegionGroup is the format odds.com.au uses to represent a type of races in a region, for example "Australia Greyhounds"
 type RegionGroup struct {
 	GroupName string    `json:"regionGroup"`
 	Meetings  []Meeting `json:"meetings"`
 }
 
+// Meeting is the format odds.com.au uses to represent a race meet in their race calendar response
 type Meeting struct {
 	MeetingName       string  `json:"meetingName"`
 	RegionDescription string  `json:"regionDescription"`
@@ -18,6 +20,7 @@ type Meeting struct {
 	Events            []Event `json:"events"`
 }
 
+// Event is the format odds.com.au uses to represent a race in their race calendar response
 type Event struct {
 	EventID      int32  `json:"eventId"`
 	EventNumber  int32  `json:"eventNumber"`
@@ -51,27 +54,30 @@ type RaceCard struct {
 
 // RaceSelection is the format odds.com.au uses to represent an entrant in a race
 type RaceSelection struct {
-	Name             string `json:"name"`
-	SelectionID      string `json:"selectionId"`
-	CompetitorID     string `json:"competitorId"`
-	Flucs            string `json:"flucs"`
-	ProfileURL       string `json:"profileUrl"`
-	Result           string `json:"result"`
-	ResultOrdinal    string `json:"resultOrdinal"`
-	CompetitorNumber string `json:"competitorNumber"`
-	BarrierNumber    string `json:"barrierNumber"`
-	ImageURL         string `json:"imageUrl"`
-	JockeyName       string `json:"jockeyName"`
-	JockeyWeight     string `json:"jockeyWeight"`
-	JockeyURL        string `json:"jockeyUrl"`
-	Weight           string `json:"weight"`
-	Prices           []struct {
-		Bookmaker      string  `json:"bookmaker"`
-		BookmakerLower string  `json:"bookmakerLower"`
-		BetType        string  `json:"betType"`
-		OddsKey        string  `json:"oddsKey"`
-		HasOdds        bool    `json:"hasOdds"`
-		Odds           float32 `json:"odds"`
-		IsBest         bool    `json:"isBest"`
-	} `json:"prices"`
+	Name             string      `json:"name"`
+	SelectionID      string      `json:"selectionId"`
+	CompetitorID     string      `json:"competitorId"`
+	Flucs            string      `json:"flucs"`
+	ProfileURL       string      `json:"profileUrl"`
+	Result           string      `json:"result"`
+	ResultOrdinal    string      `json:"resultOrdinal"`
+	CompetitorNumber string      `json:"competitorNumber"`
+	BarrierNumber    string      `json:"barrierNumber"`
+	ImageURL         string      `json:"imageUrl"`
+	JockeyName       string      `json:"jockeyName"`
+	JockeyWeight     string      `json:"jockeyWeight"`
+	JockeyURL        string      `json:"jockeyUrl"`
+	Weight           string      `json:"weight"`
+	Prices           []RacePrice `json:"prices"`
+}
+
+// RacePrice is the format odds.com.au uses to represent the price for a market offered by a particular bookmaker
+type RacePrice struct {
+	Bookmaker      string  `json:"bookmaker"`
+	BookmakerLower string  `json:"bookmakerLower"`
+	BetType        string  `json:"betType"`
+	OddsKey        string  `json:"oddsKey"`
+	HasOdds        bool    `json:"hasOdds"`
+	Odds           float32 `json:"odds"`
+	IsBest         bool    `json:"isBest"`
 }

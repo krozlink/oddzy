@@ -74,11 +74,12 @@ func TestReadInternalReturnsData(t *testing.T) {
 }
 
 func TestReadExternalReturnsData(t *testing.T) {
-	// mock calls to scrape race calendar
-	// validate caled for each race type and date range
 	c := &mockRacingClient{}
 	s := &mockScraper{}
 
+	// Not an ideal test but working for now
+	// There would be 12 calls to ScrapeRaceCalendar - 4 days x 3 race types.
+	// This mocked version will return each one incrementally
 	calendars := []*RaceCalendar{
 		getTestRaceCalendar(1),
 		getTestRaceCalendar(2),
@@ -89,6 +90,9 @@ func TestReadExternalReturnsData(t *testing.T) {
 		getTestRaceCalendar(7),
 		getTestRaceCalendar(8),
 		getTestRaceCalendar(9),
+		getTestRaceCalendar(10),
+		getTestRaceCalendar(11),
+		getTestRaceCalendar(12),
 	}
 
 	s.calendars = calendars
@@ -97,9 +101,10 @@ func TestReadExternalReturnsData(t *testing.T) {
 
 	data, err := readExternal(p)
 
-	assert.Equal(t, 9, s.calendarCallCount, "Unexpected calendar call count")
+	assert.Equal(t, len(calendars), s.scrapeCalendarCount, "Unexpected calendar call count")
 	assert.NoError(t, err)
 
+	// As no internal meetings have been mocked it is expected that all meetings will be treated as new
 	assert.Equal(t, 0, len(data.existingMeetings), "Unexpected existing meetings")
 	assert.Equal(t, 0, len(data.existingRaces), "Unexpected existing races")
 
@@ -108,7 +113,20 @@ func TestReadExternalReturnsData(t *testing.T) {
 }
 
 func TestUpdateExistingRacesHandlesMultipleRaces(t *testing.T) {
-	t.Fail()
+	c := &mockRacingClient{}
+
+	// create 3 races and update them
+	m := getTestMeeting("m123", "meeting-123", 3)
+	races := []*racing.Race{
+		getTestRace(m, 1001, 1),
+		getTestRace(m, 1002, 2),
+		getTestRace(m, 1003, 3),
+	}
+
+	updateExistingRaces(c, races)
+
+	// confirm update race was called 3 times
+	assert.Equal(t, len(races), c.updateRaceCount)
 }
 
 func TestProcessRaceCalendarSplitsNewAndExisting(t *testing.T) {
@@ -234,15 +252,68 @@ func TestGetRaceStatusFromCalendar(t *testing.T) {
 }
 
 func TestParseRaceCardReadsSelections(t *testing.T) {
-	t.Fail()
+
+	// add test race card with 1 selection
+	card := getTestRaceCard(1, 1)
+
+	s, err := parseRaceCard(card)
+
+	// confirm 1 selection parsed
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(s))
 }
 
 func TestScrapeRacesScrapesAllMissingRaces(t *testing.T) {
-	t.Fail()
+	c := &mockRacingClient{}
+	s := &mockScraper{}
+
+	// inject 3 responses to scraping a race card
+	s.cards = []*RaceCard{
+		getTestRaceCard(1, 1),
+		getTestRaceCard(2, 2),
+		getTestRaceCard(3, 3),
+	}
+
+	p := getTestProcess(c, s)
+
+	// inject 3 races to scrape
+	m := getTestMeeting("m123", "meeting-123", 3)
+	races := []*racing.Race{
+		getTestRace(m, 1001, 1),
+		getTestRace(m, 1002, 2),
+		getTestRace(m, 1003, 3),
+	}
+
+	// scrape 3 races and confirm that ScrapeRaceCard was called 3 times
+	scrapeRaces(p, races)
+
+	assert.Equal(t, len(races), s.scrapeRaceCardCount)
 }
 
 func TestScrapeRacesUpdatesScrapedRaces(t *testing.T) {
-	t.Fail()
+	c := &mockRacingClient{}
+	s := &mockScraper{}
+
+	// inject 3 responses to scraping a race card
+	s.cards = []*RaceCard{
+		getTestRaceCard(1, 1),
+		getTestRaceCard(2, 2),
+		getTestRaceCard(3, 3),
+	}
+
+	p := getTestProcess(c, s)
+
+	m := getTestMeeting("m123", "meeting-123", 3)
+	races := []*racing.Race{
+		getTestRace(m, 1001, 1),
+		getTestRace(m, 1002, 2),
+		getTestRace(m, 1003, 3),
+	}
+
+	// scrape 3 races and confirm that ScrapeRaceCard was called 3 times
+	scrapeRaces(p, races)
+
+	assert.Equal(t, len(races), c.updateRaceCount)
 }
 
 func getTestProcess(c *mockRacingClient, s *mockScraper) *scrapeProcess {
@@ -346,29 +417,72 @@ func getTestRaceCalendar(id int) *RaceCalendar {
 	return cal
 }
 
+func getTestRaceCard(id, number int32) *RaceCard {
+	prices := []RacePrice{}
+	selections := []RaceSelection{
+		RaceSelection{
+			BarrierNumber:    "1",
+			CompetitorID:     "2",
+			CompetitorNumber: "3",
+			Flucs:            "2.00,2.05,2.1",
+			ImageURL:         "example.com",
+			JockeyName:       "Bob",
+			JockeyURL:        "bob.com",
+			JockeyWeight:     "40kg",
+			Name:             "Winx",
+			Prices:           prices,
+			ProfileURL:       "winx.com",
+			Result:           "",
+			ResultOrdinal:    "",
+			SelectionID:      "123",
+			Weight:           "10032kg",
+		},
+	}
+	card := &RaceCard{
+		EventDescription: "race number " + string(number),
+		EventDistance:    "1000m",
+		EventID:          id,
+		EventName:        "race number " + string(number),
+		EventNameFull:    "race number " + string(number),
+		IsGreyhounds:     true,
+		IsHarness:        false,
+		IsHorseRacing:    false,
+		IsRacing:         true,
+		ResultState:      "open",
+		Selections:       selections,
+		SportID:          1,
+		StartTime:        1000,
+		Status:           "open",
+	}
+
+	return card
+}
+
 type mockScraper struct {
-	calendarCallCount int
-	cardCallCount     int
+	scrapeCalendarCount int
+	scrapeRaceCardCount int
 
 	cards     []*RaceCard
 	calendars []*RaceCalendar
 }
 
 func (c *mockScraper) ScrapeRaceCard(sourceID string) (*RaceCard, error) {
-	card := c.cards[c.cardCallCount]
-	c.cardCallCount++
+	card := c.cards[c.scrapeRaceCardCount]
+	c.scrapeRaceCardCount++
 	return card, nil
 }
 
 func (c *mockScraper) ScrapeRaceCalendar(eventType string, date string) (*RaceCalendar, error) {
-	cal := c.calendars[c.calendarCallCount]
-	c.calendarCallCount++
+	cal := c.calendars[c.scrapeCalendarCount]
+	c.scrapeCalendarCount++
 	return cal, nil
 }
 
 type mockRacingClient struct {
 	meetings []*racing.Meeting
 	races    []*racing.Race
+
+	updateRaceCount int
 }
 
 func (c *mockRacingClient) AddMeetings(ctx context.Context, req *racing.AddMeetingsRequest, opts ...client.CallOption) (*racing.AddMeetingsResponse, error) {
@@ -394,6 +508,7 @@ func (c *mockRacingClient) ListRacesByMeetingDate(ctx context.Context, req *raci
 }
 
 func (c *mockRacingClient) UpdateRace(ctx context.Context, req *racing.UpdateRaceRequest, opts ...client.CallOption) (*racing.UpdateRaceResponse, error) {
+	c.updateRaceCount++
 	return nil, nil
 }
 

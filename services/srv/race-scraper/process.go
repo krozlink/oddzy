@@ -48,7 +48,6 @@ func (p *scrapeProcess) run() {
 }
 
 func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
-	// STATUS - RACE_CREATION
 	p.status = "RACE_CREATION"
 
 	// queue all races that require scraping
@@ -341,7 +340,7 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 // parseRaceCard parses the selections (horses/greyhounds) from a race card
 func parseRaceCard(c *RaceCard) ([]*racing.Selection, error) {
 	selections := make([]*racing.Selection, len(c.Selections))
-	for _, v := range c.Selections {
+	for i, v := range c.Selections {
 
 		number, err := strconv.Atoi(v.CompetitorNumber)
 		if err != nil {
@@ -361,7 +360,7 @@ func parseRaceCard(c *RaceCard) ([]*racing.Selection, error) {
 			SourceCompetitorId: v.CompetitorID,
 		}
 
-		selections = append(selections, s)
+		selections[i] = s
 	}
 
 	return selections, nil
