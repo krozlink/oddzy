@@ -215,15 +215,15 @@ func readExternal(p *scrapeProcess) (*externalRaceData, error) {
 				return nil, fmt.Errorf("Unable to read race calendar for %v on %v - %v", t, d, err)
 			}
 
-			d, err := processRaceCalendar(p, t, cal)
+			c, err := processRaceCalendar(p, t, cal)
 			if err != nil {
 				return nil, fmt.Errorf("Unable to process race calendar for %v on %v - %v", t, d, err)
 			}
 
-			data.existingMeetings = append(data.existingMeetings, d.existingMeetings...)
-			data.existingRaces = append(data.existingRaces, d.existingRaces...)
-			data.newMeetings = append(data.newMeetings, d.newMeetings...)
-			data.newRaces = append(data.newRaces, d.newRaces...)
+			data.existingMeetings = append(data.existingMeetings, c.existingMeetings...)
+			data.existingRaces = append(data.existingRaces, c.existingRaces...)
+			data.newMeetings = append(data.newMeetings, c.newMeetings...)
+			data.newRaces = append(data.newRaces, c.newRaces...)
 		}
 	}
 

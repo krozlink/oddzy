@@ -27,7 +27,7 @@ func TestReadInternalReturnsData(t *testing.T) {
 		meetings: meetings,
 		races:    races,
 	}
-	p := getTestProcess(client)
+	p := getTestProcess(client, &mockScraper{})
 
 	intMeetings, intRaces, err := readInternal(p)
 	if err != nil {
@@ -74,7 +74,37 @@ func TestReadInternalReturnsData(t *testing.T) {
 }
 
 func TestReadExternalReturnsData(t *testing.T) {
-	t.Fail()
+	// mock calls to scrape race calendar
+	// validate caled for each race type and date range
+	c := &mockRacingClient{}
+	s := &mockScraper{}
+
+	calendars := []*RaceCalendar{
+		getTestRaceCalendar(1),
+		getTestRaceCalendar(2),
+		getTestRaceCalendar(3),
+		getTestRaceCalendar(4),
+		getTestRaceCalendar(5),
+		getTestRaceCalendar(6),
+		getTestRaceCalendar(7),
+		getTestRaceCalendar(8),
+		getTestRaceCalendar(9),
+	}
+
+	s.calendars = calendars
+
+	p := getTestProcess(c, s)
+
+	data, err := readExternal(p)
+
+	assert.Equal(t, 9, s.calendarCallCount, "Unexpected calendar call count")
+	assert.NoError(t, err)
+
+	assert.Equal(t, 0, len(data.existingMeetings), "Unexpected existing meetings")
+	assert.Equal(t, 0, len(data.existingRaces), "Unexpected existing races")
+
+	assert.Equal(t, len(calendars), len(data.newMeetings), "Unexpected new meetings")
+	assert.Equal(t, len(calendars), len(data.newRaces), "Unexpected new races")
 }
 
 func TestUpdateExistingRacesHandlesMultipleRaces(t *testing.T) {
@@ -132,7 +162,7 @@ func TestProcessRaceCalendarSplitsNewAndExisting(t *testing.T) {
 		meetings: meetings,
 		races:    races,
 	}
-	p := getTestProcess(client)
+	p := getTestProcess(client, &mockScraper{})
 
 	for _, m := range meetings {
 		p.meetingsByID[m.MeetingId] = m
@@ -215,13 +245,13 @@ func TestScrapeRacesUpdatesScrapedRaces(t *testing.T) {
 	t.Fail()
 }
 
-func getTestProcess(c *mockRacingClient) *scrapeProcess {
+func getTestProcess(c *mockRacingClient, s *mockScraper) *scrapeProcess {
 	return &scrapeProcess{
 		status:           "TEST",
 		done:             make(chan bool),
 		http:             handler{},
 		racing:           c,
-		scraper:          &mockScraper{},
+		scraper:          s,
 		meetingsByID:     make(map[string]*racing.Meeting),
 		meetingsBySource: make(map[string]*racing.Meeting),
 		racesByID:        make(map[string]*racing.Race),
@@ -291,15 +321,49 @@ func readTestRaceCalendar() *RaceCalendar {
 	return cal
 }
 
+func getTestRaceCalendar(id int) *RaceCalendar {
+	meeting := Meeting{
+		MeetingName:       "Meeting " + string(id),
+		RegionDescription: "Australia",
+		RegionIconURL:     "www.example.com",
+		Events: []Event{
+			getTestCalendarEvent(1, int32(1000+id), "/greyhounds/meeting-"+string(id)+"/race-1/", "04 Jun 2018"),
+		},
+	}
+
+	cal := &RaceCalendar{
+		HasResults: true,
+		RegionGroups: []RegionGroup{
+			{
+				GroupName: "Aussie Horses",
+				Meetings: []Meeting{
+					meeting,
+				},
+			},
+		},
+	}
+
+	return cal
+}
+
 type mockScraper struct {
+	calendarCallCount int
+	cardCallCount     int
+
+	cards     []*RaceCard
+	calendars []*RaceCalendar
 }
 
 func (c *mockScraper) ScrapeRaceCard(sourceID string) (*RaceCard, error) {
-	return nil, nil
+	card := c.cards[c.cardCallCount]
+	c.cardCallCount++
+	return card, nil
 }
 
 func (c *mockScraper) ScrapeRaceCalendar(eventType string, date string) (*RaceCalendar, error) {
-	return nil, nil
+	cal := c.calendars[c.calendarCallCount]
+	c.calendarCallCount++
+	return cal, nil
 }
 
 type mockRacingClient struct {
