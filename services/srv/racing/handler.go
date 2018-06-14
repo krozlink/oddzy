@@ -206,9 +206,10 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 				return err
 			}
 			selectionUpdated = true
-		} else if len(originalSelections) != len(req.Selections) {
+		} else if len(originalSelections) < len(req.Selections) {
 			return fmt.Errorf("Number of selections unexpectedly changed from %v to %v", len(originalSelections), len(req.Selections))
 		} else {
+
 			for _, v := range req.Selections {
 				o := getSelectionByID(v.SelectionId, originalSelections)
 				if o == nil {
@@ -220,6 +221,27 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 					err = repo.UpdateSelection(v)
 					if err != nil {
 						return err
+					}
+				}
+			}
+
+			// When the number of selections has decreased it means a horse has been scratched
+			if len(originalSelections) > len(req.Selections) {
+
+				// find the selection that no longer exists
+				for _, v := range originalSelections {
+					if getSelectionByID(v.SelectionId, req.Selections) == nil {
+
+						// scratch it
+						selectionUpdated = true
+						u := &proto.Selection{
+							SelectionId: v.SelectionId,
+							Scratched:   true,
+						}
+						err = repo.UpdateSelection(u)
+						if err != nil {
+							return err
+						}
 					}
 				}
 			}

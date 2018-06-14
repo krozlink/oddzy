@@ -102,8 +102,9 @@ message Selection {
     int32 number = 8;
     int32 barrier_number = 9;
 
+    bool scratched = 10;
     
-    int64 last_updated = 10;
+    int64 last_updated = 11;
 }
 
 message Race {

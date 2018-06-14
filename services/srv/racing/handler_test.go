@@ -6,6 +6,7 @@ import (
 	"fmt"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 	"github.com/micro/go-micro/broker"
+	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 	"time"
@@ -62,13 +63,8 @@ func TestListRacesByMeetingDate(t *testing.T) {
 		resp := &proto.ListRacesByMeetingDateResponse{}
 		err := srv.ListRacesByMeetingDate(ctx, req, resp)
 
-		if err != nil {
-			t.Error("Expected no error when calling ListRacesByMeetingDate")
-		}
-
-		if len(resp.Races) != v.expected {
-			t.Errorf("Expected %v races, got %v", v.expected, len(resp.Races))
-		}
+		assert.NoError(t, err)
+		assert.Equal(t, v.expected, len(resp.Races))
 	}
 }
 
@@ -111,13 +107,8 @@ func TestListRacesByMeetingDateValidation(t *testing.T) {
 		resp := &proto.ListRacesByMeetingDateResponse{}
 		err := srv.ListRacesByMeetingDate(ctx, req, resp)
 
-		if err == nil && v.error {
-			t.Errorf("Expected error when calling ListRacesByMeetingDate for range %v to %v", v.start, v.end)
-		}
-
-		if err != nil && !v.error {
-			t.Errorf("Expected no error when calling ListRacesByMeetingDate for range %v to %v", v.start, v.end)
-		}
+		assert.Falsef(t, err == nil && v.error, "Expected error when calling ListRacesByMeetingDate for range %v to %v", v.start, v.end)
+		assert.Falsef(t, err != nil && !v.error, "Expected no error when calling ListRacesByMeetingDate for range %v to %v", v.start, v.end)
 	}
 }
 
@@ -161,13 +152,8 @@ func TestListMeetingsByDate(t *testing.T) {
 		resp := &proto.ListMeetingsByDateResponse{}
 		err := srv.ListMeetingsByDate(ctx, req, resp)
 
-		if err != nil {
-			t.Error("Expected no error when calling ListMeetingsByDate")
-		}
-
-		if len(resp.Meetings) != v.expected {
-			t.Errorf("Expected %v meetings, got %v", v.expected, len(resp.Meetings))
-		}
+		assert.NoError(t, err)
+		assert.Equal(t, v.expected, len(resp.Meetings))
 	}
 }
 
@@ -210,13 +196,8 @@ func TestListMeetingsByDateValidation(t *testing.T) {
 		resp := &proto.ListMeetingsByDateResponse{}
 		err := srv.ListMeetingsByDate(ctx, req, resp)
 
-		if err == nil && v.error {
-			t.Errorf("Expected error when calling ListMeetingsByDate for range %v to %v", v.start, v.end)
-		}
-
-		if err != nil && !v.error {
-			t.Errorf("Expected no error when calling ListMeetingsByDate for range %v to %v", v.start, v.end)
-		}
+		assert.Falsef(t, err == nil && v.error, "Expected error when calling ListMeetingsByDate for range %v to %v", v.start, v.end)
+		assert.Falsef(t, err != nil && !v.error, "Expected no error when calling ListMeetingsByDate for range %v to %v", v.start, v.end)
 	}
 }
 
@@ -1105,7 +1086,7 @@ func TestUpdateRaceCreatesSelectionsOnInitalCall(t *testing.T) {
 	}
 }
 
-func TestUpdateRaceFailsWhenNumberOfSelectionsChange(t *testing.T) {
+func TestUpdateRaceFailsWhenNumberOfSelectionsIncreases(t *testing.T) {
 	// Create two races
 	// Race 1 has no selections
 	// Race 2 has 2 selections
@@ -1230,6 +1211,120 @@ func TestUpdateRaceFailsWhenNumberOfSelectionsChange(t *testing.T) {
 	} else if !strings.Contains(err.Error(), "Number of selections unexpectedly changed") {
 		t.Error("Expected error for number of selections changing from 2 to 3")
 	}
+}
+
+func TestUpdateRaceFlagsScratchedWhenSelectionIsRemoved(t *testing.T) {
+
+	var originalLastUpdate int64 = 2000
+	// Create two races
+	// Race 1 has no selections
+	// Race 2 has 2 selections
+	repo := &MockRepo{
+		races: []*proto.Race{
+			&proto.Race{
+				RaceId:         "race-1",
+				ActualStart:    1000,
+				DateCreated:    2000,
+				LastUpdated:    originalLastUpdate,
+				MeetingId:      "meeting-1",
+				MeetingStart:   4000,
+				Name:           "Race 1",
+				Number:         1,
+				Results:        "2,3,4",
+				ScheduledStart: 5000,
+				SourceId:       "source-1",
+				Status:         "AWESOME",
+			},
+			&proto.Race{
+				RaceId:         "race-2",
+				ActualStart:    1000,
+				DateCreated:    2000,
+				LastUpdated:    originalLastUpdate,
+				MeetingId:      "meeting-1",
+				MeetingStart:   4000,
+				Name:           "Race 1",
+				Number:         2,
+				Results:        "2,3,4",
+				ScheduledStart: 5000,
+				SourceId:       "source-2",
+				Status:         "AWESOME",
+			},
+		},
+		selections: []*proto.Selection{
+			&proto.Selection{
+				SelectionId:        "selection-a",
+				BarrierNumber:      2,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Winx",
+				Number:             3,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-a",
+				LastUpdated:        originalLastUpdate,
+			},
+			&proto.Selection{
+				SelectionId:        "selection-b",
+				BarrierNumber:      4,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Hartnell",
+				Number:             5,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-b",
+				LastUpdated:        originalLastUpdate,
+			},
+		},
+	}
+	ctx := context.Background()
+	srv := getTestRacingService(repo)
+
+	// Update 1 selection in Race 2 (no change, but 2nd selection is no longer included)
+	req := &proto.UpdateRaceRequest{
+		Race: &proto.Race{
+			RaceId:         "race-2",
+			ActualStart:    1000,
+			DateCreated:    2000,
+			LastUpdated:    3000,
+			MeetingId:      "meeting-1",
+			MeetingStart:   4000,
+			Name:           "Race 2",
+			Number:         1,
+			Results:        "2,3,4",
+			ScheduledStart: 5000,
+			SourceId:       "source-1",
+			Status:         "AWESOME",
+		},
+		Selections: []*proto.Selection{
+			&proto.Selection{
+				SelectionId:        "selection-a",
+				BarrierNumber:      3,
+				CompetitorId:       "competitor-1",
+				Jockey:             "Daniel",
+				Name:               "Winx",
+				Number:             3,
+				RaceId:             "race-2",
+				SourceCompetitorId: "source-comp-1",
+				SourceId:           "source-a",
+			},
+		},
+	}
+
+	resp := &proto.UpdateRaceResponse{}
+
+	err := srv.UpdateRace(ctx, req, resp)
+	assert.NoError(t, err)
+
+	// Selection that was not updated is now flagged as scratched
+	assert.True(t, repo.selections[1].Scratched)
+
+	// Selection that was updated is not flagged as scratched
+	assert.False(t, repo.selections[0].Scratched)
+
+	// Confirm both selections were modified
+	assert.NotEqual(t, originalLastUpdate, repo.selections[0].LastUpdated)
+	assert.NotEqual(t, originalLastUpdate, repo.selections[1].LastUpdated)
 }
 
 func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
@@ -1910,11 +2005,15 @@ func (repo *MockRepo) UpdateSelection(selection *proto.Selection) error {
 		return fmt.Errorf("No selection found with id %v", selection.SelectionId)
 	}
 
-	existing.BarrierNumber = selection.BarrierNumber
-	existing.Jockey = selection.Jockey
-	existing.Number = selection.Number
-	existing.SourceCompetitorId = selection.SourceCompetitorId
-	existing.Name = selection.Name
+	if selection.Scratched {
+		existing.Scratched = true
+	} else {
+		existing.BarrierNumber = selection.BarrierNumber
+		existing.Jockey = selection.Jockey
+		existing.Number = selection.Number
+		existing.SourceCompetitorId = selection.SourceCompetitorId
+		existing.Name = selection.Name
+	}
 	existing.LastUpdated = time.Now().Unix()
 
 	return nil

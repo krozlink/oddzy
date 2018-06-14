@@ -168,16 +168,29 @@ func (repo *RacingRepository) UpdateSelection(s *proto.Selection) error {
 
 	updated := model.SelectionProtoToModel(s)
 
-	change := mgo.Change{
-		Update: bson.M{"$set": bson.M{
-			"barrier_number":       updated.BarrierNumber,
-			"jockey":               updated.Jockey,
-			"number":               updated.Number,
-			"source_competitor_id": updated.SourceCompetitorID,
-			"name":                 updated.Name,
-			"last_updated":         time.Now().Unix(),
-		},
-		},
+	var change mgo.Change
+
+	if updated.Scratched {
+		change = mgo.Change{
+			Update: bson.M{"$set": bson.M{
+				"scratched":    updated.Scratched,
+				"last_updated": time.Now().Unix(),
+			},
+			},
+		}
+
+	} else {
+		change = mgo.Change{
+			Update: bson.M{"$set": bson.M{
+				"barrier_number":       updated.BarrierNumber,
+				"jockey":               updated.Jockey,
+				"number":               updated.Number,
+				"source_competitor_id": updated.SourceCompetitorID,
+				"name":                 updated.Name,
+				"last_updated":         time.Now().Unix(),
+			},
+			},
+		}
 	}
 
 	o := &model.Selection{}
