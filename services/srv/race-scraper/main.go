@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	racingService = "oddzy.services.racing"
+	racingService = "racing"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func registerProcessMonitor(process *scrapeProcess) {
 	monitor := newStatusMonitor(process)
 
 	srv := micro.NewService(
-		micro.Name("oddzy.services.race-scraper"),
+		micro.Name("race-scraper"),
 		micro.Version("latest"),
 	)
 

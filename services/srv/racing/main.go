@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	defaultHost = "localhost:27017"
-	serviceName = "oddzy.services.racing"
+	defaultHost    = "localhost:27017"
+	serviceName    = "racing"
 	serviceVersion = "latest"
 )
 

@@ -11,6 +11,14 @@ services:
       - consul
       - db-mongo
       - nats
+  race-scraper-service:
+    build: ./services/srv/race-scraper
+    environment:
+      - MICRO_REGISTRY_ADDRESS=consul:8500
+      - MICRO_SERVER_ADDRESS=:8080
+    depends_on:
+      - consul
+      - racing-service
   consul:
     image: consul:latest
     hostname: consul
