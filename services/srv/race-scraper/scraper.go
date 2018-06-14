@@ -76,7 +76,32 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 // ScrapeRaceCard reads and parses a race card for the provided odds.com.au event id
 func (o *OddscomauScraper) ScrapeRaceCard(eventID string) (*RaceCard, error) {
 	throttle(o)
-	return nil, nil
+
+	url := fmt.Sprintf(raceDataURL, eventID)
+	encodedResponse, err := o.http.getResponse(url)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving race card response - %v", err)
+	}
+
+	odds := &response{}
+	err = json.Unmarshal(encodedResponse, odds)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to parse encoded race card response - %v", err)
+	}
+
+	d, err := decode(odds.Value)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to decode race card response - %v", err)
+	}
+
+	card := &RaceCard{}
+	err = json.Unmarshal(d, card)
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to unmarshal decoded response into race card - %v", err)
+	}
+
+	return card, nil
 }
 
 func throttle(o *OddscomauScraper) {

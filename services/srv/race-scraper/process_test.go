@@ -29,7 +29,8 @@ func TestReadInternalReturnsData(t *testing.T) {
 	}
 	p := getTestProcess(client, &mockScraper{})
 
-	intMeetings, intRaces, err := readInternal(p)
+	start, end := getDateRange([2]int{0, 0})
+	intMeetings, intRaces, err := readInternal(p, start, end)
 	if err != nil {
 		t.Error(err)
 	}
@@ -78,28 +79,20 @@ func TestReadExternalReturnsData(t *testing.T) {
 	s := &mockScraper{}
 
 	// Not an ideal test but working for now
-	// There would be 12 calls to ScrapeRaceCalendar - 4 days x 3 race types.
+	// There would be 3 calls to ScrapeRaceCalendar - 1 day x 3 race types.
 	// This mocked version will return each one incrementally
 	calendars := []*RaceCalendar{
 		getTestRaceCalendar(1),
 		getTestRaceCalendar(2),
 		getTestRaceCalendar(3),
-		getTestRaceCalendar(4),
-		getTestRaceCalendar(5),
-		getTestRaceCalendar(6),
-		getTestRaceCalendar(7),
-		getTestRaceCalendar(8),
-		getTestRaceCalendar(9),
-		getTestRaceCalendar(10),
-		getTestRaceCalendar(11),
-		getTestRaceCalendar(12),
 	}
 
 	s.calendars = calendars
 
 	p := getTestProcess(c, s)
+	start, end := getDateRange([2]int{0, 0}) // only read today
 
-	data, err := readExternal(p)
+	data, err := readExternal(p, start, end)
 
 	assert.Equal(t, len(calendars), s.scrapeCalendarCount, "Unexpected calendar call count")
 	assert.NoError(t, err)
