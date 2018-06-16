@@ -1,0 +1,13 @@
+{
+	"meetings": [
+        {
+            "meeting_id": "m-123",
+            "source_id": "meeting-source-123",
+            "name": "Meeting Number 1",
+            "country": "AUS",
+            "race_type": "horse-racing",
+            "scheduled_start": 1000,
+            "race_ids": ["race-1", "race-2"]
+        }
+    ]
+}

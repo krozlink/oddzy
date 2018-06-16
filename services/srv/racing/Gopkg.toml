@@ -24,6 +24,10 @@
 #   go-tests = true
 #   unused-packages = true
 
+[[constraint]]
+  name = "github.com/bshuster-repo/logrus-logstash-hook"
+  branch = "master"
+  source = "github.com/bshuster-repo/logrus-logstash-hook"
 
 [[constraint]]
   name = "github.com/golang/protobuf"
@@ -48,3 +52,7 @@
 [[constraint]]
   name = "github.com/stretchr/testify"
   version = "1.2.2"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.0.5"

@@ -2,6 +2,19 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/bshuster-repo/logrus-logstash-hook"
+  packages = ["."]
+  revision = "1e961e8e173c48bdddbf90e4fc4df8eaf8a7e918"
+  source = "github.com/bshuster-repo/logrus-logstash-hook"
+
+[[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/go-log/log"
   packages = [
     ".",
@@ -156,17 +169,36 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/satori/go.uuid"
   packages = ["."]
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
+  version = "v1.0.5"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
     "ed25519",
-    "ed25519/internal/edwards25519"
+    "ed25519/internal/edwards25519",
+    "ssh/terminal"
   ]
   revision = "df8d4716b3472e4a531c33cedbe537dae921a1a9"
 
@@ -183,9 +215,18 @@
   ]
   revision = "1e491301e022f8f977054da4c2d852decd59571f"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows"
+  ]
+  revision = "6c888cc515d3ed83fc103cf1d84468aad274b0a7"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "843392b39bbd08952cae4d5c5f1e5acef5a5c575867fbe6f7283e8aec93f965f"
+  inputs-digest = "37ac87ed586497dfb4d6c565e3d4e81bb06ee105c13798db935585930bbfb105"
   solver-name = "gps-cdcl"
   solver-version = 1

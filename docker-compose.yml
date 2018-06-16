@@ -1,7 +1,10 @@
 version: "3"
 services:
   racing-service:
-    build: ./services/srv/racing
+    build: 
+      context: ./services/srv/racing
+    security_opt:
+      - seccomp:unconfined
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
@@ -11,14 +14,59 @@ services:
       - consul
       - db-mongo
       - nats
-  race-scraper-service:
-    build: ./services/srv/race-scraper
-    environment:
-      - MICRO_REGISTRY_ADDRESS=consul:8500
-      - MICRO_SERVER_ADDRESS=:8080
-    depends_on:
-      - consul
-      - racing-service
+      - logstash
+  # racing-service:
+  #   build: 
+  #     context: ./services/srv/racing
+  #     dockerfile: Dockerfile.debug
+  #   security_opt:
+  #     - seccomp:unconfined
+  #   entrypoint: dlv debug github.com/krozlink/oddzy/services/srv/racing -l 0.0.0.0:2345 --headless=true --log=true -- server
+  #   volumes:
+  #     - ./services/srv/racing:/opt/go/src/github.com/krozlink/oddzy/services/srv/racing
+  #   ports:
+  #     - "2345:2345"
+  #   expose:
+  #     - "2345"
+  #   environment:
+  #     - MICRO_REGISTRY_ADDRESS=consul:8500
+  #     - MICRO_SERVER_ADDRESS=:8080
+  #     - DB_HOST=db-mongo
+  #     - NATS_URI=nats://nats:4222
+  #   depends_on:
+  #     - consul
+  #     - db-mongo
+  #     - nats
+  #     - logstash
+  # # race-scraper-service:
+  #   build: 
+  #     context: ./services/srv/race-scraper
+  #     dockerfile: Dockerfile.debug
+  #   security_opt:
+  #     - seccomp:unconfined
+  #   entrypoint: dlv debug github.com/krozlink/oddzy/services/srv/race-scraper -l 0.0.0.0:2345 --headless=true --log=true -- server
+  #   volumes:
+  #     - ./services/srv/race-scraper:/opt/go/src/github.com/krozlink/oddzy/services/srv/race-scraper
+  #   environment:
+  #     - MICRO_REGISTRY_ADDRESS=consul:8500
+  #     - MICRO_SERVER_ADDRESS=:8080
+  #   ports:
+  #     - "2345:2345"
+  #   expose:
+  #     - "2345"
+  #   depends_on:
+  #     - consul
+  #     - racing-service
+  #     - logstash
+  # race-scraper-service:
+  #   build: ./services/srv/race-scraper
+  #   environment:
+  #     - MICRO_REGISTRY_ADDRESS=consul:8500
+  #     - MICRO_SERVER_ADDRESS=:8080
+  #   depends_on:
+  #     - consul
+  #     - racing-service
+  #     - logstash
   consul:
     image: consul:latest
     hostname: consul
@@ -50,5 +98,34 @@ services:
       - "4222"
     ports:
       - "8222:8222"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.0
+    ports: 
+      - 9200:9200
+      - 9300:9300
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.3.0
+    ports:
+      - 5601:5601
+    # volumes:
+    #   - ./deploy/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    links:
+      - elasticsearch
+  logstash:
+    image: docker.elastic.co/logstash/logstash:6.3.0
+    command: -f /etc/logstash/conf.d/
+    ports:
+      - 5000:5000
+    volumes:
+      - ./deploy/logstash/logstash.conf:/etc/logstash/conf.d/logstash.conf
+    links:
+      - elasticsearch
 volumes:
   mongodata:
+  elasticsearch:

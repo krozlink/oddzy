@@ -4,14 +4,17 @@ import (
 	proto "github.com/krozlink/oddzy/services/srv/race-scraper/proto"
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
-	"log"
 )
 
 const (
 	racingService = "racing"
+	serviceName   = "race-scraper"
 )
 
 func main() {
+
+	log = getLog()
+
 	process := newScrapeProcess()
 	registerProcessMonitor(&process)
 
@@ -24,13 +27,14 @@ func registerProcessMonitor(process *scrapeProcess) {
 	monitor := newStatusMonitor(process)
 
 	srv := micro.NewService(
-		micro.Name("race-scraper"),
+		micro.Name(serviceName),
 		micro.Version("latest"),
 	)
 
 	srv.Init()
 
 	proto.RegisterMonitorServiceHandler(srv.Server(), monitor)
+	log.Infof("Registered monitor successfully")
 
 	go func() {
 		if err := srv.Run(); err != nil {

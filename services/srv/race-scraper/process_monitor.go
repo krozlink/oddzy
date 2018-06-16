@@ -4,7 +4,6 @@ import (
 	"context"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	_ "github.com/micro/go-plugins/registry/consul"
-	"log"
 	"sort"
 	"time"
 )

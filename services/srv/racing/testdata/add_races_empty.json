@@ -1,0 +1,19 @@
+{
+    "meetings_id": "",
+    "races": [
+        {
+            "race_id": "",
+            "source_id": "",
+            "meeting_id": "",
+            "number": 0,
+            "name": "",
+            "scheduled_start": 0,
+            "actual_start": 0,
+            "status": "",
+            "results": "",
+            "meeting_start": 0,
+            "last_updated": 0,
+            "date_created": 0
+        }
+    ]
+}

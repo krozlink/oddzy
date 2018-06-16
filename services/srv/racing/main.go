@@ -6,7 +6,6 @@ import (
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/broker/nats"
 	_ "github.com/micro/go-plugins/registry/consul"
-	"log"
 	"os"
 )
 
@@ -22,7 +21,9 @@ func main() {
 		host = defaultHost
 	}
 
-	log.Printf("Connecting to %s", host)
+	log = getLog()
+
+	log.Infof("Connecting to %s", host)
 	session, err := CreateSession(host)
 	defer session.Close()
 
@@ -30,7 +31,7 @@ func main() {
 		log.Fatalf("Error connecting to datastore %s: %v", host, err)
 	}
 
-	log.Printf("Successfully connected")
+	log.Info("Successfully connected")
 
 	if err = session.Ping(); err != nil {
 		log.Fatalf("Error on ping: %v", err)
@@ -39,6 +40,7 @@ func main() {
 	srv := micro.NewService(
 		micro.Name(serviceName),
 		micro.Version(serviceVersion),
+		micro.WrapHandler(logWrapper),
 	)
 
 	srv.Init()

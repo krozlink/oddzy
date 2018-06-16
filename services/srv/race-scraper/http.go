@@ -2,8 +2,8 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strings"
 )
 
 type handler struct {
@@ -14,7 +14,8 @@ type requestHandler interface {
 }
 
 func (h *handler) getResponse(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+	resp, err := http.Post(url, "", strings.NewReader(""))
+
 	if err != nil {
 		log.Fatalln(err)
 	}
