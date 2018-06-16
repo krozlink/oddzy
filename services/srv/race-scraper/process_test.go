@@ -313,7 +313,6 @@ func getTestProcess(c *mockRacingClient, s *mockScraper) *scrapeProcess {
 	return &scrapeProcess{
 		status:           "TEST",
 		done:             make(chan bool),
-		http:             handler{},
 		racing:           c,
 		scraper:          s,
 		meetingsByID:     make(map[string]*racing.Meeting),

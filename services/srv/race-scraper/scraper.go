@@ -46,28 +46,49 @@ func NewOddsScraper(h requestHandler) *OddscomauScraper {
 func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*RaceCalendar, error) {
 	throttle(o)
 
+	logContext := log.WithField("method", "ScrapeRaceCalendar").WithField("parameters", fmt.Sprintf("Event Type: %v, Date: %v", eventType, date))
+
 	url := fmt.Sprintf(meetingDataURL, eventType, date)
+	logContext.Debugf("Requesting race calendar from %v", url)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
-		return nil, fmt.Errorf("error retrieving race calendar response - %v", err)
+		msg := fmt.Sprintf("error retrieving race calendar response - %v", err)
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
 	}
+
+	if len(encodedResponse) == 0 {
+		msg := fmt.Sprintf("No response retrieved")
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	logContext.Debugf("Retrieved encoded response: %s", encodedResponse)
 
 	odds := &response{}
 	err = json.Unmarshal(encodedResponse, odds)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to parse encoded response - %v", err)
+		msg := fmt.Sprintf("Unable to parse encoded response - %v", err)
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	d, err := decode(odds.Value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to decode response - %v", err)
+		msg := fmt.Sprintf("Unable to decode response - %v", err)
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
 	}
+
+	logContext.Debugf("Decoded response: %v", string(d))
 
 	calendar := &RaceCalendar{}
 	err = json.Unmarshal(d, calendar)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal decoded response into race calendar - %v", err)
+		msg := fmt.Sprintf("unable to unmarshal decoded response into race calendar - %v", err)
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	return calendar, nil
@@ -77,28 +98,38 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 func (o *OddscomauScraper) ScrapeRaceCard(eventID string) (*RaceCard, error) {
 	throttle(o)
 
+	logContext := logWithField("method", "ScrapeRaceCard")
+
 	url := fmt.Sprintf(raceDataURL, eventID)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
-		return nil, fmt.Errorf("error retrieving race card response - %v", err)
+		msg := fmt.Sprintf("error retrieving race card response - %v", err)
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	odds := &response{}
 	err = json.Unmarshal(encodedResponse, odds)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to parse encoded race card response - %v", err)
+		msg := fmt.Sprintf("Unable to parse encoded race card response - %v", err)
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	d, err := decode(odds.Value)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to decode race card response - %v", err)
+		msg := fmt.Sprintf("Unable to decode race card response - %v", err)
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	card := &RaceCard{}
 	err = json.Unmarshal(d, card)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal decoded response into race card - %v", err)
+		msg := fmt.Sprintf("unable to unmarshal decoded response into race card - %v", err)
+		logContext.Errorf(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	return card, nil

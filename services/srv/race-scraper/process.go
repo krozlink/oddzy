@@ -7,7 +7,6 @@ import (
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"github.com/satori/go.uuid"
-	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,9 +14,9 @@ import (
 )
 
 type scrapeProcess struct {
-	status    string
-	done      chan bool
-	http      handler
+	status string
+	done   chan bool
+	// http      handler
 	racing    racing.RacingService
 	scraper   Scraper
 	dateRange [2]int
@@ -44,25 +43,30 @@ func (p *scrapeProcess) run() {
 
 loop:
 	for { // this should only loop once a day, with the loop ending when the day ends
-
 		// calculate date range
 		now := time.Now()
 		today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 		tomorrow := today.Add(time.Hour * 24).Sub(time.Now())
 		start, end := getDateRange(p.dateRange)
 
+		log.Infof("Reading races between %v and %v", start.Format("02 Jan 2006"), end.Format("02 Jan 2006"))
 		open, missing := readRaces(p, start, end)
+
+		log.Info("There are %v races requiring scraping", len(missing))
 		scrapeRaces(p, missing)
 
 		stop, done := monitorOpenRaces(p, open)
 		select {
 		case <-done: // something else has killed off the monitor
+			log.Info("Scraper flagged as done")
 			break loop
 		case <-time.After(tomorrow): // channel starting following day
+			log.Info("Day complete. Exit current scraping loop")
 			stop <- true // kill the current scrape session
 			<-done       // wait for it to exit
 			reset(p)     // reset the scraper back to its inital state
 
+			log.Info("Scraping loop ended. Start scraping for next day.")
 			// No point in rescraping dates that were scraped the previous round
 			// Just need to scrape the end day of the previous round
 			p.dateRange = [2]int{p.dateRange[1], p.dateRange[1]}
@@ -149,11 +153,11 @@ func newScrapeProcess() scrapeProcess {
 	client := racing.NewRacingService("racing", service.Client())
 
 	return scrapeProcess{
-		status:    "INITIALISING",
-		done:      make(chan bool),
-		http:      handler{},
+		status: "INITIALISING",
+		done:   make(chan bool),
+		// http:      handler{},
 		racing:    client,
-		scraper:   &OddscomauScraper{},
+		scraper:   NewOddsScraper(&handler{}),
 		dateRange: [2]int{-1, 2}, // scrape from 1 day ago to 2 days in the future (4 days total)
 	}
 }
@@ -178,11 +182,15 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 		p.racesBySource[r.SourceId] = r
 	}
 
+	log.Infof("Internal - %v meetings and %v races found", len(meetings), len(races))
+
 	// read all external meeting data for scraping period (yesterday to 2 days from now)
 	data, err := readExternal(p, start, end)
 	if err != nil {
-		log.Fatalf("An error occurred reading external racing data - %v", err)
+		log.Error("An error occurred reading external racing data - %v", err)
 	}
+	log.Infof("External (existing) - %v meetings and %v races found", len(data.existingMeetings), len(data.existingRaces))
+	log.Infof("External (new) - %v meetings and %v races found", len(data.newMeetings), len(data.newRaces))
 
 	// update all existing meetings that have changed
 	uMeetings := make([]*racing.Meeting, 0)
@@ -210,13 +218,13 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 			unscraped = append(unscraped, r)
 		}
 
-		if r.Status == "open" {
+		if r.Status == "OPEN" {
 			open = append(open, r)
 		}
 	}
 
 	for _, r := range data.newRaces {
-		if r.Status == "open" {
+		if r.Status == "OPEN" {
 			open = append(open, r)
 		}
 	}
@@ -322,7 +330,7 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 				RaceType:       eventType,
 				Country:        m.RegionDescription,
 				SourceId:       mSource,
-				RaceIds:        make([]string, 1),
+				RaceIds:        make([]string, 0),
 			}
 
 			if val, ok := p.meetingsBySource[mSource]; ok {
