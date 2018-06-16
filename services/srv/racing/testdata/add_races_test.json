@@ -1,0 +1,19 @@
+{
+    "meetings_id": "m-123",
+    "races": [
+        {
+            "race_id": "r-123",
+            "source_id": "r-source-123",
+            "meeting_id": "m-123",
+            "number": 2,
+            "name": "Some race",
+            "scheduled_start": 1111,
+            "actual_start": 1212,
+            "status": "CLOSED",
+            "results": "3,1,12",
+            "meeting_start": 1000,
+            "last_updated": 1123,
+            "date_created": 1000
+        }
+    ]
+}

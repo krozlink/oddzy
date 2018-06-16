@@ -21,7 +21,7 @@ func main() {
 		host = defaultHost
 	}
 
-	log := getLog()
+	log = getLog()
 
 	log.Infof("Connecting to %s", host)
 	session, err := CreateSession(host)

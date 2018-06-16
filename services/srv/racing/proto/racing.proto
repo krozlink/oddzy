@@ -35,8 +35,7 @@ message ListRacesByMeetingDateResponse {
 }
 
 message AddRacesRequest {
-    string meeting_id = 1;
-    repeated Race races = 2;
+    repeated Race races = 1;
 }
 
 message AddRacesResponse {
