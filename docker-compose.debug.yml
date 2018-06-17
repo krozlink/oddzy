@@ -1,0 +1,45 @@
+version: "3"
+services:
+  racing-service:
+    build: 
+      context: ./services/srv/racing
+      dockerfile: Dockerfile.debug
+    security_opt:
+      - seccomp:unconfined
+    entrypoint: dlv debug github.com/krozlink/oddzy/services/srv/racing -l 0.0.0.0:2301 --headless=true --log=true -- server
+    volumes:
+      - ./services/srv/racing:/opt/go/src/github.com/krozlink/oddzy/services/srv/racing
+    ports:
+      - "2301:2301"
+    expose:
+      - "2301"
+    environment:
+      - MICRO_REGISTRY_ADDRESS=consul:8500
+      - MICRO_SERVER_ADDRESS=:8080
+      - DB_HOST=db-mongo
+      - NATS_URI=nats://nats:4222
+    depends_on:
+      - consul
+      - db-mongo
+      - nats
+      - logstash
+  race-scraper-service:
+    build: 
+      context: ./services/srv/race-scraper
+      dockerfile: Dockerfile.debug
+    security_opt:
+      - seccomp:unconfined
+    entrypoint: dlv debug github.com/krozlink/oddzy/services/srv/race-scraper -l 0.0.0.0:2302 --headless=true --log=true -- server
+    volumes:
+      - ./services/srv/race-scraper:/opt/go/src/github.com/krozlink/oddzy/services/srv/race-scraper
+    environment:
+      - MICRO_REGISTRY_ADDRESS=consul:8500
+      - MICRO_SERVER_ADDRESS=:8080
+    ports:
+      - "2302:2302"
+    expose:
+      - "2302"
+    depends_on:
+      - consul
+      - racing-service
+      - logstash

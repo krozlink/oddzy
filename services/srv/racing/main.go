@@ -10,18 +10,24 @@ import (
 )
 
 const (
-	defaultHost    = "localhost:27017"
+	defaultHost    = "db-mongo:27017"
 	serviceName    = "racing"
 	serviceVersion = "latest"
 )
 
 func main() {
+	var err error
 	host := os.Getenv("DB_HOST")
 	if host == "" {
 		host = defaultHost
 	}
 
 	log = getLog()
+
+	stats, err = getStats(os.Getenv("STATSD"))
+	if err != nil {
+		log.Fatalf("Unable to get statsd client - %v", err)
+	}
 
 	log.Infof("Connecting to %s", host)
 	session, err := CreateSession(host)
