@@ -2,23 +2,24 @@ package model
 
 import (
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
+	"time"
 )
 
 // Selection represents an instance of an animal running in a particular race
 // The data is specific to the race itself. Data specific to the animal is stored in the Competitor entity
 // This model is used for storing/retrieving data from mongodb
 type Selection struct {
-	SelectionID        string `bson:"_id,omitempty"`
-	SourceID           string `bson:"source_id"`
-	CompetitorID       string `bson:"competitor_id"`
-	SourceCompetitorID string `bson:"source_competitor_id"`
-	RaceID             string `bson:"race_id"`
-	Name               string `bson:"name"`
-	Jockey             string `bson:"jockey"`
-	Number             int32  `bson:"number"`
-	BarrierNumber      int32  `bson:"barrier_number"`
-	LastUpdated        int64  `bson:"last_updated"`
-	Scratched          bool   `bson:"scratched"`
+	SelectionID        string    `bson:"_id,omitempty"`
+	SourceID           string    `bson:"source_id"`
+	CompetitorID       string    `bson:"competitor_id"`
+	SourceCompetitorID string    `bson:"source_competitor_id"`
+	RaceID             string    `bson:"race_id"`
+	Name               string    `bson:"name"`
+	Jockey             string    `bson:"jockey"`
+	Number             int32     `bson:"number"`
+	BarrierNumber      int32     `bson:"barrier_number"`
+	LastUpdated        time.Time `bson:"last_updated"`
+	Scratched          bool      `bson:"scratched"`
 }
 
 // SelectionProtoToModel converts a Selection protobuf object used in service communication
@@ -35,7 +36,7 @@ func SelectionProtoToModel(p *proto.Selection) *Selection {
 		Number:             p.Number,
 		BarrierNumber:      p.BarrierNumber,
 		Scratched:          p.Scratched,
-		LastUpdated:        p.LastUpdated,
+		LastUpdated:        time.Unix(p.LastUpdated, 0),
 	}
 }
 
@@ -53,7 +54,7 @@ func SelectionModelToProto(s *Selection) *proto.Selection {
 		Number:             s.Number,
 		BarrierNumber:      s.BarrierNumber,
 		Scratched:          s.Scratched,
-		LastUpdated:        s.LastUpdated,
+		LastUpdated:        s.LastUpdated.Unix(),
 	}
 }
 

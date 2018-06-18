@@ -193,7 +193,7 @@ func (repo *RacingRepository) UpdateRace(race *proto.Race) error {
 			"actual_start":    updated.ActualStart,
 			"status":          updated.Status,
 			"results":         updated.Results,
-			"last_updated":    time.Now().Unix(),
+			"last_updated":    updated.LastUpdated,
 		},
 		},
 	}
@@ -218,7 +218,7 @@ func (repo *RacingRepository) UpdateSelection(s *proto.Selection) error {
 		change = mgo.Change{
 			Update: bson.M{"$set": bson.M{
 				"scratched":    updated.Scratched,
-				"last_updated": time.Now().Unix(),
+				"last_updated": updated.LastUpdated,
 			},
 			},
 		}
@@ -231,7 +231,7 @@ func (repo *RacingRepository) UpdateSelection(s *proto.Selection) error {
 				"number":               updated.Number,
 				"source_competitor_id": updated.SourceCompetitorID,
 				"name":                 updated.Name,
-				"last_updated":         time.Now().Unix(),
+				"last_updated":         updated.LastUpdated,
 			},
 			},
 		}

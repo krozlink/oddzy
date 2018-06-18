@@ -1879,9 +1879,9 @@ func getTestRace(meetingID string, number int32, actualStart int64) *proto.Race 
 	return &proto.Race{
 		MeetingId:   meetingID,
 		Number:      number,
-		RaceId:      "race-" + string(number),
+		RaceId:      fmt.Sprintf("race-%v", number),
 		ActualStart: actualStart,
-		Name:        string(number),
+		Name:        fmt.Sprintf("%v", number),
 	}
 }
 

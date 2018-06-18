@@ -136,6 +136,7 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 	}
 
 	if errors != "" {
+		log.Errorf("Validation failed when adding %v meetings - %v", len(req.Meetings), errors)
 		stats.Increment(addMeetingsFailed)
 		return fmt.Errorf(errors)
 	}
@@ -145,12 +146,14 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 
 	err := repo.AddMeetings(req.Meetings)
 	if err != nil {
+		log.Errorf("Failed to add $v meetings - %v", len(req.Meetings), err)
 		stats.Increment(addMeetingsFailed)
 		return err
 	}
 
 	resp.Created = true
 
+	log.Debugf("%v meetings successfully added", len(req.Meetings))
 	stats.Increment(addMeetingsSuccess)
 	return nil
 }
@@ -186,8 +189,12 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 			errors += fmt.Sprintf("No status provided for race %v\n", i)
 		}
 
-		if v.LastUpdated == 0 {
-			errors += fmt.Sprintf("No last updated time provided for race %v\n", i)
+		if v.DateCreated == 0 {
+			errors += fmt.Sprintf("No date created time provided for race %v\n", i)
+		}
+
+		if v.LastUpdated != 0 {
+			errors += fmt.Sprintf("Date last updated should not be set on creation for race %v\n", i)
 		}
 
 		if v.MeetingStart == 0 {
@@ -222,6 +229,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 
 	err := validateRace(req)
 	if err != nil {
+		log.Errorf("Failed to update race. Error: %v", err)
 		stats.Increment(updateRaceFailed)
 		return err
 	}
@@ -302,10 +310,10 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	}
 
 	if raceUpdated || selectionUpdated {
-		if err := s.publishRaceUpdate(req.Race, req.Selections); err != nil {
-			stats.Increment(updateRaceFailed)
-			return err
-		}
+		// if err := s.publishRaceUpdate(req.Race, req.Selections); err != nil {
+		// 	stats.Increment(updateRaceFailed)
+		// 	return err
+		// }
 	}
 
 	stats.Increment(updateRaceSuccess)
@@ -393,10 +401,6 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 		errors += fmt.Sprintln("Status not provided for the race")
 	}
 
-	if len(req.Selections) == 0 {
-		errors += fmt.Sprintln("No selections provided for the race")
-	}
-
 	for i, v := range req.Selections {
 		if v.SourceId == "" {
 			errors += fmt.Sprintf("Source id not provided for selection %v\n", i)
@@ -420,10 +424,6 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 
 		if v.Name == "" {
 			errors += fmt.Sprintf("Name not provided for selection %v\n", i)
-		}
-
-		if v.Jockey == "" {
-			errors += fmt.Sprintf("Jockey not provided for selection %v\n", i)
 		}
 
 		if v.Number == 0 {
