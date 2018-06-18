@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 // RaceCalendar is the format odds.com.au uses to represent a race calendar
 type RaceCalendar struct {
 	HasResults   bool          `json:"hasResults"`
@@ -40,7 +42,7 @@ type RaceCard struct {
 	EventName        string          `json:"eventName"`
 	EventNameFull    string          `json:"eventNameFull"`
 	EventDescription string          `json:"eventDesc"`
-	EventDistance    string          `json:"eventDistance"`
+	EventDistance    json.Number     `json:"eventDistance,Number"`
 	StartTime        int64           `json:"startTime"`
 	SportID          int32           `json:"sportId"`
 	IsRacing         bool            `json:"isRacing"`
@@ -57,17 +59,12 @@ type RaceSelection struct {
 	Name             string      `json:"name"`
 	SelectionID      string      `json:"selectionId"`
 	CompetitorID     string      `json:"competitorId"`
-	Flucs            string      `json:"flucs"`
-	ProfileURL       string      `json:"profileUrl"`
 	Result           string      `json:"result"`
 	ResultOrdinal    string      `json:"resultOrdinal"`
 	CompetitorNumber string      `json:"competitorNumber"`
 	BarrierNumber    string      `json:"barrierNumber"`
 	ImageURL         string      `json:"imageUrl"`
 	JockeyName       string      `json:"jockeyName"`
-	JockeyWeight     string      `json:"jockeyWeight"`
-	JockeyURL        string      `json:"jockeyUrl"`
-	Weight           string      `json:"weight"`
 	Prices           []RacePrice `json:"prices"`
 }
 

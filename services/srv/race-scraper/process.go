@@ -52,7 +52,7 @@ loop:
 		log.Infof("Reading races between %v and %v", start.Format("02 Jan 2006"), end.Format("02 Jan 2006"))
 		open, missing := readRaces(p, start, end)
 
-		log.Info("There are %v races requiring scraping", len(missing))
+		log.Infof("There are %v races requiring scraping", len(missing))
 		scrapeRaces(p, missing)
 
 		stop, done := monitorOpenRaces(p, open)
@@ -108,6 +108,10 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 				lock.Unlock()
 			}
 			selections, err := parseRaceCard(card)
+			for _, s := range selections {
+				s.SelectionId = uuid.NewV4().String()
+				s.RaceId = r.RaceId
+			}
 			if err != nil {
 				lock.Lock()
 				errors = append(errors, err)
@@ -156,9 +160,13 @@ func newScrapeProcess() scrapeProcess {
 		status: "INITIALISING",
 		done:   make(chan bool),
 		// http:      handler{},
-		racing:    client,
-		scraper:   NewOddsScraper(&handler{}),
-		dateRange: [2]int{-1, 2}, // scrape from 1 day ago to 2 days in the future (4 days total)
+		racing:           client,
+		scraper:          NewOddsScraper(&handler{}),
+		dateRange:        [2]int{-1, 2}, // scrape from 1 day ago to 2 days in the future (4 days total)
+		meetingsByID:     make(map[string]*racing.Meeting),
+		meetingsBySource: make(map[string]*racing.Meeting),
+		racesByID:        make(map[string]*racing.Race),
+		racesBySource:    make(map[string]*racing.Race),
 	}
 }
 
@@ -200,6 +208,8 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 			uMeetings = append(uMeetings, m)
 		}
 	}
+
+	log.Infof("%v meetings have changed - updating repository", len(uMeetings))
 	updateExistingMeetings(p.racing, uMeetings)
 
 	unscraped := make([]*racing.Race, 0)
@@ -229,6 +239,7 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 		}
 	}
 
+	log.Infof("%v races have changed - updating repository", len(uRaces))
 	updateExistingRaces(p.racing, uRaces)
 
 	// Create new meetings and races
@@ -342,7 +353,7 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 			}
 
 			for _, e := range m.Events {
-				rSource := string(e.EventID)
+				rSource := strconv.Itoa(int(e.EventID))
 				race := &racing.Race{
 					MeetingId:      meeting.MeetingId,
 					Name:           e.EventName,
@@ -393,6 +404,9 @@ func parseRaceCard(c *RaceCard) ([]*racing.Selection, error) {
 		}
 
 		s := &racing.Selection{
+			RaceId:             "",
+			Name:               v.Name,
+			Scratched:          false,
 			SourceId:           v.SelectionID,
 			BarrierNumber:      int32(barrier),
 			Jockey:             v.JockeyName,
@@ -477,8 +491,12 @@ func createNewMeetings(client racing.RacingService, meetings []*racing.Meeting) 
 func createNewRaces(client racing.RacingService, races []*racing.Race) {
 	ctx := context.Background()
 	req := &racing.AddRacesRequest{
-		MeetingId: races[0].MeetingId,
-		Races:     races,
+		Races: races,
+	}
+
+	for _, r := range races {
+		r.LastUpdated = 0
+		r.DateCreated = time.Now().Unix()
 	}
 
 	if _, err := client.AddRaces(ctx, req); err != nil {
@@ -499,6 +517,8 @@ func updateExistingRaces(client racing.RacingService, races []*racing.Race) {
 	var errors []error
 
 	for _, v := range races {
+		v.LastUpdated = time.Now().Unix()
+
 		go func(r *racing.Race) {
 			defer wg.Done()
 			req := &racing.UpdateRaceRequest{

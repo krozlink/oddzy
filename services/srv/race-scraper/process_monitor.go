@@ -5,6 +5,7 @@ import (
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -82,23 +83,23 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 				m := p.meetingsByID[r.race.RaceId]
 				cal, err := p.scraper.ScrapeRaceCalendar(m.RaceType, mDate)
 				if err != nil {
-					log.Printf("Unable to scrape calendar for event type '%v' on %v' - %v", m.RaceType, mDate, err)
-					log.Printf("Skipping race %v", r.race.RaceId)
+					log.Errorf("Unable to scrape calendar for event type '%v' on %v' - %v", m.RaceType, mDate, err)
+					log.Errorf("Skipping race %v", r.race.RaceId)
 					continue
 				}
 				updated := getRaceFromCalendar(cal, r.race)
 				p.racesByID[r.race.RaceId] = updated
 				p.racesBySource[r.race.SourceId] = updated
 
-				// if race has changed then call UpdateRace
+				// if race has changed then call UpdateRaceUpdateRace
 				if raceChanged(r.race, updated) {
 					req := &racing.UpdateRaceRequest{
 						Race: updated,
 					}
 					_, err := p.racing.UpdateRace(context.Background(), req)
 					if err != nil {
-						log.Printf("Unable to update race id '%v' - %v", r.race.RaceId, err)
-						log.Printf("Skipping race %v", r.race.RaceId)
+						log.Errorf("Unable to update race id '%v' - %v", r.race.RaceId, err)
+						log.Errorf("Skipping race %v", r.race.RaceId)
 						continue
 					}
 				}
@@ -230,11 +231,10 @@ loop:
 	for _, rg := range cal.RegionGroups {
 		for _, m := range rg.Meetings {
 			for _, e := range m.Events {
-				if original.SourceId == string(e.EventID) {
+				if original.SourceId == strconv.Itoa(int(e.EventID)) {
 					race = &racing.Race{
 						MeetingId:      original.MeetingId,
 						RaceId:         original.RaceId,
-						LastUpdated:    time.Now().Unix(),
 						MeetingStart:   original.MeetingStart,
 						Name:           e.EventName,
 						Number:         e.EventNumber,

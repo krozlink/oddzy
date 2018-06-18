@@ -8,6 +8,7 @@ import (
 	client "github.com/micro/go-micro/client"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"strconv"
 	"testing"
 )
 
@@ -357,7 +358,7 @@ func getTestRace(m *racing.Meeting, eventID, number int32) *racing.Race {
 		Number:         number,
 		Results:        result,
 		ScheduledStart: int64(number * 1000),
-		SourceId:       string(eventID),
+		SourceId:       strconv.Itoa(eventID),
 		Status:         status,
 	}
 }
@@ -366,7 +367,7 @@ func getTestCalendarEvent(number, eventID int32, url, date string) Event {
 	return Event{
 		EventID:      eventID,
 		DateWithYear: date,
-		EventName:    "Event number " + string(number),
+		EventName:    fmt.Sprintf("Event number %v", number),
 		EventNumber:  number,
 		EventURL:     url,
 		IsAbandoned:  0,
@@ -386,11 +387,11 @@ func readTestRaceCalendar() *RaceCalendar {
 
 func getTestRaceCalendar(id int) *RaceCalendar {
 	meeting := Meeting{
-		MeetingName:       "Meeting " + string(id),
+		MeetingName:       fmt.Sprintf("Meeting %v", id),
 		RegionDescription: "Australia",
 		RegionIconURL:     "www.example.com",
 		Events: []Event{
-			getTestCalendarEvent(1, int32(1000+id), "/greyhounds/meeting-"+string(id)+"/race-1/", "04 Jun 2018"),
+			getTestCalendarEvent(1, int32(1000+id), fmt.Sprintf("/greyhounds/meeting-%v/race-1/", id), "04 Jun 2018"),
 		},
 	}
 
@@ -431,11 +432,11 @@ func getTestRaceCard(id, number int32) *RaceCard {
 		},
 	}
 	card := &RaceCard{
-		EventDescription: "race number " + string(number),
+		EventDescription: fmt.Sprintf("race number %v", number),
 		EventDistance:    "1000m",
 		EventID:          id,
-		EventName:        "race number " + string(number),
-		EventNameFull:    "race number " + string(number),
+		EventName:        fmt.Sprintf("race number %v", number),
+		EventNameFull:    fmt.Sprintf("race number %v", number),
 		IsGreyhounds:     true,
 		IsHarness:        false,
 		IsHorseRacing:    false,

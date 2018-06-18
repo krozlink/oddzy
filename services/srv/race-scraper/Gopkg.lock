@@ -60,7 +60,7 @@
   branch = "master"
   name = "github.com/krozlink/oddzy"
   packages = ["services/srv/racing/proto"]
-  revision = "2be708fd10b2c52d7b158e417f147a90c9bd0c22"
+  revision = "a6496e5ad57e5c423478193cb9c8ec11a0e4261e"
 
 [[projects]]
   branch = "master"
@@ -135,8 +135,8 @@
 [[projects]]
   name = "github.com/miekg/dns"
   packages = ["."]
-  revision = "e57bf427e68187a27e22adceac868350d7a7079b"
-  version = "v1.0.7"
+  revision = "5a2b9fab83ff0f8bfc99684bd5f43a37abe560f1"
+  version = "v1.0.8"
 
 [[projects]]
   branch = "master"
@@ -200,7 +200,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "df8d4716b3472e4a531c33cedbe537dae921a1a9"
+  revision = "027cca12c2d63e3d62b670d901e8a2c95854feec"
 
 [[projects]]
   branch = "master"
@@ -213,7 +213,7 @@
     "ipv4",
     "ipv6"
   ]
-  revision = "1e491301e022f8f977054da4c2d852decd59571f"
+  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
 
 [[projects]]
   branch = "master"

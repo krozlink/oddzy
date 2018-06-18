@@ -118,7 +118,7 @@ func (o *OddscomauScraper) ScrapeRaceCard(eventID string) (*RaceCard, error) {
 
 	d, err := decode(odds.Value)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to decode race card response - %v", err)
+		msg := fmt.Sprintf("Unable to decode race card response. Event ID: %v URL: %v Response: %v Error: %v", eventID, url, string(encodedResponse), err)
 		logContext.Errorf(msg)
 		return nil, fmt.Errorf(msg)
 	}
@@ -127,7 +127,7 @@ func (o *OddscomauScraper) ScrapeRaceCard(eventID string) (*RaceCard, error) {
 	err = json.Unmarshal(d, card)
 
 	if err != nil {
-		msg := fmt.Sprintf("unable to unmarshal decoded response into race card - %v", err)
+		msg := fmt.Sprintf("unable to unmarshal decoded response into race card. Event ID: %v URL: %v Response: %v - Error - %v", eventID, url, string(d), err)
 		logContext.Errorf(msg)
 		return nil, fmt.Errorf(msg)
 	}
