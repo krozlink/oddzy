@@ -51,8 +51,13 @@ message AddMeetingsResponse {
 }
 
 message UpdateRaceRequest {
-    Race race = 1;
-    repeated Selection selections = 2;
+    string race_id = 1;
+    int64 scheduled_start = 2;
+    int64 actual_start = 3;
+    string status = 4;
+    string results = 5;
+    
+    repeated Selection selections = 6;
 }
 
 message UpdateRaceResponse {
@@ -120,4 +125,6 @@ message Race {
 
     int64 date_created = 11;
     int64 last_updated = 12;
+
+    bool is_scraped = 13;
 }

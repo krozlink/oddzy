@@ -165,40 +165,43 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 
 	errors := ""
 	for i, v := range req.Races {
+		id := v.RaceId
 		if v.RaceId == "" {
 			errors += fmt.Sprintf("Race id not provided on race %v\n", i)
+		} else {
+			id = string(i)
 		}
 
 		if v.SourceId == "" {
-			errors += fmt.Sprintf("Source id not provided on race %v\n", i)
+			errors += fmt.Sprintf("Source id not provided on race %v\n", id)
 		}
 
 		if v.Name == "" {
-			errors += fmt.Sprintf("No name provided for race %v\n", i)
+			errors += fmt.Sprintf("No name provided for race %v\n", id)
 		}
 
 		if v.Number == 0 {
-			errors += fmt.Sprintf("No number provided for race %v\n", i)
+			errors += fmt.Sprintf("No number provided for race %v\n", id)
 		}
 
 		if v.ScheduledStart == 0 {
-			errors += fmt.Sprintf("No scheduled start time provided for race %v\n", i)
+			errors += fmt.Sprintf("No scheduled start time provided for race %v\n", id)
 		}
 
 		if v.Status == "" {
-			errors += fmt.Sprintf("No status provided for race %v\n", i)
+			errors += fmt.Sprintf("No status provided for race %v\n", id)
 		}
 
 		if v.DateCreated == 0 {
-			errors += fmt.Sprintf("No date created time provided for race %v\n", i)
+			errors += fmt.Sprintf("No date created time provided for race %v\n", id)
 		}
 
-		if v.LastUpdated != 0 {
-			errors += fmt.Sprintf("Date last updated should not be set on creation for race %v\n", i)
+		if v.LastUpdated == 0 {
+			errors += fmt.Sprintf("No last update time provided for race %v\n", id)
 		}
 
 		if v.MeetingStart == 0 {
-			errors += fmt.Sprintf("No meeting start time provided for race %v\n", i)
+			errors += fmt.Sprintf("No meeting start time provided for race %v\n", id)
 		}
 	}
 
