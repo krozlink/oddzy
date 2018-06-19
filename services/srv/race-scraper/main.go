@@ -12,8 +12,12 @@ const (
 )
 
 func main() {
-
+	var err error
 	baseLog = getLog()
+	stats, err = getStats()
+	if err != nil {
+		baseLog.Fatalf("Unable to get statsd client - %v", err)
+	}
 
 	process := newScrapeProcess()
 	registerProcessMonitor(&process)

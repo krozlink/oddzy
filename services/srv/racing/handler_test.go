@@ -24,6 +24,8 @@ func getTestRacingService(repo *MockRepo) *RacingService {
 }
 
 func TestListRacesByMeetingDate(t *testing.T) {
+	stats = getMockStats()
+
 	repo := &MockRepo{
 		races: []*proto.Race{
 			&proto.Race{
@@ -69,6 +71,7 @@ func TestListRacesByMeetingDate(t *testing.T) {
 }
 
 func TestListRacesByMeetingDateValidation(t *testing.T) {
+	stats = getMockStats()
 	repo := &MockRepo{
 		races: []*proto.Race{
 			&proto.Race{
@@ -113,6 +116,7 @@ func TestListRacesByMeetingDateValidation(t *testing.T) {
 }
 
 func TestListMeetingsByDate(t *testing.T) {
+	stats = getMockStats()
 	repo := &MockRepo{
 		meetings: []*proto.Meeting{
 			&proto.Meeting{
@@ -158,6 +162,7 @@ func TestListMeetingsByDate(t *testing.T) {
 }
 
 func TestListMeetingsByDateValidation(t *testing.T) {
+	stats = getMockStats()
 	repo := &MockRepo{
 		meetings: []*proto.Meeting{
 			&proto.Meeting{
@@ -203,6 +208,7 @@ func TestListMeetingsByDateValidation(t *testing.T) {
 
 func TestAddMeetingsValidation(t *testing.T) {
 
+	stats = getMockStats()
 	repo := &MockRepo{}
 	ctx := context.Background()
 	srv := getTestRacingService(repo)
@@ -301,6 +307,7 @@ func TestAddMeetingsValidation(t *testing.T) {
 }
 
 func TestAddMeetings(t *testing.T) {
+	stats = getMockStats()
 	repo := &MockRepo{}
 	ctx := context.Background()
 	srv := getTestRacingService(repo)
@@ -351,6 +358,7 @@ func TestAddMeetings(t *testing.T) {
 }
 
 func TestAddRacesValidation(t *testing.T) {
+	stats = getMockStats()
 	repo := &MockRepo{}
 	ctx := context.Background()
 	srv := getTestRacingService(repo)
@@ -527,6 +535,7 @@ func TestAddRacesValidation(t *testing.T) {
 }
 
 func TestAddRaces(t *testing.T) {
+	stats = getMockStats()
 	repo := &MockRepo{}
 	ctx := context.Background()
 	srv := getTestRacingService(repo)
@@ -587,6 +596,7 @@ func TestAddRaces(t *testing.T) {
 }
 
 func TestUpdateRaceValidatesRace(t *testing.T) {
+	stats = getMockStats()
 	repo := &MockRepo{
 		races: []*proto.Race{
 			&proto.Race{
@@ -761,6 +771,7 @@ func TestUpdateRaceValidatesRace(t *testing.T) {
 
 func TestUpdateRaceValidatesSelections(t *testing.T) {
 
+	stats = getMockStats()
 	repo := &MockRepo{
 		races: []*proto.Race{
 			&proto.Race{
@@ -956,6 +967,7 @@ func TestUpdateRaceValidatesSelections(t *testing.T) {
 
 func TestUpdateRaceCreatesSelectionsOnInitalCall(t *testing.T) {
 
+	stats = getMockStats()
 	// Create two races
 	// Race 1 has no selections
 	// Race 2 has 2 selections
@@ -1087,6 +1099,7 @@ func TestUpdateRaceCreatesSelectionsOnInitalCall(t *testing.T) {
 }
 
 func TestUpdateRaceFailsWhenNumberOfSelectionsIncreases(t *testing.T) {
+	stats = getMockStats()
 	// Create two races
 	// Race 1 has no selections
 	// Race 2 has 2 selections
@@ -1216,6 +1229,7 @@ func TestUpdateRaceFailsWhenNumberOfSelectionsIncreases(t *testing.T) {
 func TestUpdateRaceFlagsScratchedWhenSelectionIsRemoved(t *testing.T) {
 
 	var originalLastUpdate int64 = 2000
+	stats = getMockStats()
 	// Create two races
 	// Race 1 has no selections
 	// Race 2 has 2 selections
@@ -1329,6 +1343,7 @@ func TestUpdateRaceFlagsScratchedWhenSelectionIsRemoved(t *testing.T) {
 
 func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
 
+	stats = getMockStats()
 	// Create two races
 	// Race 1 has no selections
 	// Race 2 has 2 selections
@@ -1461,6 +1476,7 @@ func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
 }
 
 func TestUpdateRaceNotifiesOnRaceChange(t *testing.T) {
+	stats = getMockStats()
 	// Create 1 race with 2 selections
 	repo := &MockRepo{
 		races: []*proto.Race{
@@ -1584,6 +1600,7 @@ func TestUpdateRaceNotifiesOnRaceChange(t *testing.T) {
 }
 
 func TestUpdateRaceNotifiesOnSelectionChange(t *testing.T) {
+	stats = getMockStats()
 	// Create 1 race with 2 selections
 	repo := &MockRepo{
 		races: []*proto.Race{
@@ -1695,6 +1712,7 @@ func TestUpdateRaceNotifiesOnSelectionChange(t *testing.T) {
 }
 
 func TestUpdateRaceNoNotificationIfNoChange(t *testing.T) {
+	stats = getMockStats()
 	// Create 1 race with 2 selections
 	repo := &MockRepo{
 		races: []*proto.Race{
@@ -1797,6 +1815,7 @@ func TestUpdateRaceNoNotificationIfNoChange(t *testing.T) {
 
 func TestGetNextRace(t *testing.T) {
 
+	stats = getMockStats()
 	repo := &MockRepo{}
 
 	ctx := context.Background()
@@ -2078,4 +2097,33 @@ func (m *MockSubscriber) Topic() string {
 
 func (m *MockSubscriber) Unsubscribe() error {
 	return nil
+}
+
+func getMockStats() *mockStats {
+	return &mockStats{
+		counters: make(map[string]int),
+	}
+}
+
+type mockStats struct {
+	counters map[string]int
+}
+
+type mockTiming struct {
+	start time.Time
+	end   time.Time
+}
+
+func (m *mockStats) Increment(bucket string) {
+	m.counters[bucket]++
+}
+
+func (m *mockStats) NewTiming() statsTiming {
+	return &mockTiming{
+		start: time.Now(),
+	}
+}
+
+func (t *mockTiming) Send(bucket string) {
+	t.end = time.Now()
 }

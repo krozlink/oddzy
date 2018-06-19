@@ -37,6 +37,12 @@ type externalRaceData struct {
 	newRaces         []*racing.Race
 }
 
+const (
+	scrapeRaceTiming  = "race-scraper.service.scraperace.timing"
+	scrapeRaceSuccess = "race-scraper.service.scraperace.success"
+	scrapeRaceFailed  = "race-scraper.service.scraperace.failed"
+)
+
 var raceTypes = []string{"horse-racing", "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
@@ -101,6 +107,7 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 	// scrape each race and queue for updates
 	go func() {
 		for r := range scrape {
+			t := stats.NewTiming()
 			card, err := p.scraper.ScrapeRaceCard(r.SourceId)
 			if err != nil {
 				lock.Lock()
@@ -122,6 +129,13 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 				Race:       r,
 				Selections: selections,
 			}
+
+			if err == nil {
+				stats.Increment(scrapeRaceSuccess)
+			} else {
+				stats.Increment(scrapeRaceFailed)
+			}
+			t.Send(scrapeRaceTiming)
 			update <- req
 		}
 		close(update)

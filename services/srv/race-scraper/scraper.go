@@ -9,9 +9,11 @@ import (
 )
 
 const (
-	meetingDataURL  = "https://www.odds.com.au/api/web/public/Racing/getUpcomingRaces/?sport=%s&date=%s"
-	raceDataURL     = "https://www.odds.com.au/api/web/public/Odds/getOddsComparisonCacheable/?eventId=%s&includeTAB=1&includeOdds=1&arrangeOdds=0&betType=FixedWin&includeTote=true&allowGet=true"
-	defaultInterval = 1000
+	meetingDataURL          = "https://www.odds.com.au/api/web/public/Racing/getUpcomingRaces/?sport=%s&date=%s"
+	raceDataURL             = "https://www.odds.com.au/api/web/public/Odds/getOddsComparisonCacheable/?eventId=%s&includeTAB=1&includeOdds=1&arrangeOdds=0&betType=FixedWin&includeTote=true&allowGet=true"
+	defaultInterval         = 1000
+	oddsComAuRequestSuccess = "race-scraper.service.odds-request.success"
+	oddsComAuRequestFailed  = "race-scraper.service.odds-request.failed"
 )
 
 // Scraper reads racing data from a source
@@ -52,10 +54,12 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 	logContext.Debugf("Requesting race calendar from %v", url)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
+		stats.Increment(oddsComAuRequestFailed)
 		msg := fmt.Sprintf("error retrieving race calendar response - %v", err)
 		logContext.Errorf(msg)
 		return nil, fmt.Errorf(msg)
 	}
+	stats.Increment(oddsComAuRequestSuccess)
 
 	if len(encodedResponse) == 0 {
 		msg := fmt.Sprintf("No response retrieved")
@@ -103,10 +107,12 @@ func (o *OddscomauScraper) ScrapeRaceCard(eventID string) (*RaceCard, error) {
 	url := fmt.Sprintf(raceDataURL, eventID)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
+		stats.Increment(oddsComAuRequestFailed)
 		msg := fmt.Sprintf("error retrieving race card response - %v", err)
 		logContext.Errorf(msg)
 		return nil, fmt.Errorf(msg)
 	}
+	stats.Increment(oddsComAuRequestSuccess)
 
 	odds := &response{}
 	err = json.Unmarshal(encodedResponse, odds)

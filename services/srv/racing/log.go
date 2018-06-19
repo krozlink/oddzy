@@ -10,13 +10,37 @@ import (
 	"os"
 )
 
-var log *logrus.Logger
+var log logClient
 
 const (
 	loggerEnv     = "ODDZY_LOGGER"
 	loggerDefault = "logstash:5000"
 	loggerLevel   = logrus.DebugLevel
 )
+
+type Level uint32
+
+const (
+	PanicLevel Level = iota
+	FatalLevel
+	ErrorLevel
+	WarnLevel
+	InfoLevel
+	DebugLevel
+)
+
+type logClient interface {
+	Infof(msg string, args ...interface{})
+	Debugf(msg string, args ...interface{})
+	Warnf(msg string, args ...interface{})
+	Errorf(msg string, args ...interface{})
+	Fatalf(msg string, args ...interface{})
+	SetLevel()
+}
+
+type logger struct {
+	c *logrus.Logger
+}
 
 func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, resp interface{}) error {
