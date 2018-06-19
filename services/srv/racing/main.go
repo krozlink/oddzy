@@ -17,16 +17,16 @@ const (
 
 func main() {
 	var err error
+	log = getLog()
+	stats, err = getStats()
+
+	if err != nil {
+		log.Fatalf("Unable to get statsd client - %v", err)
+	}
+
 	host := os.Getenv("DB_HOST")
 	if host == "" {
 		host = defaultHost
-	}
-
-	log = getLog()
-
-	stats, err = getStats(os.Getenv("STATSD"))
-	if err != nil {
-		log.Fatalf("Unable to get statsd client - %v", err)
 	}
 
 	log.Infof("Connecting to %s", host)
