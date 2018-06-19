@@ -21,6 +21,7 @@ const (
 )
 
 func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-chan bool) {
+	log := logWithField("function", "monitorOpenRaces")
 	p.status = "RACE_MONITORING"
 
 	overdue, upcoming := categorise(open)

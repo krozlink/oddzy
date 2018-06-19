@@ -17,7 +17,7 @@ func (h *handler) getResponse(url string) ([]byte, error) {
 	resp, err := http.Post(url, "", strings.NewReader(""))
 
 	if err != nil {
-		log.Fatalln(err)
+		baseLog.Fatalln(err)
 	}
 
 	defer resp.Body.Close()

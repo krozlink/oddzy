@@ -358,7 +358,7 @@ func getTestRace(m *racing.Meeting, eventID, number int32) *racing.Race {
 		Number:         number,
 		Results:        result,
 		ScheduledStart: int64(number * 1000),
-		SourceId:       strconv.Itoa(eventID),
+		SourceId:       strconv.Itoa(int(eventID)),
 		Status:         status,
 	}
 }
@@ -417,18 +417,13 @@ func getTestRaceCard(id, number int32) *RaceCard {
 			BarrierNumber:    "1",
 			CompetitorID:     "2",
 			CompetitorNumber: "3",
-			Flucs:            "2.00,2.05,2.1",
 			ImageURL:         "example.com",
 			JockeyName:       "Bob",
-			JockeyURL:        "bob.com",
-			JockeyWeight:     "40kg",
 			Name:             "Winx",
 			Prices:           prices,
-			ProfileURL:       "winx.com",
 			Result:           "",
 			ResultOrdinal:    "",
 			SelectionID:      "123",
-			Weight:           "10032kg",
 		},
 	}
 	card := &RaceCard{

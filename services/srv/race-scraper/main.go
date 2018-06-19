@@ -13,7 +13,7 @@ const (
 
 func main() {
 
-	log = getLog()
+	baseLog = getLog()
 
 	process := newScrapeProcess()
 	registerProcessMonitor(&process)
@@ -34,11 +34,11 @@ func registerProcessMonitor(process *scrapeProcess) {
 	srv.Init()
 
 	proto.RegisterMonitorServiceHandler(srv.Server(), monitor)
-	log.Infof("Registered monitor successfully")
+	baseLog.Infof("Registered monitor successfully")
 
 	go func() {
 		if err := srv.Run(); err != nil {
-			log.Fatalln(err)
+			baseLog.Fatalln(err)
 		}
 	}()
 }

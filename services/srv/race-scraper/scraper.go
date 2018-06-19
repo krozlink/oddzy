@@ -46,7 +46,7 @@ func NewOddsScraper(h requestHandler) *OddscomauScraper {
 func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*RaceCalendar, error) {
 	throttle(o)
 
-	logContext := log.WithField("method", "ScrapeRaceCalendar").WithField("parameters", fmt.Sprintf("Event Type: %v, Date: %v", eventType, date))
+	logContext := logWithField("function", "ScrapeRaceCalendar").WithField("parameters", fmt.Sprintf("Event Type: %v, Date: %v", eventType, date))
 
 	url := fmt.Sprintf(meetingDataURL, eventType, date)
 	logContext.Debugf("Requesting race calendar from %v", url)

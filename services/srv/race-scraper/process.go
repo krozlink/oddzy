@@ -40,7 +40,7 @@ type externalRaceData struct {
 var raceTypes = []string{"horse-racing", "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
-
+	log := logWithField("function", "run")
 loop:
 	for { // this should only loop once a day, with the loop ending when the day ends
 		// calculate date range
@@ -171,6 +171,9 @@ func newScrapeProcess() scrapeProcess {
 }
 
 func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racing.Race) {
+
+	log := logWithField("function", "readRaces")
+
 	// STATUS - SETUP
 	p.status = "SETUP"
 
@@ -479,6 +482,7 @@ func raceChanged(from, to *racing.Race) bool {
 }
 
 func createNewMeetings(client racing.RacingService, meetings []*racing.Meeting) {
+	log := logWithField("function", "createNewMeetings")
 	ctx := context.Background()
 	req := &racing.AddMeetingsRequest{
 		Meetings: meetings,
@@ -489,6 +493,7 @@ func createNewMeetings(client racing.RacingService, meetings []*racing.Meeting) 
 }
 
 func createNewRaces(client racing.RacingService, races []*racing.Race) {
+	log := logWithField("function", "createNewRaces")
 	ctx := context.Background()
 	req := &racing.AddRacesRequest{
 		Races: races,
@@ -509,6 +514,8 @@ func updateExistingMeetings(client racing.RacingService, meetings []*racing.Meet
 }
 
 func updateExistingRaces(client racing.RacingService, races []*racing.Race) {
+	log := logWithField("function", "updateExistingRaces")
+
 	ctx := context.Background()
 	var wg sync.WaitGroup
 	wg.Add(len(races))
