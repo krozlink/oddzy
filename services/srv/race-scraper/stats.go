@@ -5,32 +5,37 @@ import (
 	"os"
 )
 
-var stats statsClient
-
-type statsdClient struct {
-	c statsd.Client
-}
-
-type statsClient interface {
-	NewTiming() statsd.Timing
-	Increment(bucket string)
-}
-
 const (
 	statsDefaultAddress = "statsd:9125"
 )
 
-func getStats() (*statsd.Client, error) {
+var stats statsClient
+
+type statsClient interface {
+	Increment(stat string)
+	NewTiming() statsTiming
+}
+
+type statsTiming interface {
+	Send(bucket string)
+}
+
+type statsdClient struct {
+	c *statsd.Client
+}
+
+func getStats() (*statsdClient, error) {
 	add := os.Getenv("STATSD")
 	if add == "" {
 		add = statsDefaultAddress
 	}
-	return statsd.New(
-		statsd.Address(add),
-	)
+
+	client, err := statsd.New(statsd.Address(add))
+
+	return &statsdClient{c: client}, err
 }
 
-func (s *statsdClient) NewTiming() statsd.Timing {
+func (s *statsdClient) NewTiming() statsTiming {
 	return s.c.NewTiming()
 }
 

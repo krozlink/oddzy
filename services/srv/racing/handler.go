@@ -109,6 +109,7 @@ func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.L
 
 // AddMeetings will save the provided meetings
 func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsRequest, resp *proto.AddMeetingsResponse) error {
+	log := logWithField("function", "AddMeetings")
 	timing := stats.NewTiming()
 	defer timing.Send(addMeetingsTiming)
 
@@ -165,40 +166,43 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 
 	errors := ""
 	for i, v := range req.Races {
+		id := v.RaceId
 		if v.RaceId == "" {
 			errors += fmt.Sprintf("Race id not provided on race %v\n", i)
+		} else {
+			id = string(i)
 		}
 
 		if v.SourceId == "" {
-			errors += fmt.Sprintf("Source id not provided on race %v\n", i)
+			errors += fmt.Sprintf("Source id not provided on race %v\n", id)
 		}
 
 		if v.Name == "" {
-			errors += fmt.Sprintf("No name provided for race %v\n", i)
+			errors += fmt.Sprintf("No name provided for race %v\n", id)
 		}
 
 		if v.Number == 0 {
-			errors += fmt.Sprintf("No number provided for race %v\n", i)
+			errors += fmt.Sprintf("No number provided for race %v\n", id)
 		}
 
 		if v.ScheduledStart == 0 {
-			errors += fmt.Sprintf("No scheduled start time provided for race %v\n", i)
+			errors += fmt.Sprintf("No scheduled start time provided for race %v\n", id)
 		}
 
 		if v.Status == "" {
-			errors += fmt.Sprintf("No status provided for race %v\n", i)
+			errors += fmt.Sprintf("No status provided for race %v\n", id)
 		}
 
-		if v.DateCreated == 0 {
-			errors += fmt.Sprintf("No date created time provided for race %v\n", i)
+		if v.DateCreated != 0 {
+			errors += fmt.Sprintf("Date created time should not be set when adding race %v\n", id)
 		}
 
 		if v.LastUpdated != 0 {
-			errors += fmt.Sprintf("Date last updated should not be set on creation for race %v\n", i)
+			errors += fmt.Sprintf("Last update time should not be set when adding race %v\n", id)
 		}
 
 		if v.MeetingStart == 0 {
-			errors += fmt.Sprintf("No meeting start time provided for race %v\n", i)
+			errors += fmt.Sprintf("No meeting start time provided for race %v\n", id)
 		}
 	}
 
@@ -224,6 +228,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 
 // UpdateRace will update the race and (optionally) selection data for the provided race
 func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceRequest, resp *proto.UpdateRaceResponse) error {
+	log := logWithField("function", "UpdateRace")
 	timing := stats.NewTiming()
 	defer timing.Send(updateRaceTiming)
 
@@ -237,21 +242,30 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	originalRace, err := repo.GetRace(req.Race.RaceId)
+	originalRace, err := repo.GetRace(req.RaceId)
 	if err != nil {
 		stats.Increment(updateRaceFailed)
 		return err
 	}
 
-	raceUpdated := hasRaceChanged(originalRace, req.Race)
+	race := &proto.RaceUpdatedMessage{
+		RaceId:         req.RaceId,
+		Results:        req.Results,
+		ScheduledStart: req.ScheduledStart,
+		ActualStart:    req.ActualStart,
+		Status:         req.Status,
+		Selections:     req.Selections,
+	}
+
+	raceUpdated := hasRaceChanged(originalRace, race)
 	if raceUpdated {
-		err = repo.UpdateRace(req.Race)
+		err = repo.UpdateRace(race)
 	}
 
 	selectionUpdated := false
 
 	if len(req.Selections) > 0 { // May not include selection data in an update
-		originalSelections, err := repo.ListSelectionsByRaceID(req.Race.RaceId)
+		originalSelections, err := repo.ListSelectionsByRaceID(req.RaceId)
 		if err != nil {
 			stats.Increment(updateRaceFailed)
 			return err
@@ -310,10 +324,10 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	}
 
 	if raceUpdated || selectionUpdated {
-		// if err := s.publishRaceUpdate(req.Race, req.Selections); err != nil {
-		// 	stats.Increment(updateRaceFailed)
-		// 	return err
-		// }
+		if err := s.publishRaceUpdate(race, req.Selections); err != nil {
+			stats.Increment(updateRaceFailed)
+			return err
+		}
 	}
 
 	stats.Increment(updateRaceSuccess)
@@ -350,20 +364,15 @@ func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceR
 	return nil
 }
 
-func (s *RacingService) publishRaceUpdate(race *proto.Race, selections []*proto.Selection) error {
-	body := &proto.RaceUpdatedMessage{
-		Race:       race,
-		Selections: selections,
-	}
+func (s *RacingService) publishRaceUpdate(update *proto.RaceUpdatedMessage, selections []*proto.Selection) error {
 
-	b, err := json.Marshal(body)
+	b, err := json.Marshal(update)
 	if err != nil {
 		return err
 	}
 	msg := &broker.Message{
 		Header: map[string]string{
-			"race_id":    race.RaceId,
-			"meeting_id": race.MeetingId,
+			"race_id": update.RaceId,
 		},
 		Body: b,
 	}
@@ -377,27 +386,15 @@ func (s *RacingService) publishRaceUpdate(race *proto.Race, selections []*proto.
 
 func validateRace(req *proto.UpdateRaceRequest) error {
 	errors := ""
-	if req.Race.RaceId == "" {
+	if req.RaceId == "" {
 		errors += fmt.Sprintln("Race id not provided")
 	}
 
-	if req.Race.SourceId == "" {
-		errors += fmt.Sprintln("Source id not provided for the race")
-	}
-
-	if req.Race.ScheduledStart == 0 {
+	if req.ScheduledStart == 0 {
 		errors += fmt.Sprintln("Scheduled start time not provided for the race")
 	}
 
-	if req.Race.Number == 0 {
-		errors += fmt.Sprintln("Number not provided for the race")
-	}
-
-	if req.Race.Name == "" {
-		errors += fmt.Sprintln("Name not provided for the race")
-	}
-
-	if req.Race.Status == "" {
+	if req.Status == "" {
 		errors += fmt.Sprintln("Status not provided for the race")
 	}
 
@@ -418,7 +415,7 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 			errors += fmt.Sprintf("Race id not provided for selection %v\n", i)
 		}
 
-		if v.RaceId != req.Race.RaceId {
+		if v.RaceId != req.RaceId {
 			errors += fmt.Sprintf("Race id for selection %v does not match the race\n", i)
 		}
 
@@ -442,7 +439,7 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 	return nil
 }
 
-func hasRaceChanged(from, to *proto.Race) bool {
+func hasRaceChanged(from *proto.Race, to *proto.RaceUpdatedMessage) bool {
 	return from.ScheduledStart != to.ScheduledStart ||
 		from.ActualStart != to.ActualStart ||
 		from.Status != to.Status ||

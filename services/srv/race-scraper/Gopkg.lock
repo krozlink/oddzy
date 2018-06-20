@@ -60,7 +60,7 @@
   branch = "master"
   name = "github.com/krozlink/oddzy"
   packages = ["services/srv/racing/proto"]
-  revision = "a6496e5ad57e5c423478193cb9c8ec11a0e4261e"
+  revision = "eb5a2cee8eba2639245442cf125629e076d1d68a"
 
 [[projects]]
   branch = "master"
@@ -182,7 +182,10 @@
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
-  packages = ["."]
+  packages = [
+    ".",
+    "hooks/test"
+  ]
   revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
   version = "v1.0.5"
 
@@ -200,7 +203,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "027cca12c2d63e3d62b670d901e8a2c95854feec"
+  revision = "7f39a6fea4fe9364fb61e1def6a268a51b4f3a06"
 
 [[projects]]
   branch = "master"
@@ -222,11 +225,17 @@
     "unix",
     "windows"
   ]
-  revision = "6c888cc515d3ed83fc103cf1d84468aad274b0a7"
+  revision = "fc8bd948cf46f9c7af0f07d34151ce25fe90e477"
+
+[[projects]]
+  name = "gopkg.in/alexcesaro/statsd.v2"
+  packages = ["."]
+  revision = "7fea3f0d2fab1ad973e641e51dba45443a311a90"
+  version = "v2.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "37ac87ed586497dfb4d6c565e3d4e81bb06ee105c13798db935585930bbfb105"
+  inputs-digest = "9785e05c71690e097764727649211565d4165e4697437cac34a6a4ac2fa9d57a"
   solver-name = "gps-cdcl"
   solver-version = 1

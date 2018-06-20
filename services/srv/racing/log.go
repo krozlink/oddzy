@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-var log *logrus.Logger
+var baseLog *logrus.Logger
 
 const (
 	loggerEnv     = "ODDZY_LOGGER"
@@ -20,7 +20,7 @@ const (
 
 func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, resp interface{}) error {
-		log.Printf("Server request: %v", req.Method())
+		baseLog.Printf("Server request: %v", req.Method())
 		return fn(ctx, req, resp)
 	}
 }
@@ -49,7 +49,7 @@ func getLog() *logrus.Logger {
 }
 
 func logWithField(key string, value interface{}) *logrus.Entry {
-	return log.WithField(key, value)
+	return baseLog.WithField(key, value)
 }
 
 func addField(l *logrus.Entry, key string, value interface{}) *logrus.Entry {

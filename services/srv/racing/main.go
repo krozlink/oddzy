@@ -17,11 +17,11 @@ const (
 
 func main() {
 	var err error
-	log = getLog()
+	baseLog = getLog()
 	stats, err = getStats()
 
 	if err != nil {
-		log.Fatalf("Unable to get statsd client - %v", err)
+		baseLog.Fatalf("Unable to get statsd client - %v", err)
 	}
 
 	host := os.Getenv("DB_HOST")
@@ -29,18 +29,18 @@ func main() {
 		host = defaultHost
 	}
 
-	log.Infof("Connecting to %s", host)
+	baseLog.Infof("Connecting to %s", host)
 	session, err := CreateSession(host)
 	defer session.Close()
 
 	if err != nil {
-		log.Fatalf("Error connecting to datastore %s: %v", host, err)
+		baseLog.Fatalf("Error connecting to datastore %s: %v", host, err)
 	}
 
-	log.Info("Successfully connected")
+	baseLog.Info("Successfully connected")
 
 	if err = session.Ping(); err != nil {
-		log.Fatalf("Error on ping: %v", err)
+		baseLog.Fatalf("Error on ping: %v", err)
 	}
 
 	srv := micro.NewService(

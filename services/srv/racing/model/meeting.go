@@ -14,6 +14,8 @@ type Meeting struct {
 	Country        string    `bson:"country"`
 	RaceType       string    `bson:"race_type"`
 	ScheduledStart time.Time `bson:"scheduled_start"`
+	DateCreated    time.Time `bson:"date_created"`
+	LastUpdated    time.Time `bson:"last_updated"`
 }
 
 // MeetingProtoToModel converts a Meeting protobuf object used in service communication to a Meeting model object used in storage
@@ -25,6 +27,8 @@ func MeetingProtoToModel(p *proto.Meeting) *Meeting {
 		Name:           p.Name,
 		RaceType:       p.RaceType,
 		ScheduledStart: time.Unix(p.ScheduledStart, 0),
+		LastUpdated:    time.Unix(p.LastUpdated, 0),
+		DateCreated:    time.Unix(p.DateCreated, 0),
 	}
 }
 
@@ -38,6 +42,8 @@ func MeetingModelToProto(m *Meeting) *proto.Meeting {
 		Name:           m.Name,
 		RaceType:       m.RaceType,
 		ScheduledStart: m.ScheduledStart.Unix(),
+		LastUpdated:    m.LastUpdated.Unix(),
+		DateCreated:    m.DateCreated.Unix(),
 	}
 }
 
