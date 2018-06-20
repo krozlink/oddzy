@@ -109,6 +109,7 @@ func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.L
 
 // AddMeetings will save the provided meetings
 func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsRequest, resp *proto.AddMeetingsResponse) error {
+	log := logWithField("function", "AddMeetings")
 	timing := stats.NewTiming()
 	defer timing.Send(addMeetingsTiming)
 
@@ -227,6 +228,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 
 // UpdateRace will update the race and (optionally) selection data for the provided race
 func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceRequest, resp *proto.UpdateRaceResponse) error {
+	log := logWithField("function", "UpdateRace")
 	timing := stats.NewTiming()
 	defer timing.Send(updateRaceTiming)
 

@@ -210,7 +210,7 @@ func TestListMeetingsByDateValidation(t *testing.T) {
 
 func TestAddMeetingsValidation(t *testing.T) {
 
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	repo := &MockRepo{}
 	ctx := context.Background()
@@ -310,7 +310,7 @@ func TestAddMeetingsValidation(t *testing.T) {
 }
 
 func TestAddMeetings(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	repo := &MockRepo{}
 	ctx := context.Background()
@@ -362,7 +362,7 @@ func TestAddMeetings(t *testing.T) {
 }
 
 func TestAddRacesValidation(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	repo := &MockRepo{}
 	ctx := context.Background()
@@ -554,7 +554,7 @@ func TestAddRacesValidation(t *testing.T) {
 }
 
 func TestAddRaces(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	repo := &MockRepo{}
 	ctx := context.Background()
@@ -612,7 +612,7 @@ func TestAddRaces(t *testing.T) {
 }
 
 func TestUpdateRaceValidatesRace(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	repo := &MockRepo{
 		races: []*proto.Race{
@@ -711,7 +711,7 @@ func TestUpdateRaceValidatesRace(t *testing.T) {
 }
 
 func TestUpdateRaceValidatesSelections(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	repo := &MockRepo{
 		races: []*proto.Race{
@@ -898,7 +898,7 @@ func TestUpdateRaceValidatesSelections(t *testing.T) {
 }
 
 func TestUpdateRaceCreatesSelectionsOnInitalCall(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	// Create two races
 	// Race 1 has no selections
@@ -1022,7 +1022,7 @@ func TestUpdateRaceCreatesSelectionsOnInitalCall(t *testing.T) {
 }
 
 func TestUpdateRaceFailsWhenNumberOfSelectionsIncreases(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	// Create two races
 	// Race 1 has no selections
@@ -1144,7 +1144,7 @@ func TestUpdateRaceFailsWhenNumberOfSelectionsIncreases(t *testing.T) {
 func TestUpdateRaceFlagsScratchedWhenSelectionIsRemoved(t *testing.T) {
 
 	var originalLastUpdate int64 = 2000
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	// Create two races
 	// Race 1 has no selections
@@ -1250,7 +1250,7 @@ func TestUpdateRaceFlagsScratchedWhenSelectionIsRemoved(t *testing.T) {
 
 func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
 
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	// Create two races
 	// Race 1 has no selections
@@ -1375,7 +1375,7 @@ func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
 }
 
 func TestUpdateRaceNotifiesOnRaceChange(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	// Create 1 race with 2 selections
 	repo := &MockRepo{
@@ -1483,7 +1483,7 @@ func TestUpdateRaceNotifiesOnRaceChange(t *testing.T) {
 }
 
 func TestUpdateRaceNotifiesOnSelectionChange(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	// Create 1 race with 2 selections
 	repo := &MockRepo{
@@ -1587,7 +1587,7 @@ func TestUpdateRaceNotifiesOnSelectionChange(t *testing.T) {
 }
 
 func TestUpdateRaceNoNotificationIfNoChange(t *testing.T) {
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	// Create 1 race with 2 selections
 	repo := &MockRepo{
@@ -1682,7 +1682,7 @@ func TestUpdateRaceNoNotificationIfNoChange(t *testing.T) {
 
 func TestGetNextRace(t *testing.T) {
 
-	log, _ = getTestLogger()
+	baseLog, _ = getTestLogger()
 	stats = getMockStats()
 	repo := &MockRepo{}
 
