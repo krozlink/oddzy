@@ -376,8 +376,6 @@ func TestAddRacesValidation(t *testing.T) {
 			races: []*proto.Race{&proto.Race{
 				RaceId:         "race-1",
 				ActualStart:    1000,
-				DateCreated:    2000,
-				LastUpdated:    3000,
 				MeetingId:      "meeting-1",
 				MeetingStart:   4000,
 				Name:           "Race 1",
@@ -388,6 +386,38 @@ func TestAddRacesValidation(t *testing.T) {
 				Status:         "AWESOME",
 			}},
 			expectedErr: "",
+		},
+		{
+			races: []*proto.Race{&proto.Race{
+				RaceId:         "race-1",
+				ActualStart:    1000,
+				LastUpdated:    2000,
+				MeetingId:      "meeting-1",
+				MeetingStart:   4000,
+				Name:           "Race 1",
+				Number:         1,
+				Results:        "2,3,4",
+				ScheduledStart: 5000,
+				SourceId:       "source-1",
+				Status:         "AWESOME",
+			}},
+			expectedErr: "Last update time should not be set when adding race",
+		},
+		{
+			races: []*proto.Race{&proto.Race{
+				RaceId:         "race-1",
+				ActualStart:    1000,
+				DateCreated:    2000,
+				MeetingId:      "meeting-1",
+				MeetingStart:   4000,
+				Name:           "Race 1",
+				Number:         1,
+				Results:        "2,3,4",
+				ScheduledStart: 5000,
+				SourceId:       "source-1",
+				Status:         "AWESOME",
+			}},
+			expectedErr: "Date created time should not be set when adding race",
 		},
 		{
 			races: []*proto.Race{&proto.Race{
@@ -490,22 +520,6 @@ func TestAddRacesValidation(t *testing.T) {
 				RaceId:         "race-1",
 				ActualStart:    1000,
 				DateCreated:    2000,
-				MeetingId:      "meeting-1",
-				MeetingStart:   4000,
-				Name:           "Race 1",
-				Number:         1,
-				Results:        "2,3,4",
-				ScheduledStart: 5000,
-				SourceId:       "source-1",
-				Status:         "AWESOME",
-			}},
-			expectedErr: "No last updated time provided",
-		},
-		{
-			races: []*proto.Race{&proto.Race{
-				RaceId:         "race-1",
-				ActualStart:    1000,
-				DateCreated:    2000,
 				LastUpdated:    3000,
 				MeetingId:      "meeting-1",
 				Name:           "Race 1",
@@ -550,7 +564,6 @@ func TestAddRaces(t *testing.T) {
 		&proto.Race{
 			RaceId:         "race-1",
 			ActualStart:    1000,
-			DateCreated:    2000,
 			MeetingId:      "meeting-1",
 			MeetingStart:   4000,
 			Name:           "Race 1",
@@ -563,7 +576,6 @@ func TestAddRaces(t *testing.T) {
 		&proto.Race{
 			RaceId:         "race-2",
 			ActualStart:    1000,
-			DateCreated:    2000,
 			MeetingId:      "meeting-2",
 			MeetingStart:   4000,
 			Name:           "Race 2",
@@ -624,131 +636,51 @@ func TestUpdateRaceValidatesRace(t *testing.T) {
 	srv := getTestRacingService(repo)
 
 	var testValues = []struct {
-		race        *proto.Race
-		expectedErr string
+		ActualStart    int64
+		RaceID         string
+		Results        string
+		ScheduledStart int64
+		Status         string
+		expectedErr    string
 	}{
 		{
-			race: &proto.Race{
-				RaceId:         "race-1",
-				ActualStart:    1001,
-				DateCreated:    2000,
-				LastUpdated:    3000,
-				MeetingId:      "meeting-1",
-				MeetingStart:   4000,
-				Name:           "Race 1",
-				Number:         2,
-				Results:        "2,3,4",
-				ScheduledStart: 5000,
-				SourceId:       "source-1",
-				Status:         "AWESOME",
-			},
-			expectedErr: "",
+			RaceID:         "race-1",
+			ActualStart:    1001,
+			Results:        "2,3,4",
+			ScheduledStart: 5000,
+			Status:         "AWESOME",
+			expectedErr:    "",
 		},
 		{
-			race: &proto.Race{
-				ActualStart:    1001,
-				DateCreated:    2000,
-				LastUpdated:    3000,
-				MeetingId:      "meeting-1",
-				MeetingStart:   4000,
-				Name:           "Race 1",
-				Number:         2,
-				Results:        "2,3,4",
-				ScheduledStart: 5000,
-				SourceId:       "source-1",
-				Status:         "AWESOME",
-			},
-			expectedErr: "Race id not provided",
+			ActualStart:    1001,
+			Results:        "2,3,4",
+			ScheduledStart: 5000,
+			Status:         "AWESOME",
+			expectedErr:    "Race id not provided",
 		},
 		{
-			race: &proto.Race{
-				RaceId:         "race-1",
-				ActualStart:    1001,
-				DateCreated:    2000,
-				LastUpdated:    3000,
-				MeetingId:      "meeting-1",
-				MeetingStart:   4000,
-				Name:           "Race 1",
-				Number:         2,
-				Results:        "2,3,4",
-				ScheduledStart: 5000,
-				Status:         "AWESOME",
-			},
-			expectedErr: "Source id not provided for the race",
-		},
-		{
-			race: &proto.Race{
-				RaceId:       "race-1",
-				ActualStart:  1001,
-				DateCreated:  2000,
-				LastUpdated:  3000,
-				MeetingId:    "meeting-1",
-				MeetingStart: 4000,
-				Name:         "Race 1",
-				Number:       2,
-				Results:      "2,3,4",
-				SourceId:     "source-1",
-				Status:       "AWESOME",
-			},
+			RaceID:      "race-1",
+			ActualStart: 1001,
+			Results:     "2,3,4",
+			Status:      "AWESOME",
 			expectedErr: "Scheduled start time not provided for the race",
 		},
 		{
-			race: &proto.Race{
-				RaceId:         "race-1",
-				ActualStart:    1001,
-				DateCreated:    2000,
-				LastUpdated:    3000,
-				MeetingId:      "meeting-1",
-				MeetingStart:   4000,
-				Name:           "Race 1",
-				Results:        "2,3,4",
-				ScheduledStart: 5000,
-				SourceId:       "source-1",
-				Status:         "AWESOME",
-			},
-			expectedErr: "Number not provided for the race",
-		},
-		{
-			race: &proto.Race{
-				RaceId:         "race-1",
-				ActualStart:    1001,
-				DateCreated:    2000,
-				LastUpdated:    3000,
-				MeetingId:      "meeting-1",
-				MeetingStart:   4000,
-				Number:         2,
-				Results:        "2,3,4",
-				ScheduledStart: 5000,
-				SourceId:       "source-1",
-				Status:         "AWESOME",
-			},
-			expectedErr: "Name not provided for the race",
-		},
-		{
-			race: &proto.Race{
-				RaceId:         "race-1",
-				ActualStart:    1001,
-				DateCreated:    2000,
-				LastUpdated:    3000,
-				MeetingId:      "meeting-1",
-				MeetingStart:   4000,
-				Name:           "Race 1",
-				Number:         2,
-				Results:        "2,3,4",
-				ScheduledStart: 5000,
-				SourceId:       "source-1",
-			},
-			expectedErr: "Status not provided for the race",
+			RaceID:         "race-1",
+			ActualStart:    1001,
+			Results:        "2,3,4",
+			ScheduledStart: 5000,
+			expectedErr:    "Status not provided for the race",
 		},
 	}
 
 	for _, v := range testValues {
 		req := &proto.UpdateRaceRequest{
-			ActualStart:    v.race.ActualStart,
-			RaceId:         v.race.RaceId,
-			Results:        v.race.Results,
-			ScheduledStart: v.race.ScheduledStart,
-			Status:         v.race.Status,
+			ActualStart:    v.ActualStart,
+			RaceId:         v.RaceID,
+			Results:        v.Results,
+			ScheduledStart: v.ScheduledStart,
+			Status:         v.Status,
 			Selections: []*proto.Selection{
 				&proto.Selection{
 					SelectionId:        "selection-a",
@@ -910,7 +842,7 @@ func TestUpdateRaceValidatesSelections(t *testing.T) {
 				SourceCompetitorId: "source-comp-1",
 				SourceId:           "source-a",
 			},
-			expectedErr: "Jockey not provided for selection",
+			expectedErr: "", // Jockey not a mandatory field
 		},
 		{
 			selection: &proto.Selection{
@@ -1531,26 +1463,18 @@ func TestUpdateRaceNotifiesOnRaceChange(t *testing.T) {
 		t.Error(err)
 	}
 
+	if len(broker.messages) == 0 {
+		assert.False(t, len(broker.messages) == 0, "Expected message broker to contain a message")
+	}
+
 	msg := &proto.RaceUpdatedMessage{}
 	err := json.Unmarshal(broker.messages[0].Body, msg)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if len(broker.messages) != 1 {
-		t.Errorf("Expected 1 message but got %v", len(broker.messages))
-	}
-
 	if broker.messages[0].Header["race_id"] != "race-2" {
 		t.Errorf("Expected message with race id %v but got %v", "race-2", broker.messages[0].Header["race_id"])
-	}
-
-	if broker.messages[0].Header["meeting_id"] != "meeting-1" {
-		t.Errorf("Expected message with meeting id %v but got %v", "meeting-1", broker.messages[0].Header["meeting_id"])
-	}
-
-	if msg.Race.SourceId != repo.races[0].SourceId {
-		t.Errorf("Expected message with source id %v but got %v", repo.races[0].SourceId, msg.Race.SourceId)
 	}
 
 	if msg.Selections[0].SelectionId != repo.selections[0].SelectionId {
@@ -1888,7 +1812,7 @@ func (repo *MockRepo) AddSelections(selections []*proto.Selection) error {
 	return nil
 }
 
-func (repo *MockRepo) UpdateRace(race *proto.Race) error {
+func (repo *MockRepo) UpdateRace(race *proto.RaceUpdatedMessage) error {
 
 	var existing *proto.Race
 	for _, v := range repo.races {

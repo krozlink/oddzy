@@ -192,12 +192,12 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 			errors += fmt.Sprintf("No status provided for race %v\n", id)
 		}
 
-		if v.DateCreated == 0 {
-			errors += fmt.Sprintf("No date created time provided for race %v\n", id)
+		if v.DateCreated != 0 {
+			errors += fmt.Sprintf("Date created time should not be set when adding race %v\n", id)
 		}
 
-		if v.LastUpdated == 0 {
-			errors += fmt.Sprintf("No last update time provided for race %v\n", id)
+		if v.LastUpdated != 0 {
+			errors += fmt.Sprintf("Last update time should not be set when adding race %v\n", id)
 		}
 
 		if v.MeetingStart == 0 {
@@ -246,12 +246,13 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 		return err
 	}
 
-	race := &proto.Race{
+	race := &proto.RaceUpdatedMessage{
 		RaceId:         req.RaceId,
 		Results:        req.Results,
 		ScheduledStart: req.ScheduledStart,
 		ActualStart:    req.ActualStart,
 		Status:         req.Status,
+		Selections:     req.Selections,
 	}
 
 	raceUpdated := hasRaceChanged(originalRace, race)
@@ -321,10 +322,10 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	}
 
 	if raceUpdated || selectionUpdated {
-		// if err := s.publishRaceUpdate(req.Race, req.Selections); err != nil {
-		// 	stats.Increment(updateRaceFailed)
-		// 	return err
-		// }
+		if err := s.publishRaceUpdate(race, req.Selections); err != nil {
+			stats.Increment(updateRaceFailed)
+			return err
+		}
 	}
 
 	stats.Increment(updateRaceSuccess)
@@ -361,20 +362,15 @@ func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceR
 	return nil
 }
 
-func (s *RacingService) publishRaceUpdate(race *proto.Race, selections []*proto.Selection) error {
-	body := &proto.RaceUpdatedMessage{
-		Race:       race,
-		Selections: selections,
-	}
+func (s *RacingService) publishRaceUpdate(update *proto.RaceUpdatedMessage, selections []*proto.Selection) error {
 
-	b, err := json.Marshal(body)
+	b, err := json.Marshal(update)
 	if err != nil {
 		return err
 	}
 	msg := &broker.Message{
 		Header: map[string]string{
-			"race_id":    race.RaceId,
-			"meeting_id": race.MeetingId,
+			"race_id": update.RaceId,
 		},
 		Body: b,
 	}
@@ -441,7 +437,7 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 	return nil
 }
 
-func hasRaceChanged(from, to *proto.Race) bool {
+func hasRaceChanged(from *proto.Race, to *proto.RaceUpdatedMessage) bool {
 	return from.ScheduledStart != to.ScheduledStart ||
 		from.ActualStart != to.ActualStart ||
 		from.Status != to.Status ||

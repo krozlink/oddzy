@@ -12,8 +12,12 @@ service RacingService {
 }
 
 message RaceUpdatedMessage {
-    Race race = 1;
-    repeated Selection selections = 2;
+    string race_id = 1;
+    int64 scheduled_start = 2;
+    int64 actual_start = 3;
+    string status = 4;
+    string results = 5;
+    repeated Selection selections = 6;
 }
 
 message ListMeetingsByDateRequest {

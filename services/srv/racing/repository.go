@@ -26,7 +26,7 @@ type Repository interface {
 	AddRaces(races []*proto.Race) error
 	GetRace(raceID string) (*proto.Race, error)
 	ListRacesByMeetingID(meetingID string) ([]*proto.Race, error)
-	UpdateRace(race *proto.Race) error
+	UpdateRace(race *proto.RaceUpdatedMessage) error
 
 	AddSelections(races []*proto.Selection) error
 	ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error)
@@ -190,8 +190,8 @@ func (repo *RacingRepository) ListSelectionsByRaceID(raceID string) ([]*proto.Se
 }
 
 // UpdateRace updates the race record
-func (repo *RacingRepository) UpdateRace(race *proto.Race) error {
-	updated := model.RaceProtoToModel(race)
+func (repo *RacingRepository) UpdateRace(race *proto.RaceUpdatedMessage) error {
+	updated := model.RaceUpdateProtoToModel(race)
 
 	change := mgo.Change{
 		Update: bson.M{"$set": bson.M{
