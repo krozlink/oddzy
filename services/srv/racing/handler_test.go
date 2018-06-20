@@ -744,7 +744,11 @@ func TestUpdateRaceValidatesRace(t *testing.T) {
 
 	for _, v := range testValues {
 		req := &proto.UpdateRaceRequest{
-			Race: v.race,
+			ActualStart:    v.race.ActualStart,
+			RaceId:         v.race.RaceId,
+			Results:        v.race.Results,
+			ScheduledStart: v.race.ScheduledStart,
+			Status:         v.race.Status,
 			Selections: []*proto.Selection{
 				&proto.Selection{
 					SelectionId:        "selection-a",
@@ -939,21 +943,12 @@ func TestUpdateRaceValidatesSelections(t *testing.T) {
 	for _, v := range testValues {
 
 		req := &proto.UpdateRaceRequest{
-			Race: &proto.Race{
-				RaceId:         "race-1",
-				ActualStart:    1000,
-				DateCreated:    2000,
-				LastUpdated:    3000,
-				MeetingId:      "meeting-1",
-				MeetingStart:   4000,
-				Name:           "Race 1",
-				Number:         1,
-				Results:        "2,3,4",
-				ScheduledStart: 5000,
-				SourceId:       "source-1",
-				Status:         "AWESOME",
-			},
-			Selections: []*proto.Selection{v.selection},
+			RaceId:         "race-1",
+			ActualStart:    1000,
+			Results:        "2,3,4",
+			ScheduledStart: 5000,
+			Status:         "AWESOME",
+			Selections:     []*proto.Selection{v.selection},
 		}
 
 		resp := &proto.UpdateRaceResponse{}
@@ -1037,20 +1032,11 @@ func TestUpdateRaceCreatesSelectionsOnInitalCall(t *testing.T) {
 
 	// Update Race 1 with 2 selections
 	req := &proto.UpdateRaceRequest{
-		Race: &proto.Race{
-			RaceId:         "race-1",
-			ActualStart:    1000,
-			DateCreated:    2000,
-			LastUpdated:    3000,
-			MeetingId:      "meeting-1",
-			MeetingStart:   4000,
-			Name:           "Race 1",
-			Number:         1,
-			Results:        "2,3,4",
-			ScheduledStart: 5000,
-			SourceId:       "source-1",
-			Status:         "AWESOME",
-		},
+		RaceId:         "race-1",
+		ActualStart:    1000,
+		Results:        "2,3,4",
+		ScheduledStart: 5000,
+		Status:         "AWESOME",
 		Selections: []*proto.Selection{
 			&proto.Selection{
 				SelectionId:        "selection-1",
@@ -1170,20 +1156,11 @@ func TestUpdateRaceFailsWhenNumberOfSelectionsIncreases(t *testing.T) {
 
 	// Update 3 selections in Race 2
 	req := &proto.UpdateRaceRequest{
-		Race: &proto.Race{
-			RaceId:         "race-2",
-			ActualStart:    1000,
-			DateCreated:    2000,
-			LastUpdated:    3000,
-			MeetingId:      "meeting-1",
-			MeetingStart:   4000,
-			Name:           "Race 2",
-			Number:         1,
-			Results:        "2,3,4",
-			ScheduledStart: 5000,
-			SourceId:       "source-1",
-			Status:         "AWESOME",
-		},
+		RaceId:         "race-2",
+		ActualStart:    1000,
+		Results:        "2,3,4",
+		ScheduledStart: 5000,
+		Status:         "AWESOME",
 		Selections: []*proto.Selection{
 			&proto.Selection{
 				SelectionId:        "selection-a",
@@ -1303,20 +1280,11 @@ func TestUpdateRaceFlagsScratchedWhenSelectionIsRemoved(t *testing.T) {
 
 	// Update 1 selection in Race 2 (no change, but 2nd selection is no longer included)
 	req := &proto.UpdateRaceRequest{
-		Race: &proto.Race{
-			RaceId:         "race-2",
-			ActualStart:    1000,
-			DateCreated:    2000,
-			LastUpdated:    3000,
-			MeetingId:      "meeting-1",
-			MeetingStart:   4000,
-			Name:           "Race 2",
-			Number:         1,
-			Results:        "2,3,4",
-			ScheduledStart: 5000,
-			SourceId:       "source-1",
-			Status:         "AWESOME",
-		},
+		RaceId:         "race-2",
+		ActualStart:    1000,
+		Results:        "2,3,4",
+		ScheduledStart: 5000,
+		Status:         "AWESOME",
 		Selections: []*proto.Selection{
 			&proto.Selection{
 				SelectionId:        "selection-a",
@@ -1416,20 +1384,11 @@ func TestUpdateRaceModifiesExistingSelections(t *testing.T) {
 
 	// Update the two selections in Race 2
 	req := &proto.UpdateRaceRequest{
-		Race: &proto.Race{
-			RaceId:         "race-2",
-			ActualStart:    1000,
-			DateCreated:    2000,
-			LastUpdated:    3000,
-			MeetingId:      "meeting-1",
-			MeetingStart:   4000,
-			Name:           "Race 2",
-			Number:         1,
-			Results:        "2,3,4",
-			ScheduledStart: 5000,
-			SourceId:       "source-1",
-			Status:         "AWESOME",
-		},
+		RaceId:         "race-2",
+		ActualStart:    1000,
+		Results:        "2,3,4",
+		ScheduledStart: 5000,
+		Status:         "AWESOME",
 		Selections: []*proto.Selection{
 			&proto.Selection{
 				SelectionId:        "selection-a",
@@ -1535,20 +1494,11 @@ func TestUpdateRaceNotifiesOnRaceChange(t *testing.T) {
 
 	// Update the race but not the selections
 	req := &proto.UpdateRaceRequest{
-		Race: &proto.Race{
-			RaceId:         "race-2",
-			ActualStart:    1000,
-			DateCreated:    2000,
-			LastUpdated:    3000,
-			MeetingId:      "meeting-1",
-			MeetingStart:   4000,
-			Name:           "Race 1",
-			Number:         2,
-			Results:        "2,3,4",
-			ScheduledStart: 6000, // Scheduled start changed from 5000 to 6000
-			SourceId:       "source-2",
-			Status:         "AWESOME",
-		},
+		RaceId:         "race-2",
+		ActualStart:    1000,
+		Results:        "2,3,4",
+		ScheduledStart: 6000,
+		Status:         "AWESOME",
 		Selections: []*proto.Selection{
 			&proto.Selection{
 				SelectionId:        "selection-a",
@@ -1660,20 +1610,11 @@ func TestUpdateRaceNotifiesOnSelectionChange(t *testing.T) {
 
 	// Update the selections but not the race
 	req := &proto.UpdateRaceRequest{
-		Race: &proto.Race{
-			RaceId:         "race-2",
-			ActualStart:    1000,
-			DateCreated:    2000,
-			LastUpdated:    3000,
-			MeetingId:      "meeting-1",
-			MeetingStart:   4000,
-			Name:           "Race 1",
-			Number:         2,
-			Results:        "2,3,4",
-			ScheduledStart: 5000,
-			SourceId:       "source-2",
-			Status:         "AWESOME",
-		},
+		RaceId:         "race-2",
+		ActualStart:    1000,
+		Results:        "2,3,4",
+		ScheduledStart: 5000,
+		Status:         "AWESOME",
 		Selections: []*proto.Selection{
 			&proto.Selection{
 				SelectionId:        "selection-a",
@@ -1773,20 +1714,11 @@ func TestUpdateRaceNoNotificationIfNoChange(t *testing.T) {
 
 	// Update the selections but not the race
 	req := &proto.UpdateRaceRequest{
-		Race: &proto.Race{
-			RaceId:         "race-2",
-			ActualStart:    1000,
-			DateCreated:    2000,
-			LastUpdated:    3000,
-			MeetingId:      "meeting-1",
-			MeetingStart:   4000,
-			Name:           "Race 1",
-			Number:         2,
-			Results:        "2,3,4",
-			ScheduledStart: 5000,
-			SourceId:       "source-2",
-			Status:         "AWESOME",
-		},
+		ActualStart:    1000,
+		RaceId:         "race-2",
+		Results:        "2,3,4",
+		ScheduledStart: 5000,
+		Status:         "AWESOME",
 		Selections: []*proto.Selection{
 			&proto.Selection{
 				SelectionId:        "selection-a",

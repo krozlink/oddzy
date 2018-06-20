@@ -56,7 +56,6 @@ message UpdateRaceRequest {
     int64 actual_start = 3;
     string status = 4;
     string results = 5;
-    
     repeated Selection selections = 6;
 }
 
@@ -80,6 +79,8 @@ message Meeting {
     string race_type = 5;
     int64 scheduled_start = 6;
     repeated string race_ids = 7;
+    int64 date_created = 8;
+    int64 last_updated = 9;    
 }
 
 message Competitor {
@@ -96,19 +97,16 @@ message Competitor {
 message Selection {
     string selection_id = 1;
     string source_id = 2;
-
     string competitor_id = 3;
     string source_competitor_id = 4;
-
     string race_id = 5;
     string name = 6;
     string jockey = 7;
     int32 number = 8;
     int32 barrier_number = 9;
-
     bool scratched = 10;
-    
-    int64 last_updated = 11;
+    int64 date_created = 11;
+    int64 last_updated = 12;
 }
 
 message Race {
@@ -122,9 +120,7 @@ message Race {
     string status = 8;
     string results = 9;
     int64 meeting_start = 10;
-
-    int64 date_created = 11;
-    int64 last_updated = 12;
-
-    bool is_scraped = 13;
+    bool is_scraped = 11;
+    int64 date_created = 12;
+    int64 last_updated = 13;
 }

@@ -18,6 +18,7 @@ type Selection struct {
 	Jockey             string    `bson:"jockey"`
 	Number             int32     `bson:"number"`
 	BarrierNumber      int32     `bson:"barrier_number"`
+	DateCreated        time.Time `bson:"date_created"`
 	LastUpdated        time.Time `bson:"last_updated"`
 	Scratched          bool      `bson:"scratched"`
 }
@@ -36,6 +37,7 @@ func SelectionProtoToModel(p *proto.Selection) *Selection {
 		Number:             p.Number,
 		BarrierNumber:      p.BarrierNumber,
 		Scratched:          p.Scratched,
+		DateCreated:        time.Unix(p.DateCreated, 0),
 		LastUpdated:        time.Unix(p.LastUpdated, 0),
 	}
 }
@@ -54,6 +56,7 @@ func SelectionModelToProto(s *Selection) *proto.Selection {
 		Number:             s.Number,
 		BarrierNumber:      s.BarrierNumber,
 		Scratched:          s.Scratched,
+		DateCreated:        s.DateCreated.Unix(),
 		LastUpdated:        s.LastUpdated.Unix(),
 	}
 }

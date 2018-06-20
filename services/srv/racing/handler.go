@@ -240,21 +240,29 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	originalRace, err := repo.GetRace(req.Race.RaceId)
+	originalRace, err := repo.GetRace(req.RaceId)
 	if err != nil {
 		stats.Increment(updateRaceFailed)
 		return err
 	}
 
-	raceUpdated := hasRaceChanged(originalRace, req.Race)
+	race := &proto.Race{
+		RaceId:         req.RaceId,
+		Results:        req.Results,
+		ScheduledStart: req.ScheduledStart,
+		ActualStart:    req.ActualStart,
+		Status:         req.Status,
+	}
+
+	raceUpdated := hasRaceChanged(originalRace, race)
 	if raceUpdated {
-		err = repo.UpdateRace(req.Race)
+		err = repo.UpdateRace(race)
 	}
 
 	selectionUpdated := false
 
 	if len(req.Selections) > 0 { // May not include selection data in an update
-		originalSelections, err := repo.ListSelectionsByRaceID(req.Race.RaceId)
+		originalSelections, err := repo.ListSelectionsByRaceID(req.RaceId)
 		if err != nil {
 			stats.Increment(updateRaceFailed)
 			return err
@@ -380,27 +388,15 @@ func (s *RacingService) publishRaceUpdate(race *proto.Race, selections []*proto.
 
 func validateRace(req *proto.UpdateRaceRequest) error {
 	errors := ""
-	if req.Race.RaceId == "" {
+	if req.RaceId == "" {
 		errors += fmt.Sprintln("Race id not provided")
 	}
 
-	if req.Race.SourceId == "" {
-		errors += fmt.Sprintln("Source id not provided for the race")
-	}
-
-	if req.Race.ScheduledStart == 0 {
+	if req.ScheduledStart == 0 {
 		errors += fmt.Sprintln("Scheduled start time not provided for the race")
 	}
 
-	if req.Race.Number == 0 {
-		errors += fmt.Sprintln("Number not provided for the race")
-	}
-
-	if req.Race.Name == "" {
-		errors += fmt.Sprintln("Name not provided for the race")
-	}
-
-	if req.Race.Status == "" {
+	if req.Status == "" {
 		errors += fmt.Sprintln("Status not provided for the race")
 	}
 
@@ -421,7 +417,7 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 			errors += fmt.Sprintf("Race id not provided for selection %v\n", i)
 		}
 
-		if v.RaceId != req.Race.RaceId {
+		if v.RaceId != req.RaceId {
 			errors += fmt.Sprintf("Race id for selection %v does not match the race\n", i)
 		}
 
