@@ -6,10 +6,13 @@ import (
 	"fmt"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	client "github.com/micro/go-micro/client"
+	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestReadInternalReturnsData(t *testing.T) {
@@ -107,6 +110,7 @@ func TestReadExternalReturnsData(t *testing.T) {
 }
 
 func TestUpdateExistingRacesHandlesMultipleRaces(t *testing.T) {
+	baseLog, _ = getTestLogger()
 	c := &mockRacingClient{}
 
 	// create 3 races and update them
@@ -260,6 +264,7 @@ func TestParseRaceCardReadsSelections(t *testing.T) {
 func TestScrapeRacesScrapesAllMissingRaces(t *testing.T) {
 	c := &mockRacingClient{}
 	s := &mockScraper{}
+	stats = getMockStats()
 
 	// inject 3 responses to scraping a race card
 	s.cards = []*RaceCard{
@@ -502,4 +507,39 @@ func (c *mockRacingClient) UpdateRace(ctx context.Context, req *racing.UpdateRac
 
 func (c *mockRacingClient) GetNextRace(ctx context.Context, req *racing.GetNextRaceRequest, opts ...client.CallOption) (*racing.GetNextRaceResponse, error) {
 	return nil, nil
+}
+
+func getTestLogger() (*logrus.Logger, *test.Hook) {
+	l, hook := test.NewNullLogger()
+	l.SetLevel(logrus.DebugLevel)
+	return l, hook
+}
+
+func getMockStats() *mockStats {
+	return &mockStats{
+		counters: make(map[string]int),
+	}
+}
+
+type mockStats struct {
+	counters map[string]int
+}
+
+type mockTiming struct {
+	start time.Time
+	end   time.Time
+}
+
+func (m *mockStats) Increment(bucket string) {
+	m.counters[bucket]++
+}
+
+func (m *mockStats) NewTiming() statsTiming {
+	return &mockTiming{
+		start: time.Now(),
+	}
+}
+
+func (t *mockTiming) Send(bucket string) {
+	t.end = time.Now()
 }
