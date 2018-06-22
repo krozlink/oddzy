@@ -60,7 +60,7 @@
   branch = "master"
   name = "github.com/krozlink/oddzy"
   packages = ["services/srv/racing/proto"]
-  revision = "eb5a2cee8eba2639245442cf125629e076d1d68a"
+  revision = "bd0ab1967082bc350873727b42099a93d9f09124"
 
 [[projects]]
   branch = "master"
@@ -203,7 +203,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "7f39a6fea4fe9364fb61e1def6a268a51b4f3a06"
+  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
 
 [[projects]]
   branch = "master"
@@ -216,7 +216,7 @@
     "ipv4",
     "ipv6"
   ]
-  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
+  revision = "afe8f62b1d6bbd81f31868121a50b06d8188e1f9"
 
 [[projects]]
   branch = "master"
@@ -225,7 +225,7 @@
     "unix",
     "windows"
   ]
-  revision = "fc8bd948cf46f9c7af0f07d34151ce25fe90e477"
+  revision = "63fc586f45fe72d95d5240a5d5eb95e6503907d3"
 
 [[projects]]
   name = "gopkg.in/alexcesaro/statsd.v2"
