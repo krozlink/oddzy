@@ -126,8 +126,12 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 			}
 
 			req := &racing.UpdateRaceRequest{
-				Race:       r,
-				Selections: selections,
+				ActualStart:    r.ActualStart,
+				RaceId:         r.RaceId,
+				Results:        r.Results,
+				ScheduledStart: r.ScheduledStart,
+				Status:         r.Status,
+				Selections:     selections,
 			}
 
 			if err == nil {
@@ -513,11 +517,6 @@ func createNewRaces(client racing.RacingService, races []*racing.Race) {
 		Races: races,
 	}
 
-	for _, r := range races {
-		r.LastUpdated = 0
-		r.DateCreated = time.Now().Unix()
-	}
-
 	if _, err := client.AddRaces(ctx, req); err != nil {
 		log.Fatal(err)
 	}
@@ -543,7 +542,11 @@ func updateExistingRaces(client racing.RacingService, races []*racing.Race) {
 		go func(r *racing.Race) {
 			defer wg.Done()
 			req := &racing.UpdateRaceRequest{
-				Race: r,
+				ActualStart:    r.ActualStart,
+				RaceId:         r.RaceId,
+				Results:        r.Results,
+				ScheduledStart: r.ScheduledStart,
+				Status:         r.Status,
 			}
 			_, err := client.UpdateRace(ctx, req)
 			if err != nil {

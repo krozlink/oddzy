@@ -95,7 +95,11 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 				// if race has changed then call UpdateRaceUpdateRace
 				if raceChanged(r.race, updated) {
 					req := &racing.UpdateRaceRequest{
-						Race: updated,
+						ActualStart:    updated.ActualStart,
+						RaceId:         updated.RaceId,
+						Results:        updated.Results,
+						ScheduledStart: updated.ScheduledStart,
+						Status:         updated.Status,
 					}
 					_, err := p.racing.UpdateRace(context.Background(), req)
 					if err != nil {
