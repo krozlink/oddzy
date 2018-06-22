@@ -7,6 +7,7 @@ import (
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 	"github.com/micro/go-micro/broker"
 	"sort"
+	"strconv"
 )
 
 const (
@@ -147,7 +148,7 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 
 	err := repo.AddMeetings(req.Meetings)
 	if err != nil {
-		log.Errorf("Failed to add $v meetings - %v", len(req.Meetings), err)
+		log.Errorf("Failed to add %v meetings - %v", len(req.Meetings), err)
 		stats.Increment(addMeetingsFailed)
 		return err
 	}
@@ -161,6 +162,7 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 
 // AddRaces will save the provided races
 func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest, resp *proto.AddRacesResponse) error {
+	log := logWithField("function", "AddRaces")
 	timing := stats.NewTiming()
 	defer timing.Send(addRacesTiming)
 
@@ -170,7 +172,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 		if v.RaceId == "" {
 			errors += fmt.Sprintf("Race id not provided on race %v\n", i)
 		} else {
-			id = string(i)
+			id = strconv.Itoa(i)
 		}
 
 		if v.SourceId == "" {
@@ -194,11 +196,11 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 		}
 
 		if v.DateCreated != 0 {
-			errors += fmt.Sprintf("Date created time should not be set when adding race %v\n", id)
+			errors += fmt.Sprintf("Date created time (%v) should not be set when adding race %v\n", v.DateCreated, id)
 		}
 
 		if v.LastUpdated != 0 {
-			errors += fmt.Sprintf("Last update time should not be set when adding race %v\n", id)
+			errors += fmt.Sprintf("Last update time (%v) should not be set when adding race %v\n", v.LastUpdated, id)
 		}
 
 		if v.MeetingStart == 0 {
@@ -207,6 +209,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 	}
 
 	if errors != "" {
+		log.Errorf("Failed to validate %v races - %v", len(req.Races), errors)
 		stats.Increment(addRacesFailed)
 		return fmt.Errorf(errors)
 	}
@@ -216,6 +219,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 
 	err := repo.AddRaces(req.Races)
 	if err != nil {
+		log.Errorf("Failed to add %v races - %v", len(req.Races), errors)
 		stats.Increment(addRacesFailed)
 		return err
 	}
@@ -365,7 +369,7 @@ func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceR
 }
 
 func (s *RacingService) publishRaceUpdate(update *proto.RaceUpdatedMessage, selections []*proto.Selection) error {
-
+	log := logWithField("function", "publishRaceUpdate")
 	b, err := json.Marshal(update)
 	if err != nil {
 		return err
@@ -378,6 +382,7 @@ func (s *RacingService) publishRaceUpdate(update *proto.RaceUpdatedMessage, sele
 	}
 
 	if err := s.broker.Publish(raceUpdateTopic, msg); err != nil {
+		log.Errorf("Publish failed: %v", err)
 		return fmt.Errorf("Publish failed: %v", err)
 	}
 

@@ -401,7 +401,7 @@ func TestAddRacesValidation(t *testing.T) {
 				SourceId:       "source-1",
 				Status:         "AWESOME",
 			}},
-			expectedErr: "Last update time should not be set when adding race",
+			expectedErr: "Last update time (2000) should not be set when adding race",
 		},
 		{
 			races: []*proto.Race{&proto.Race{
@@ -417,7 +417,7 @@ func TestAddRacesValidation(t *testing.T) {
 				SourceId:       "source-1",
 				Status:         "AWESOME",
 			}},
-			expectedErr: "Date created time should not be set when adding race",
+			expectedErr: "Date created time (2000) should not be set when adding race",
 		},
 		{
 			races: []*proto.Race{&proto.Race{
