@@ -11,6 +11,8 @@ FROM alpine:latest
 RUN mkdir /app
 WORKDIR /app
 
+RUN apk --no-cache add ca-certificates
+
 COPY --from=builder /go/src/github.com/krozlink/oddzy/services/srv/race-scraper/race-scraper-service .
 
 CMD [ "./race-scraper-service" ]

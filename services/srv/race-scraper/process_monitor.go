@@ -24,10 +24,15 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 	log := logWithField("function", "monitorOpenRaces")
 	p.status = "RACE_MONITORING"
 
+	log.Info("Starting race monitoring")
+
 	overdue, upcoming := categorise(open)
 
 	sort.Sort(byNextScrapeTime(overdue))  // races that are past their scheduled start time
 	sort.Sort(byNextScrapeTime(upcoming)) // races before their scheduled start time
+
+	log.Infof("Overdue races: %v", len(overdue))
+	log.Infof("Upcoming races: %v", len(upcoming))
 
 	scrapeQueue := make(chan *scheduledScrape, 1000)
 	updateQueue := make(chan *scheduledScrape, 10)
@@ -41,6 +46,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 		processmessages:
 			for {
 				if race == nil { // no race found so wait for a previous race to be updated or wait for a while and check again for a new race
+					log.Debugf("No races found - waiting")
 					select {
 					case u := <-updateQueue: // a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
 						if time.Unix(u.race.ScheduledStart, 0).After(time.Now()) {
@@ -56,12 +62,15 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 						return
 					}
 				} else { // race found so wait until time to scrape and then queue it
+					log.Debugf("Race %v found - waiting %.2f seconds before scraping", race.race.RaceId, time.Until(race.next).Seconds)
 					select {
 					case u := <-updateQueue: // a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
 						if time.Unix(u.race.ScheduledStart, 0).After(time.Now()) {
+							log.Debug("Race %v added back on upcoming queue", u.race.RaceId)
 							upcoming = append(upcoming, u)
 							sort.Sort(byNextScrapeTime(upcoming))
 						} else {
+							log.Debug("Race %v added back on overdue queue", u.race.RaceId)
 							overdue = append(overdue, u)
 							sort.Sort(byNextScrapeTime(overdue))
 						}
@@ -80,6 +89,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 		for {
 			select {
 			case r := <-scrapeQueue:
+				log.Debugf("Scraping race %v", r.race.RaceId)
 				mDate := time.Unix(r.race.MeetingStart, 0).Format("2006-01-02")
 				m := p.meetingsByID[r.race.RaceId]
 				cal, err := p.scraper.ScrapeRaceCalendar(m.RaceType, mDate)
@@ -94,6 +104,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 
 				// if race has changed then call UpdateRaceUpdateRace
 				if raceChanged(r.race, updated) {
+					log.Debugf("Race %v has been updated - saving changes", r.race.RaceId)
 					req := &racing.UpdateRaceRequest{
 						ActualStart:    updated.ActualStart,
 						RaceId:         updated.RaceId,
@@ -109,12 +120,15 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 					}
 				}
 				// if status is still open put back on either overdue or upcoming depending on start time
-				if updated.Status == "open" {
+				if updated.Status == "OPEN" {
+					log.Debugf("Race %v has has been scraped but has not ended - pushing back on the update queue", r.race.RaceId)
 					s := &scheduledScrape{
 						race: updated,
 						next: nextScrapeTime(updated),
 					}
 					updateQueue <- s
+				} else {
+					log.Debugf("Race %v has has been scraped and is now %v - removing from update queue", r.race.RaceId, r.race.Status)
 				}
 			case <-stopUpdate:
 				return
@@ -127,6 +141,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 
 	go func() {
 		<-stop
+		log.Info("Race monitoring has been stopped")
 		stopScrape <- true
 		stopUpdate <- true
 		done <- true

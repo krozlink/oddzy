@@ -27,7 +27,7 @@ type OddscomauScraper struct {
 	http        requestHandler
 	lastRequest time.Time
 	interval    int
-	mux         *sync.Mutex
+	mux         sync.Mutex
 }
 
 type response struct {
@@ -40,7 +40,7 @@ func NewOddsScraper(h requestHandler) *OddscomauScraper {
 		http:        h,
 		lastRequest: time.Time{},
 		interval:    defaultInterval,
-		mux:         &sync.Mutex{},
+		mux:         sync.Mutex{},
 	}
 }
 
@@ -149,7 +149,7 @@ func throttle(o *OddscomauScraper) {
 
 	remainingMS := int(diff.Nanoseconds() / 1000000)
 	if remainingMS < o.interval {
-		<-time.After(time.Millisecond * time.Duration(o.interval-remainingMS))
+		time.Sleep(time.Millisecond * time.Duration(o.interval-remainingMS))
 	}
 }
 

@@ -114,15 +114,10 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 				errors = append(errors, err)
 				lock.Unlock()
 			}
-			selections, err := parseRaceCard(card)
+			selections := parseRaceCard(card)
 			for _, s := range selections {
 				s.SelectionId = uuid.NewV4().String()
 				s.RaceId = r.RaceId
-			}
-			if err != nil {
-				lock.Lock()
-				errors = append(errors, err)
-				lock.Unlock()
 			}
 
 			req := &racing.UpdateRaceRequest{
@@ -410,18 +405,18 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 }
 
 // parseRaceCard parses the selections (horses/greyhounds) from a race card
-func parseRaceCard(c *RaceCard) ([]*racing.Selection, error) {
+func parseRaceCard(c *RaceCard) []*racing.Selection {
 	selections := make([]*racing.Selection, len(c.Selections))
 	for i, v := range c.Selections {
 
 		number, err := strconv.Atoi(v.CompetitorNumber)
 		if err != nil {
-			return nil, fmt.Errorf("Unable to parse competitor number '%v'", v.CompetitorNumber)
+			number = 0
 		}
 
 		barrier, err := strconv.Atoi(v.BarrierNumber)
 		if err != nil {
-			return nil, fmt.Errorf("Unable to parse barrier number '%v'", v.BarrierNumber)
+			barrier = 0
 		}
 
 		s := &racing.Selection{
@@ -438,7 +433,7 @@ func parseRaceCard(c *RaceCard) ([]*racing.Selection, error) {
 		selections[i] = s
 	}
 
-	return selections, nil
+	return selections
 }
 
 // getResults takes a string result in the format "3,1,12" and returns the equivalent slice of ints
