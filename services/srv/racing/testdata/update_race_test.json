@@ -1,7 +1,8 @@
 {
-    "race_id": "r-123",
-    "scheduled_start": 1111,
-    "actual_start": 1212,
-    "status": "CLOSED",
-    "results": "3,1,12"
+    "race_id": "e57fbaef-4cc2-448f-b09b-d15b8cdc018d",
+    "scheduled_start": 1529721180,
+    "actual_start": 1529721180,
+    "status": "OPENZ",
+    "results": "",
+    "selections": []
 }

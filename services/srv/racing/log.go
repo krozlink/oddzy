@@ -8,6 +8,7 @@ import (
 	defaultLog "log"
 	"net"
 	"os"
+	"time"
 )
 
 var baseLog *logrus.Logger
@@ -33,14 +34,27 @@ func getLog() *logrus.Logger {
 	}
 
 	l := logrus.New()
+	l.Formatter = &logrus.JSONFormatter{
+		TimestampFormat: time.RFC3339Nano,
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime: "@timestamp",
+			logrus.FieldKeyMsg:  "message",
+		},
+	}
+
 	conn, err := net.Dial("tcp", env)
 	if err != nil {
 		defaultLog.Fatal(err)
 	}
 
-	hook := logrustash.New(conn, logrustash.DefaultFormatter(logrus.Fields{
-		"service": serviceName,
-	}))
+	fmt := logrustash.LogstashFormatter{
+		Fields: logrus.Fields{
+			"service": serviceName,
+		},
+		Formatter: l.Formatter,
+	}
+
+	hook := logrustash.New(conn, fmt)
 	l.Hooks.Add(hook)
 
 	l.SetLevel(loggerLevel)

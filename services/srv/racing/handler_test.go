@@ -857,19 +857,6 @@ func TestUpdateRaceValidatesSelections(t *testing.T) {
 			},
 			expectedErr: "Number not provided for selection",
 		},
-		{
-			selection: &proto.Selection{
-				SelectionId:        "selection-a",
-				CompetitorId:       "competitor-1",
-				Jockey:             "Daniel",
-				Name:               "Winx",
-				Number:             3,
-				RaceId:             "race-1",
-				SourceCompetitorId: "source-comp-1",
-				SourceId:           "source-a",
-			},
-			expectedErr: "Barrier number not provided for selection",
-		},
 	}
 
 	for _, v := range testValues {

@@ -2,18 +2,16 @@
     "meetings_id": "m-123",
     "races": [
         {
-            "race_id": "r-123",
-            "source_id": "r-source-123",
-            "meeting_id": "m-123",
-            "number": 2,
-            "name": "Some race",
-            "scheduled_start": 1111,
-            "actual_start": 1212,
-            "status": "CLOSED",
-            "results": "3,1,12",
-            "meeting_start": 1000,
-            "last_updated": 1123,
-            "date_created": 1000
-        }
+            "race_id": "e57fbaef-4cc2-448f-b09b-d15b8cdc018d",
+            "source_id": "742978",
+            "meeting_id": "e9ac3376-9689-4b6c-887e-93f6bcddedeb",
+            "number": 1,
+            "name": "BRONWYN'S BIRTHDAY BASH Class 3 Plate",
+            "scheduled_start": 1529721180,
+            "status": "OPEN",
+            "meeting_start": 1529721180,
+            "date_created": 1529662117,
+            "last_updated": 1529663771
+          }
     ]
 }

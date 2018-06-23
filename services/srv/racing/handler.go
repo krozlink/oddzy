@@ -431,10 +431,6 @@ func validateRace(req *proto.UpdateRaceRequest) error {
 		if v.Number == 0 {
 			errors += fmt.Sprintf("Number not provided for selection %v\n", i)
 		}
-
-		if v.BarrierNumber == 0 {
-			errors += fmt.Sprintf("Barrier number not provided for selection %v\n", i)
-		}
 	}
 
 	if errors != "" {
