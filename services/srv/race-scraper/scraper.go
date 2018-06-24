@@ -144,13 +144,16 @@ func (o *OddscomauScraper) ScrapeRaceCard(eventID string) (*RaceCard, error) {
 func throttle(o *OddscomauScraper) {
 	o.mux.Lock()
 	diff := time.Since(o.lastRequest)
-	o.lastRequest = time.Now()
+	remainingMS := o.interval - int(diff.Nanoseconds()/1000000)
 	o.mux.Unlock()
 
-	remainingMS := int(diff.Nanoseconds() / 1000000)
-	if remainingMS < o.interval {
-		time.Sleep(time.Millisecond * time.Duration(o.interval-remainingMS))
+	if remainingMS > 0 {
+		time.Sleep(time.Millisecond * time.Duration(remainingMS))
 	}
+
+	o.mux.Lock()
+	o.lastRequest = time.Now()
+	o.mux.Unlock()
 }
 
 func decode(response string) ([]byte, error) {
