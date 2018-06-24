@@ -62,7 +62,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 						return
 					}
 				} else { // race found so wait until time to scrape and then queue it
-					log.Debugf("Race %v found - waiting %.2f seconds before scraping", race.race.RaceId, time.Until(race.next).Seconds)
+					log.Debugf("Race %v found - waiting %.2f seconds before scraping", race.race.RaceId, time.Until(race.next).Seconds())
 					select {
 					case u := <-updateQueue: // a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
 						if time.Unix(u.race.ScheduledStart, 0).After(time.Now()) {
