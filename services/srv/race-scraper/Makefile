@@ -1,3 +1,5 @@
+default: protoc test build
+
 build:
 	docker build --rm -t race-scraper-service .
 

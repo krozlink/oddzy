@@ -2,11 +2,15 @@ package main
 
 import (
 	"gopkg.in/alexcesaro/statsd.v2"
+	"log"
 	"os"
+	"time"
 )
 
 const (
 	statsDefaultAddress = "statsd:9125"
+	statsRetryInterval  = 5
+	statsMaxAttempts    = 10
 )
 
 var stats statsClient
@@ -24,15 +28,31 @@ type statsdClient struct {
 	c *statsd.Client
 }
 
-func getStats() (*statsdClient, error) {
+func getStats() *statsdClient {
 	add := os.Getenv("STATSD")
 	if add == "" {
 		add = statsDefaultAddress
 	}
 
-	client, err := statsd.New(statsd.Address(add))
+	var client *statsd.Client
+	var err error
+	for count := 1; count <= statsMaxAttempts; count++ {
+		client, err = statsd.New(statsd.Address(add))
+		if err != nil {
+			if count == statsMaxAttempts {
+				log.Print("Unable to connect to statsd - max attempts exceeded")
+				log.Fatal(err)
+			}
 
-	return &statsdClient{c: client}, err
+			log.Printf("Unable to connect to statsd - attempt %v of %v. Retrying in %v seconds...", count, statsMaxAttempts, statsRetryInterval)
+			time.Sleep(time.Second * statsRetryInterval)
+			continue
+		}
+		break
+	}
+
+	log.Print("Successfully connected to statsd")
+	return &statsdClient{c: client}
 }
 
 func (s *statsdClient) NewTiming() statsTiming {

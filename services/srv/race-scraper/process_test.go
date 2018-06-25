@@ -254,10 +254,9 @@ func TestParseRaceCardReadsSelections(t *testing.T) {
 	// add test race card with 1 selection
 	card := getTestRaceCard(1, 1)
 
-	s, err := parseRaceCard(card)
+	s := parseRaceCard(card)
 
 	// confirm 1 selection parsed
-	assert.NoError(t, err)
 	assert.Equal(t, 1, len(s))
 }
 

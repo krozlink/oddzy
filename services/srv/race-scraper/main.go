@@ -4,6 +4,7 @@ import (
 	proto "github.com/krozlink/oddzy/services/srv/race-scraper/proto"
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
+	"sync"
 )
 
 const (
@@ -12,12 +13,19 @@ const (
 )
 
 func main() {
-	var err error
-	baseLog = getLog()
-	stats, err = getStats()
-	if err != nil {
-		baseLog.Fatalf("Unable to get statsd client - %v", err)
-	}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		baseLog = getLog()
+		wg.Done()
+	}()
+
+	go func() {
+		stats = getStats()
+		wg.Done()
+	}()
+	wg.Wait()
 
 	process := newScrapeProcess()
 	registerProcessMonitor(&process)

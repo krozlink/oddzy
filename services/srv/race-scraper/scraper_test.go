@@ -14,7 +14,7 @@ func getMockScraper(h requestHandler) *OddscomauScraper {
 		http:        h,
 		lastRequest: time.Time{},
 		interval:    0,
-		mux:         &sync.Mutex{},
+		mux:         sync.Mutex{},
 	}
 }
 
@@ -71,7 +71,7 @@ func TestScraperUsesThrottling(t *testing.T) {
 		http:        h,
 		lastRequest: time.Time{},
 		interval:    500,
-		mux:         &sync.Mutex{},
+		mux:         sync.Mutex{},
 	}
 
 	// expect the difference to be at least 500ms as this is the throttled time delay

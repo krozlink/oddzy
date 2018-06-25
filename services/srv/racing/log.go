@@ -14,9 +14,11 @@ import (
 var baseLog *logrus.Logger
 
 const (
-	loggerEnv     = "ODDZY_LOGGER"
-	loggerDefault = "logstash:5000"
-	loggerLevel   = logrus.DebugLevel
+	loggerEnv           = "ODDZY_LOGGER"
+	loggerDefault       = "logstash:5000"
+	loggerLevel         = logrus.DebugLevel
+	loggerRetryInterval = 10
+	loggerMaxAttempts   = 10
 )
 
 func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
@@ -42,23 +44,34 @@ func getLog() *logrus.Logger {
 		},
 	}
 
-	conn, err := net.Dial("tcp", env)
-	if err != nil {
-		defaultLog.Fatal(err)
+	for count := 1; count <= loggerMaxAttempts; count++ {
+		conn, err := net.Dial("tcp", env)
+		if err != nil {
+			if count == loggerMaxAttempts {
+				defaultLog.Print("Unable to connect to logstash - max attempts exceeded")
+				defaultLog.Fatal(err)
+			}
+
+			defaultLog.Printf("Unable to connect to logstash - attempt %v of %v. Retrying in %v seconds...", count, loggerMaxAttempts, loggerRetryInterval)
+			time.Sleep(time.Second * loggerRetryInterval)
+			continue
+		}
+
+		fmt := logrustash.LogstashFormatter{
+			Fields: logrus.Fields{
+				"service": serviceName,
+			},
+			Formatter: l.Formatter,
+		}
+
+		hook := logrustash.New(conn, fmt)
+		l.Hooks.Add(hook)
+
+		l.SetLevel(loggerLevel)
+		break
 	}
 
-	fmt := logrustash.LogstashFormatter{
-		Fields: logrus.Fields{
-			"service": serviceName,
-		},
-		Formatter: l.Formatter,
-	}
-
-	hook := logrustash.New(conn, fmt)
-	l.Hooks.Add(hook)
-
-	l.SetLevel(loggerLevel)
-
+	defaultLog.Print("Successfully connected to logstash")
 	return l
 }
 

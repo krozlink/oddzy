@@ -6,7 +6,7 @@ import (
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/broker/nats"
 	_ "github.com/micro/go-plugins/registry/consul"
-	"os"
+	"sync"
 )
 
 const (
@@ -16,32 +16,22 @@ const (
 )
 
 func main() {
-	var err error
-	baseLog = getLog()
-	stats, err = getStats()
 
-	if err != nil {
-		baseLog.Fatalf("Unable to get statsd client - %v", err)
-	}
+	var wg sync.WaitGroup
+	wg.Add(3)
+	go func() {
+		baseLog = getLog()
+		wg.Done()
+	}()
 
-	host := os.Getenv("DB_HOST")
-	if host == "" {
-		host = defaultHost
-	}
+	go func() {
+		stats = getStats()
+		wg.Done()
+	}()
+	wg.Wait()
 
-	baseLog.Infof("Connecting to %s", host)
-	session, err := CreateSession(host)
+	session := getDBSession()
 	defer session.Close()
-
-	if err != nil {
-		baseLog.Fatalf("Error connecting to datastore %s: %v", host, err)
-	}
-
-	baseLog.Info("Successfully connected")
-
-	if err = session.Ping(); err != nil {
-		baseLog.Fatalf("Error on ping: %v", err)
-	}
 
 	srv := micro.NewService(
 		micro.Name(serviceName),

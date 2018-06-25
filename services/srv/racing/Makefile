@@ -1,4 +1,4 @@
-default: proto test build
+default: protoc test build
 
 build:
 	docker build --rm -t racing-service .
