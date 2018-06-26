@@ -165,7 +165,7 @@ func getDateRange(r [2]int) (time.Time, time.Time) {
 }
 
 func newScrapeProcess() scrapeProcess {
-	service := micro.NewService(micro.Name("racing.client"))
+	service := micro.NewService(micro.Name(racingServiceName))
 	service.Init()
 	client := racing.NewRacingService("racing", service.Client())
 
