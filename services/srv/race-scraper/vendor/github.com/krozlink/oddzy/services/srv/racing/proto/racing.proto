@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package racing;
+package go.micro.srv.racing;
 
 service RacingService {
     rpc ListMeetingsByDate (ListMeetingsByDateRequest) returns (ListMeetingsByDateResponse) {}

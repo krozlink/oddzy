@@ -2,7 +2,7 @@
 // source: proto/racing.proto
 
 /*
-Package racing is a generated protocol buffer package.
+Package go_micro_srv_racing is a generated protocol buffer package.
 
 It is generated from these files:
 	proto/racing.proto
@@ -26,7 +26,7 @@ It has these top-level messages:
 	Selection
 	Race
 */
-package racing
+package go_micro_srv_racing
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
@@ -75,7 +75,7 @@ func NewRacingService(name string, c client.Client) RacingService {
 		c = client.NewClient()
 	}
 	if len(name) == 0 {
-		name = "racing"
+		name = "go.micro.srv.racing"
 	}
 	return &racingService{
 		c:    c,

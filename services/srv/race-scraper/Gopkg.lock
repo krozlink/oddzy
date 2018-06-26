@@ -35,8 +35,8 @@
     "api",
     "watch"
   ]
-  revision = "5174058f0d2bda63fa5198ab96c33d9a909c58ed"
-  version = "v1.1.0"
+  revision = "28141971f966e99916da2c5e461dd968746491cd"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -60,7 +60,7 @@
   branch = "master"
   name = "github.com/krozlink/oddzy"
   packages = ["services/srv/racing/proto"]
-  revision = "bd0ab1967082bc350873727b42099a93d9f09124"
+  revision = "41aa7f4a343c30e43e13e66e9a761d44fab1b102"
 
 [[projects]]
   branch = "master"
@@ -225,7 +225,7 @@
     "unix",
     "windows"
   ]
-  revision = "63fc586f45fe72d95d5240a5d5eb95e6503907d3"
+  revision = "a200a19cb90b19de298170992778b1fda7217bd6"
 
 [[projects]]
   name = "gopkg.in/alexcesaro/statsd.v2"
