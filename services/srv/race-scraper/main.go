@@ -5,11 +5,13 @@ import (
 	micro "github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"sync"
+	"time"
 )
 
 const (
-	racingService = "racing"
-	serviceName   = "race-scraper"
+	serviceName       = "go.micro.srv.racescraper"
+	serviceVersion    = "0.1.0"
+	racingServiceName = "go.micro.srv.racing"
 )
 
 func main() {
@@ -40,7 +42,9 @@ func registerProcessMonitor(process *scrapeProcess) {
 
 	srv := micro.NewService(
 		micro.Name(serviceName),
-		micro.Version("latest"),
+		micro.Version(serviceVersion),
+		micro.RegisterTTL(time.Second*60),
+		micro.RegisterInterval(time.Second*10),
 	)
 
 	srv.Init()

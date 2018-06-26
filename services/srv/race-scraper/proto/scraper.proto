@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package scraper;
+package go.micro.srv.racescraper;
 
 service MonitorService {
     rpc GetWorkQueue(GetWorkQueueRequest) returns (GetWorkQueueResponse) {}

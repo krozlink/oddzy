@@ -57,12 +57,18 @@ func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListM
 	timing := stats.NewTiming()
 	defer timing.Send(listMeetingsTiming)
 
+	log := logWithField("function", "handler.ListMeetingsByDate")
+
 	if req.StartDate == 0 {
-		return fmt.Errorf("Start date is a mandatory field")
+		err := fmt.Errorf("Start date is a mandatory field")
+		log.Error(err)
+		return err
 	}
 
 	if req.EndDate == 0 {
-		return fmt.Errorf("End date is a mandatory field")
+		err := fmt.Errorf("End date is a mandatory field")
+		log.Error(err)
+		return err
 	}
 
 	repo := s.GetRepo()
@@ -71,6 +77,7 @@ func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListM
 	meetings, err := repo.ListMeetingsByDate(req.StartDate, req.EndDate)
 	if err != nil {
 		stats.Increment(listMeetingsFailed)
+		log.Error(err)
 		return err
 	}
 
@@ -84,13 +91,18 @@ func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListM
 func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.ListRacesByMeetingDateRequest, resp *proto.ListRacesByMeetingDateResponse) error {
 	timing := stats.NewTiming()
 	defer timing.Send(listRacesTiming)
+	log := logWithField("function", "handler.ListRacesByMeetingDate")
 
 	if req.StartDate == 0 {
-		return fmt.Errorf("Start date is a mandatory field")
+		err := fmt.Errorf("Start date is a mandatory field")
+		log.Error(err)
+		return err
 	}
 
 	if req.EndDate == 0 {
-		return fmt.Errorf("End date is a mandatory field")
+		err := fmt.Errorf("End date is a mandatory field")
+		log.Error(err)
+		return err
 	}
 
 	repo := s.GetRepo()
@@ -99,6 +111,7 @@ func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.L
 	races, err := repo.ListRacesByMeetingDate(req.StartDate, req.EndDate)
 	if err != nil {
 		stats.Increment(listRacesFailed)
+		log.Error(err)
 		return err
 	}
 

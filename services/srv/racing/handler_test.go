@@ -27,6 +27,7 @@ func getTestRacingService(repo *MockRepo) *RacingService {
 
 func TestListRacesByMeetingDate(t *testing.T) {
 	stats = getMockStats()
+	baseLog, _ = getTestLogger()
 
 	repo := &MockRepo{
 		races: []*proto.Race{

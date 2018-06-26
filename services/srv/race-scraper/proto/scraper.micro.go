@@ -2,7 +2,7 @@
 // source: proto/scraper.proto
 
 /*
-Package scraper is a generated protocol buffer package.
+Package go_micro_srv_racescraper is a generated protocol buffer package.
 
 It is generated from these files:
 	proto/scraper.proto
@@ -17,7 +17,7 @@ It has these top-level messages:
 	GetWorkHistoryRequest
 	GetWorkHistoryResponse
 */
-package scraper
+package go_micro_srv_racescraper
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
@@ -63,7 +63,7 @@ func NewMonitorService(name string, c client.Client) MonitorService {
 		c = client.NewClient()
 	}
 	if len(name) == 0 {
-		name = "scraper"
+		name = "go.micro.srv.racescraper"
 	}
 	return &monitorService{
 		c:    c,

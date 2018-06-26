@@ -49,6 +49,7 @@ func (repo *RacingRepository) NewSession() Repository {
 // ListMeetingsByDate will return all meetings between the provided start and end dates
 func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error) {
 	var results []*model.Meeting
+	log := logWithField("function", "repository.ListMeetingsByDate")
 
 	err := repo.collection(meetingCollection).Find(
 		bson.M{
@@ -60,6 +61,7 @@ func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Mee
 	).All(&results)
 
 	if err != nil {
+		log.Errorf("An error occurred finding meetings starting between %v and %v - %v", start, end, err)
 		return nil, err
 	}
 
@@ -71,7 +73,7 @@ func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Mee
 func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error) {
 	var results []*model.Race
 
-	log := logWithField("function", "ListRacesByMeetingDate")
+	log := logWithField("function", "repository.ListRacesByMeetingDate")
 
 	err := repo.collection(raceCollection).Find(
 		bson.M{
@@ -83,7 +85,7 @@ func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto
 	).All(&results)
 
 	if err != nil {
-		log.Errorf("An error occurred finding meetings starting between %v and %v - %v", start, end, err)
+		log.Errorf("An error occurred finding races with meetings starting between %v and %v - %v", start, end, err)
 		return nil, err
 	}
 
@@ -95,7 +97,7 @@ func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto
 // ListRacesByMeetingID returns all races for the provided meeting id
 func (repo *RacingRepository) ListRacesByMeetingID(meetingID string) ([]*proto.Race, error) {
 	var results []*model.Race
-	log := logWithField("function", "ListRacesByMeetingID")
+	log := logWithField("function", "repository.ListRacesByMeetingID")
 
 	err := repo.collection(raceCollection).Find(bson.M{"meeting_id": meetingID}).All(&results)
 	if err != nil {
@@ -110,7 +112,7 @@ func (repo *RacingRepository) ListRacesByMeetingID(meetingID string) ([]*proto.R
 func (repo *RacingRepository) AddMeetings(meetings []*proto.Meeting) error {
 
 	m := model.MeetingProtoToModelCollection(meetings)
-	log := logWithField("function", "AddMeetings")
+	log := logWithField("function", "repository.AddMeetings")
 
 	in := make([]interface{}, len(m))
 	for i, v := range m {
@@ -128,7 +130,7 @@ func (repo *RacingRepository) AddMeetings(meetings []*proto.Meeting) error {
 // AddRaces will add the provided races to the repository
 func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 	r := model.RaceProtoToModelCollection(races)
-	log := logWithField("function", "AddRaces")
+	log := logWithField("function", "repository.AddRaces")
 
 	in := make([]interface{}, len(r))
 	for i, v := range r {
@@ -147,7 +149,7 @@ func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 // AddSelections will add the provided selections to the repository
 func (repo *RacingRepository) AddSelections(selections []*proto.Selection) error {
 	s := model.SelectionProtoToModelCollection(selections)
-	log := logWithField("function", "AddSelections")
+	log := logWithField("function", "repository.AddSelections")
 
 	in := make([]interface{}, len(s))
 	for i, v := range s {
@@ -167,7 +169,7 @@ func (repo *RacingRepository) AddSelections(selections []*proto.Selection) error
 // GetRace retrieves a race using the provided race id
 func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
 	r := &proto.Race{}
-	log := logWithField("function", "GetRace")
+	log := logWithField("function", "repository.GetRace")
 	err := repo.collection(raceCollection).FindId(raceID).One(r)
 	if err != nil {
 		log.Errorf("An error occurred retrieving race with id %v - %v", raceID, err)
@@ -178,7 +180,7 @@ func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
 // GetMeeting retrieves a meeting using the provided meeting id
 func (repo *RacingRepository) GetMeeting(meetingID string) (*proto.Meeting, error) {
 	m := &proto.Meeting{}
-	log := logWithField("function", "GetMeeting")
+	log := logWithField("function", "repository.GetMeeting")
 	err := repo.collection(meetingCollection).FindId(meetingID).One(m)
 	if err != nil {
 		log.Errorf("An error occurred retrieving meeting with id %v - %v", meetingID, err)
@@ -189,7 +191,7 @@ func (repo *RacingRepository) GetMeeting(meetingID string) (*proto.Meeting, erro
 // ListSelectionsByRaceID retrieves all of the selections for the provided race id
 func (repo *RacingRepository) ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
 	var s []*model.Selection
-	log := logWithField("function", "ListSelectionsByRaceID")
+	log := logWithField("function", "repository.ListSelectionsByRaceID")
 	err := repo.collection(selectionCollection).Find(bson.M{"race_id": raceID}).All(&s)
 	if err != nil {
 		log.Errorf("An error occurred retrieving selections with race id %v - %v", raceID, err)
@@ -203,7 +205,7 @@ func (repo *RacingRepository) ListSelectionsByRaceID(raceID string) ([]*proto.Se
 // UpdateRace updates the race record
 func (repo *RacingRepository) UpdateRace(race *proto.RaceUpdatedMessage) error {
 	updated := model.RaceUpdateProtoToModel(race)
-	log := logWithField("function", "UpdateRace")
+	log := logWithField("function", "repository.UpdateRace")
 
 	change := mgo.Change{
 		Update: bson.M{"$set": bson.M{
@@ -228,7 +230,7 @@ func (repo *RacingRepository) UpdateRace(race *proto.RaceUpdatedMessage) error {
 // UpdateSelection updates the selection record
 func (repo *RacingRepository) UpdateSelection(s *proto.Selection) error {
 
-	log := logWithField("function", "UpdateSelection")
+	log := logWithField("function", "repository.UpdateSelection")
 	updated := model.SelectionProtoToModel(s)
 
 	var change mgo.Change

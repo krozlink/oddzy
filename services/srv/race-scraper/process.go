@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
-	micro "github.com/micro/go-micro"
+	microclient "github.com/micro/go-micro/client"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"github.com/satori/go.uuid"
 	"strconv"
@@ -165,9 +165,8 @@ func getDateRange(r [2]int) (time.Time, time.Time) {
 }
 
 func newScrapeProcess() scrapeProcess {
-	service := micro.NewService(micro.Name("racing.client"))
-	service.Init()
-	client := racing.NewRacingService("racing", service.Client())
+
+	client := racing.NewRacingService(racingServiceName, microclient.DefaultClient)
 
 	return scrapeProcess{
 		status: "INITIALISING",
@@ -299,6 +298,7 @@ func readExternal(p *scrapeProcess, start, end time.Time) (*externalRaceData, er
 
 // readInternal reads race and meeting data stored in oddzy
 func readInternal(p *scrapeProcess, start, end time.Time) ([]*racing.Meeting, []*racing.Race, error) {
+	log := logWithField("function", "readInternal")
 	// read all internal meeting data for scraping period (yesterday to 2 days from now)
 	//		ListMeetingsByDate
 	//		ListRacesByMeetingDate
@@ -309,6 +309,7 @@ func readInternal(p *scrapeProcess, start, end time.Time) ([]*racing.Meeting, []
 	}
 	mResp, err := p.racing.ListMeetingsByDate(ctx, mReq)
 	if err != nil {
+		log.Errorf("Error calling ListMeetingsByDate - %v", err)
 		return nil, nil, err
 	}
 
@@ -318,6 +319,7 @@ func readInternal(p *scrapeProcess, start, end time.Time) ([]*racing.Meeting, []
 	}
 	rResp, err := p.racing.ListRacesByMeetingDate(ctx, rReq)
 	if err != nil {
+		log.Errorf("Error calling ListRacesByMeetingDate - %v", err)
 		return nil, nil, err
 	}
 

@@ -17,6 +17,7 @@ import (
 
 func TestReadInternalReturnsData(t *testing.T) {
 
+	baseLog, _ = getTestLogger()
 	meetings := []*racing.Meeting{
 		getTestMeeting("m123", "source-123", 2),
 		getTestMeeting("m456", "source-456", 1),
