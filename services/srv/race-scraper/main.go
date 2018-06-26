@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	serviceName       = "go.micro.srv.race-scraper"
+	serviceName       = "go.micro.srv.racescraper"
 	serviceVersion    = "0.1.0"
 	racingServiceName = "go.micro.srv.racing"
 )
