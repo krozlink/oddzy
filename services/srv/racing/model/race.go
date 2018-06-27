@@ -20,6 +20,7 @@ type Race struct {
 	MeetingStart   time.Time `bson:"meeting_start"`
 	DateCreated    time.Time `bson:"date_created"`
 	LastUpdated    time.Time `bson:"last_updated"`
+	IsScraped      bool      `bson"is_scraped"`
 }
 
 // RaceProtoToModel converts a Race protobuf object used in service communication to a Race model object used in storage
@@ -37,6 +38,7 @@ func RaceProtoToModel(p *proto.Race) *Race {
 		MeetingStart:   time.Unix(p.MeetingStart, 0),
 		DateCreated:    time.Unix(p.DateCreated, 0),
 		LastUpdated:    time.Unix(p.LastUpdated, 0),
+		IsScraped:      p.IsScraped,
 	}
 }
 
@@ -67,6 +69,7 @@ func RaceModelToProto(r *Race) *proto.Race {
 		MeetingStart:   r.MeetingStart.Unix(),
 		DateCreated:    r.DateCreated.Unix(),
 		LastUpdated:    r.LastUpdated.Unix(),
+		IsScraped:      r.IsScraped,
 	}
 }
 

@@ -16,6 +16,42 @@ const (
 	competitorCollection = "competitors"
 )
 
+const (
+	repoListMeetingsByDateTiming      = "racing.service.repository.listmeetingsbydate.timing"
+	repoListMeetingsByDateSuccess     = "racing.service.repository.listmeetingsbydate.success"
+	repoListMeetingsByDateFailed      = "racing.service.repository.listmeetingsbydate.failed"
+	repoListRacesByMeetingDateTiming  = "racing.service.repository.listracesbymeetingdate.timing"
+	repoListRacesByMeetingDateSuccess = "racing.service.repository.listracesbymeetingdate.success"
+	repoListRacesByMeetingDateFailed  = "racing.service.repository.listracesbymeetingdate.failed"
+	repoListRacesByMeetingIDTiming    = "racing.service.repository.listracesbymeetingid.timing"
+	repoListRacesByMeetingIDSuccess   = "racing.service.repository.listracesbymeetingid.success"
+	repoListRacesByMeetingIDFailed    = "racing.service.repository.listracesbymeetingid.failed"
+	repoAddMeetingsTiming             = "racing.service.repository.addmeetings.timing"
+	repoAddMeetingsSuccess            = "racing.service.repository.addmeetings.success"
+	repoAddMeetingsFailed             = "racing.service.repository.addmeetings.failed"
+	repoAddRacesTiming                = "racing.service.repository.addraces.timing"
+	repoAddRacesSuccess               = "racing.service.repository.addraces.success"
+	repoAddRacesFailed                = "racing.service.repository.addraces.failed"
+	repoAddSelectionsTiming           = "racing.service.repository.addselections.timing"
+	repoAddSelectionsSuccess          = "racing.service.repository.addselections.success"
+	repoAddSelectionsFailed           = "racing.service.repository.addselections.failed"
+	repoGetRaceTiming                 = "racing.service.repository.getrace.timing"
+	repoGetRaceSuccess                = "racing.service.repository.getrace.success"
+	repoGetRaceFailed                 = "racing.service.repository.getrace.failed"
+	repoGetMeetingTiming              = "racing.service.repository.getmeeting.timing"
+	repoGetMeetingSuccess             = "racing.service.repository.getmeeting.success"
+	repoGetMeetingFailed              = "racing.service.repository.getmeeting.failed"
+	repoListSelectionsByRaceIDTiming  = "racing.service.repository.listselectionsbyraceid.timing"
+	repoListSelectionsByRaceIDSuccess = "racing.service.repository.listselectionsbyraceid.success"
+	repoListSelectionsByRaceIDFailed  = "racing.service.repository.listselectionsbyraceid.failed"
+	repoUpdateRaceTiming              = "racing.service.repository.updaterace.timing"
+	repoUpdateRaceSuccess             = "racing.service.repository.updaterace.success"
+	repoUpdateRaceFailed              = "racing.service.repository.updaterace.failed"
+	repoUpdateSelectionTiming         = "racing.service.repository.updateselection.timing"
+	repoUpdateSelectionSuccess        = "racing.service.repository.updateselection.success"
+	repoUpdateSelectionFailed         = "racing.service.repository.updateselection.failed"
+)
+
 // Repository interface used to access racing data
 type Repository interface {
 	AddMeetings(meetings []*proto.Meeting) error
@@ -51,6 +87,9 @@ func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Mee
 	var results []*model.Meeting
 	log := logWithField("function", "repository.ListMeetingsByDate")
 
+	log.Debugf("Finding meetings starting between %v and %v", start, end)
+	log.Debugf("Unix date range is %v and %v", time.Unix(start, 0), time.Unix(end, 0))
+
 	err := repo.collection(meetingCollection).Find(
 		bson.M{
 			"scheduled_start": bson.M{
@@ -64,6 +103,8 @@ func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Mee
 		log.Errorf("An error occurred finding meetings starting between %v and %v - %v", start, end, err)
 		return nil, err
 	}
+
+	log.Debugf("Meetings found - %v", len(results))
 
 	meetings := model.MeetingModelToProtoCollection(results)
 	return meetings, nil
@@ -88,6 +129,8 @@ func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto
 		log.Errorf("An error occurred finding races with meetings starting between %v and %v - %v", start, end, err)
 		return nil, err
 	}
+
+	log.Debugf("Races found - %v", len(results))
 
 	races := model.RaceModelToProtoCollection(results)
 
@@ -136,6 +179,7 @@ func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 	for i, v := range r {
 		v.LastUpdated = time.Now()
 		v.DateCreated = time.Now()
+		v.IsScraped = false
 		in[i] = v
 	}
 
@@ -213,6 +257,7 @@ func (repo *RacingRepository) UpdateRace(race *proto.RaceUpdatedMessage) error {
 			"actual_start":    updated.ActualStart,
 			"status":          updated.Status,
 			"results":         updated.Results,
+			"is_scraped":      true,
 			"last_updated":    time.Now(),
 		},
 		},

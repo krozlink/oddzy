@@ -11,24 +11,24 @@ import (
 )
 
 const (
-	listMeetingsTiming  = "racing.service.listmeetings.timing"
-	listMeetingsSuccess = "racing.service.listmeetings.success"
-	listMeetingsFailed  = "racing.service.listmeetings.failed"
-	listRacesTiming     = "racing.service.listraces.timing"
-	listRacesSuccess    = "racing.service.listraces.success"
-	listRacesFailed     = "racing.service.listraces.failed"
-	addMeetingsTiming   = "racing.service.addmeetings.timing"
-	addMeetingsSuccess  = "racing.service.addmeetings.success"
-	addMeetingsFailed   = "racing.service.addmeetings.failed"
-	addRacesTiming      = "racing.service.addraces.timing"
-	addRacesSuccess     = "racing.service.addraces.success"
-	addRacesFailed      = "racing.service.addraces.failed"
-	updateRaceTiming    = "racing.service.updaterace.timing"
-	updateRaceSuccess   = "racing.service.updaterace.success"
-	updateRaceFailed    = "racing.service.updaterace.failed"
-	getNextRaceTiming   = "racing.service.getnextrace.timing"
-	getNextRaceSuccess  = "racing.service.getnextrace.success"
-	getNextRaceFailed   = "racing.service.getnextrace.failed"
+	handlerListMeetingsTiming  = "racing.service.handler.listmeetings.timing"
+	handlerListMeetingsSuccess = "racing.service.handler.listmeetings.success"
+	handlerListMeetingsFailed  = "racing.service.handler.listmeetings.failed"
+	handlerListRacesTiming     = "racing.service.handler.listraces.timing"
+	handlerListRacesSuccess    = "racing.service.handler.listraces.success"
+	handlerListRacesFailed     = "racing.service.handler.listraces.failed"
+	handlerAddMeetingsTiming   = "racing.service.handler.addmeetings.timing"
+	handlerAddMeetingsSuccess  = "racing.service.handler.addmeetings.success"
+	handlerAddMeetingsFailed   = "racing.service.handler.addmeetings.failed"
+	handlerAddRacesTiming      = "racing.service.handler.addraces.timing"
+	handlerAddRacesSuccess     = "racing.service.handler.addraces.success"
+	handlerAddRacesFailed      = "racing.service.handler.addraces.failed"
+	handlerUpdateRaceTiming    = "racing.service.handler.updaterace.timing"
+	handlerUpdateRaceSuccess   = "racing.service.handler.updaterace.success"
+	handlerUpdateRaceFailed    = "racing.service.handler.updaterace.failed"
+	handlerGetNextRaceTiming   = "racing.service.handler.getnextrace.timing"
+	handlerGetNextRaceSuccess  = "racing.service.handler.getnextrace.success"
+	handlerGetNextRaceFailed   = "racing.service.handler.getnextrace.failed"
 )
 
 // RacingService is for interacing with racing data such as meetings and races
@@ -55,7 +55,7 @@ func (s *RacingService) GetRepo() Repository {
 // ListMeetingsByDate will return all meetings between the provided start and end dates
 func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListMeetingsByDateRequest, resp *proto.ListMeetingsByDateResponse) error {
 	timing := stats.NewTiming()
-	defer timing.Send(listMeetingsTiming)
+	defer timing.Send(handlerListMeetingsTiming)
 
 	log := logWithField("function", "handler.ListMeetingsByDate")
 
@@ -76,21 +76,21 @@ func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListM
 
 	meetings, err := repo.ListMeetingsByDate(req.StartDate, req.EndDate)
 	if err != nil {
-		stats.Increment(listMeetingsFailed)
+		stats.Increment(handlerListMeetingsFailed)
 		log.Error(err)
 		return err
 	}
 
 	resp.Meetings = meetings
 
-	stats.Increment(listMeetingsSuccess)
+	stats.Increment(handlerListMeetingsSuccess)
 	return nil
 }
 
 // ListRacesByMeetingDate will return races between the provided start and end dates
 func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.ListRacesByMeetingDateRequest, resp *proto.ListRacesByMeetingDateResponse) error {
 	timing := stats.NewTiming()
-	defer timing.Send(listRacesTiming)
+	defer timing.Send(handlerListRacesTiming)
 	log := logWithField("function", "handler.ListRacesByMeetingDate")
 
 	if req.StartDate == 0 {
@@ -110,14 +110,14 @@ func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.L
 
 	races, err := repo.ListRacesByMeetingDate(req.StartDate, req.EndDate)
 	if err != nil {
-		stats.Increment(listRacesFailed)
+		stats.Increment(handlerListRacesFailed)
 		log.Error(err)
 		return err
 	}
 
 	resp.Races = races
 
-	stats.Increment(listRacesSuccess)
+	stats.Increment(handlerListRacesSuccess)
 	return nil
 }
 
@@ -125,7 +125,7 @@ func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.L
 func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsRequest, resp *proto.AddMeetingsResponse) error {
 	log := logWithField("function", "AddMeetings")
 	timing := stats.NewTiming()
-	defer timing.Send(addMeetingsTiming)
+	defer timing.Send(handlerAddMeetingsTiming)
 
 	errors := ""
 	for i, v := range req.Meetings {
@@ -152,7 +152,7 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 
 	if errors != "" {
 		log.Errorf("Validation failed when adding %v meetings - %v", len(req.Meetings), errors)
-		stats.Increment(addMeetingsFailed)
+		stats.Increment(handlerAddMeetingsFailed)
 		return fmt.Errorf(errors)
 	}
 
@@ -162,14 +162,14 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 	err := repo.AddMeetings(req.Meetings)
 	if err != nil {
 		log.Errorf("Failed to add %v meetings - %v", len(req.Meetings), err)
-		stats.Increment(addMeetingsFailed)
+		stats.Increment(handlerAddMeetingsFailed)
 		return err
 	}
 
 	resp.Created = true
 
 	log.Debugf("%v meetings successfully added", len(req.Meetings))
-	stats.Increment(addMeetingsSuccess)
+	stats.Increment(handlerAddMeetingsSuccess)
 	return nil
 }
 
@@ -177,7 +177,7 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest, resp *proto.AddRacesResponse) error {
 	log := logWithField("function", "AddRaces")
 	timing := stats.NewTiming()
-	defer timing.Send(addRacesTiming)
+	defer timing.Send(handlerAddRacesTiming)
 
 	errors := ""
 	for i, v := range req.Races {
@@ -223,7 +223,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 
 	if errors != "" {
 		log.Errorf("Failed to validate %v races - %v", len(req.Races), errors)
-		stats.Increment(addRacesFailed)
+		stats.Increment(handlerAddRacesFailed)
 		return fmt.Errorf(errors)
 	}
 
@@ -233,12 +233,12 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 	err := repo.AddRaces(req.Races)
 	if err != nil {
 		log.Errorf("Failed to add %v races - %v", len(req.Races), errors)
-		stats.Increment(addRacesFailed)
+		stats.Increment(handlerAddRacesFailed)
 		return err
 	}
 
 	resp.Created = true
-	stats.Increment(addRacesSuccess)
+	stats.Increment(handlerAddRacesSuccess)
 
 	return nil
 }
@@ -247,12 +247,12 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceRequest, resp *proto.UpdateRaceResponse) error {
 	log := logWithField("function", "UpdateRace")
 	timing := stats.NewTiming()
-	defer timing.Send(updateRaceTiming)
+	defer timing.Send(handlerUpdateRaceTiming)
 
 	err := validateRace(req)
 	if err != nil {
 		log.Errorf("Failed to update race. Error: %v", err)
-		stats.Increment(updateRaceFailed)
+		stats.Increment(handlerUpdateRaceFailed)
 		return err
 	}
 
@@ -261,7 +261,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 
 	originalRace, err := repo.GetRace(req.RaceId)
 	if err != nil {
-		stats.Increment(updateRaceFailed)
+		stats.Increment(handlerUpdateRaceFailed)
 		return err
 	}
 
@@ -284,14 +284,14 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	if len(req.Selections) > 0 { // May not include selection data in an update
 		originalSelections, err := repo.ListSelectionsByRaceID(req.RaceId)
 		if err != nil {
-			stats.Increment(updateRaceFailed)
+			stats.Increment(handlerUpdateRaceFailed)
 			return err
 		}
 
 		if len(originalSelections) == 0 { // Add selections if included and none already exist
 			err = repo.AddSelections(req.Selections)
 			if err != nil {
-				stats.Increment(updateRaceFailed)
+				stats.Increment(handlerUpdateRaceFailed)
 				return err
 			}
 			selectionUpdated = true
@@ -302,7 +302,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 			for _, v := range req.Selections {
 				o := getSelectionByID(v.SelectionId, originalSelections)
 				if o == nil {
-					stats.Increment(updateRaceFailed)
+					stats.Increment(handlerUpdateRaceFailed)
 					return fmt.Errorf("Expected to find selection %v", v.SelectionId)
 				}
 
@@ -310,7 +310,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 					selectionUpdated = true
 					err = repo.UpdateSelection(v)
 					if err != nil {
-						stats.Increment(updateRaceFailed)
+						stats.Increment(handlerUpdateRaceFailed)
 						return err
 					}
 				}
@@ -331,7 +331,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 						}
 						err = repo.UpdateSelection(u)
 						if err != nil {
-							stats.Increment(updateRaceFailed)
+							stats.Increment(handlerUpdateRaceFailed)
 							return err
 						}
 					}
@@ -342,25 +342,25 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 
 	if raceUpdated || selectionUpdated {
 		if err := s.publishRaceUpdate(race, req.Selections); err != nil {
-			stats.Increment(updateRaceFailed)
+			stats.Increment(handlerUpdateRaceFailed)
 			return err
 		}
 	}
 
-	stats.Increment(updateRaceSuccess)
+	stats.Increment(handlerUpdateRaceSuccess)
 	return nil
 }
 
 // GetNextRace returns the next race which has not completed, or nil if all races have completed
 func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceRequest, resp *proto.GetNextRaceResponse) error {
 	timing := stats.NewTiming()
-	defer timing.Send(getNextRaceTiming)
+	defer timing.Send(handlerGetNextRaceTiming)
 
 	repo := s.GetRepo()
 
 	races, err := repo.ListRacesByMeetingID(req.MeetingId)
 	if err != nil {
-		stats.Increment(getNextRaceFailed)
+		stats.Increment(handlerGetNextRaceFailed)
 		return err
 	}
 
@@ -371,13 +371,13 @@ func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceR
 	for _, v := range races {
 		if v.ActualStart == 0 {
 			resp.Race = v
-			stats.Increment(getNextRaceSuccess)
+			stats.Increment(handlerGetNextRaceSuccess)
 			return nil
 		}
 	}
 
 	resp.Race = nil
-	stats.Increment(getNextRaceSuccess)
+	stats.Increment(handlerGetNextRaceSuccess)
 	return nil
 }
 

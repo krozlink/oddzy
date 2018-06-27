@@ -61,6 +61,7 @@ message UpdateRaceRequest {
     string status = 4;
     string results = 5;
     repeated Selection selections = 6;
+    bool is_scraped = 7;
 }
 
 message UpdateRaceResponse {
