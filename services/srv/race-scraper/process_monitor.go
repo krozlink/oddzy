@@ -91,7 +91,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 			case r := <-scrapeQueue:
 				log.Debugf("Scraping race %v", r.race.RaceId)
 				mDate := time.Unix(r.race.MeetingStart, 0).Format("2006-01-02")
-				m := p.meetingsByID[r.race.RaceId]
+				m := p.meetingsByID[r.race.MeetingId]
 				cal, err := p.scraper.ScrapeRaceCalendar(m.RaceType, mDate)
 				if err != nil {
 					log.Errorf("Unable to scrape calendar for event type '%v' on %v' - %v", m.RaceType, mDate, err)
