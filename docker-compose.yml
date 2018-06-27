@@ -67,10 +67,12 @@ services:
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
       - MICRO_SERVER_ADDRESS=:8080
+      - STATSD=statsd:9125
     depends_on:
       - consul
       - racing-service
       - logstash
+      - statsd
   consul:
     image: consul:latest
     hostname: consul

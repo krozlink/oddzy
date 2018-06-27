@@ -166,13 +166,13 @@ func getDateRange(r [2]int) (time.Time, time.Time) {
 
 func newScrapeProcess() scrapeProcess {
 
-	client := racing.NewRacingService(racingServiceName, microclient.DefaultClient)
+	r := racing.NewRacingService(racingServiceName, microclient.DefaultClient)
 
 	return scrapeProcess{
 		status: "INITIALISING",
 		done:   make(chan bool),
 		// http:      handler{},
-		racing:           client,
+		racing:           r,
 		scraper:          NewOddsScraper(&handler{}),
 		dateRange:        [2]int{-1, 2}, // scrape from 1 day ago to 2 days in the future (4 days total)
 		meetingsByID:     make(map[string]*racing.Meeting),
@@ -196,11 +196,13 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 	}
 
 	for _, m := range meetings {
+		log.Debugf("Internal meeting with source id %v and meeting id %v", m.SourceId, m.MeetingId)
 		p.meetingsByID[m.MeetingId] = m
 		p.meetingsBySource[m.SourceId] = m
 	}
 
 	for _, r := range races {
+		log.Debugf("Internal race with source id %v and race id %v", r.SourceId, r.RaceId)
 		p.racesByID[r.RaceId] = r
 		p.racesBySource[r.SourceId] = r
 	}
@@ -239,7 +241,7 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 		}
 
 		// flag existing races that have not been individually scraped yet
-		if r.LastUpdated == 0 {
+		if r.IsScraped == false {
 			unscraped = append(unscraped, r)
 		}
 
@@ -266,7 +268,7 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 		unscraped = append(unscraped, r)
 	}
 
-	return unscraped, open
+	return open, unscraped
 }
 
 // readExternal reads race and meeting data from odds.com.au
@@ -327,6 +329,8 @@ func readInternal(p *scrapeProcess, start, end time.Time) ([]*racing.Meeting, []
 }
 
 func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*externalRaceData, error) {
+	log := logWithField("function", "processRaceCalendar")
+
 	newMeetings := make([]*racing.Meeting, 0)
 	newRaces := make([]*racing.Race, 0)
 
@@ -350,6 +354,7 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 
 			mSource, err := getMeetingSourceID(firstEvent.DateWithYear, firstEvent.EventURL)
 			if err != nil {
+				log.Error(err)
 				return nil, fmt.Errorf("unable to create source id for date %v and url %v", firstEvent.DateWithYear, firstEvent.EventURL)
 			}
 
@@ -363,9 +368,11 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 			}
 
 			if val, ok := p.meetingsBySource[mSource]; ok {
+				log.Debugf("Meeting with source id %v already exists with id %v", mSource, val.MeetingId)
 				meeting.MeetingId = val.MeetingId
 				existingMeetings = append(existingMeetings, meeting)
 			} else {
+				log.Debugf("Meeting with source id %v is new", mSource)
 				meeting.MeetingId = uuid.NewV4().String()
 				newMeetings = append(newMeetings, meeting)
 			}
@@ -395,6 +402,8 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 			}
 		}
 	}
+
+	log.Debugf("Race calendar processed.   Existing Meetings: %v    Existing Races: %v    New Meetings: %v    New Races: %v", len(existingMeetings), len(existingRaces), len(newMeetings), len(newRaces))
 
 	data := &externalRaceData{
 		existingMeetings,
