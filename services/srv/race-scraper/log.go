@@ -18,7 +18,7 @@ const (
 	loggerDefault       = "logstash:5000"
 	loggerLevel         = logrus.DebugLevel
 	loggerRetryInterval = 10
-	loggerMaxAttempts   = 10
+	loggerMaxAttempts   = 20
 )
 
 func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
