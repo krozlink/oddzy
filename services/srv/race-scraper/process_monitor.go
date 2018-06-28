@@ -66,11 +66,11 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 					select {
 					case u := <-updateQueue: // a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
 						if time.Unix(u.race.ScheduledStart, 0).After(time.Now()) {
-							log.Debug("Race %v added back on upcoming queue", u.race.RaceId)
+							log.Debugf("Race %v added back on upcoming queue", u.race.RaceId)
 							upcoming = append(upcoming, u)
 							sort.Sort(byNextScrapeTime(upcoming))
 						} else {
-							log.Debug("Race %v added back on overdue queue", u.race.RaceId)
+							log.Debugf("Race %v added back on overdue queue", u.race.RaceId)
 							overdue = append(overdue, u)
 							sort.Sort(byNextScrapeTime(overdue))
 						}

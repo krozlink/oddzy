@@ -43,7 +43,8 @@ const (
 	scrapeRaceFailed  = "race-scraper.service.scraperace.failed"
 )
 
-var raceTypes = []string{"horse-racing", "harness", "greyhounds"}
+// TODO put harness and greyhounds back
+var raceTypes = []string{"horse-racing"} //, "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
 	log := logWithField("function", "run")
@@ -160,7 +161,7 @@ func getDateRange(r [2]int) (time.Time, time.Time) {
 	//r[1] - number of days ago to scrape to. e.g 2 is day after tomorrow
 	now := time.Now()
 	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Add(time.Hour * time.Duration(-24*r[0]))
-	end := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Add(time.Hour * time.Duration(24*r[1]))
+	end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location()).Add(time.Hour * time.Duration(24*r[1]))
 	return start, end
 }
 
@@ -172,9 +173,10 @@ func newScrapeProcess() scrapeProcess {
 		status: "INITIALISING",
 		done:   make(chan bool),
 		// http:      handler{},
-		racing:           r,
-		scraper:          NewOddsScraper(&handler{}),
-		dateRange:        [2]int{-1, 2}, // scrape from 1 day ago to 2 days in the future (4 days total)
+		racing:  r,
+		scraper: NewOddsScraper(&handler{}),
+		//TODO - change back to -1, 2
+		dateRange:        [2]int{0, 0}, // scrape from 1 day ago to 2 days in the future (4 days total)
 		meetingsByID:     make(map[string]*racing.Meeting),
 		meetingsBySource: make(map[string]*racing.Meeting),
 		racesByID:        make(map[string]*racing.Race),
@@ -212,7 +214,7 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 	// read all external meeting data for scraping period (yesterday to 2 days from now)
 	data, err := readExternal(p, start, end)
 	if err != nil {
-		log.Error("An error occurred reading external racing data - %v", err)
+		log.Errorf("An error occurred reading external racing data - %v", err)
 	}
 	log.Infof("External (existing) - %v meetings and %v races found", len(data.existingMeetings), len(data.existingRaces))
 	log.Infof("External (new) - %v meetings and %v races found", len(data.newMeetings), len(data.newRaces))
@@ -226,9 +228,6 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 		}
 	}
 
-	log.Infof("%v meetings have changed - updating repository", len(uMeetings))
-	updateExistingMeetings(p.racing, uMeetings)
-
 	unscraped := make([]*racing.Race, 0)
 	open := make([]*racing.Race, 0)
 
@@ -241,7 +240,7 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 		}
 
 		// flag existing races that have not been individually scraped yet
-		if r.IsScraped == false {
+		if current.IsScraped == false {
 			unscraped = append(unscraped, r)
 		}
 
@@ -256,10 +255,9 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 		}
 	}
 
-	log.Infof("%v races have changed - updating repository", len(uRaces))
+	updateExistingMeetings(p.racing, uMeetings)
 	updateExistingRaces(p.racing, uRaces)
 
-	// Create new meetings and races
 	createNewMeetings(p.racing, data.newMeetings)
 	createNewRaces(p.racing, data.newRaces)
 
@@ -507,6 +505,14 @@ func raceChanged(from, to *racing.Race) bool {
 
 func createNewMeetings(client racing.RacingService, meetings []*racing.Meeting) {
 	log := logWithField("function", "createNewMeetings")
+
+	if len(meetings) > 0 {
+		log.Infof("%v new meetings have been added - updating repository", len(meetings))
+	} else {
+		log.Infof("No meetings have been added")
+		return
+	}
+
 	ctx := context.Background()
 	req := &racing.AddMeetingsRequest{
 		Meetings: meetings,
@@ -518,6 +524,14 @@ func createNewMeetings(client racing.RacingService, meetings []*racing.Meeting) 
 
 func createNewRaces(client racing.RacingService, races []*racing.Race) {
 	log := logWithField("function", "createNewRaces")
+
+	if len(races) > 0 {
+		log.Infof("%v new races have been added - updating repository", len(races))
+	} else {
+		log.Infof("No races have been added")
+		return
+	}
+
 	ctx := context.Background()
 	req := &racing.AddRacesRequest{
 		Races: races,
@@ -528,12 +542,29 @@ func createNewRaces(client racing.RacingService, races []*racing.Race) {
 	}
 }
 
-func updateExistingMeetings(client racing.RacingService, meetings []*racing.Meeting) error {
-	return nil // TODO: do meetings get updated??
+func updateExistingMeetings(client racing.RacingService, meetings []*racing.Meeting) {
+	log := logWithField("function", "updateExistingMeetings")
+
+	if len(meetings) > 0 {
+		log.Infof("%v meetings have changed - updating repository", len(meetings))
+		log.Warn("updating existing races not currently required or supported")
+	} else {
+		log.Infof("No meetings have changed")
+		return
+	}
+
+	return // TODO: do meetings get updated??
 }
 
 func updateExistingRaces(client racing.RacingService, races []*racing.Race) {
 	log := logWithField("function", "updateExistingRaces")
+
+	if len(races) > 0 {
+		log.Infof("%v races have changed - updating repository", len(races))
+	} else {
+		log.Infof("No races have changed")
+		return
+	}
 
 	ctx := context.Background()
 	var wg sync.WaitGroup
