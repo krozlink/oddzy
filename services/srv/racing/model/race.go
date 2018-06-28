@@ -20,7 +20,7 @@ type Race struct {
 	MeetingStart   time.Time `bson:"meeting_start"`
 	DateCreated    time.Time `bson:"date_created"`
 	LastUpdated    time.Time `bson:"last_updated"`
-	IsScraped      bool      `bson"is_scraped"`
+	IsScraped      bool      `bson:"is_scraped"`
 }
 
 // RaceProtoToModel converts a Race protobuf object used in service communication to a Race model object used in storage
