@@ -1,0 +1,82 @@
+version: "3"
+services:
+  consul:
+    image: consul:latest
+    hostname: consul
+    ports:
+     - "8500:8500"
+     - "8600:8600/udp"
+    environment:
+      - CONSUL_UI_BETA=true
+    command: consul agent -dev -client 0.0.0.0
+    networks:
+      - oddzy
+  micro-web:
+    image: microhq/micro
+    command: web --address=0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    environment:
+      - MICRO_REGISTRY=consul
+      - MICRO_REGISTRY_ADDRESS=consul
+    links:
+      - consul
+    networks:
+      - oddzy
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.0
+    ports: 
+      - 9200:9200
+      - 9300:9300
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - oddzy
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.3.0
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    links:
+      - elasticsearch
+    networks:
+      - oddzy
+  logstash:
+    image: docker.elastic.co/logstash/logstash:6.3.0
+    command: -f /etc/logstash/conf.d/
+    ports:
+      - 5000:5000
+    volumes:
+      - ./deploy/logstash/logstash.conf:/etc/logstash/conf.d/logstash.conf
+    links:
+      - elasticsearch
+    networks:
+      - oddzy
+  prometheus:
+    image: prom/prometheus
+    volumes: 
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    networks:
+      - oddzy
+  graphana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    links:
+      - prometheus
+    networks:
+      - oddzy
+  statsd:
+    image: prom/statsd-exporter
+    networks:
+      - oddzy
+volumes:
+  elasticsearch:
+networks:
+  oddzy:
+      external: true
