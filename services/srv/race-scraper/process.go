@@ -368,6 +368,8 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 			if val, ok := p.meetingsBySource[mSource]; ok {
 				log.Debugf("Meeting with source id %v already exists with id %v", mSource, val.MeetingId)
 				meeting.MeetingId = val.MeetingId
+				meeting.DateCreated = val.DateCreated
+				meeting.LastUpdated = val.LastUpdated
 				existingMeetings = append(existingMeetings, meeting)
 			} else {
 				log.Debugf("Meeting with source id %v is new", mSource)
@@ -390,6 +392,8 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 
 				if val, ok := p.racesBySource[rSource]; ok {
 					race.RaceId = val.RaceId
+					race.DateCreated = val.DateCreated
+					race.LastUpdated = val.LastUpdated
 					existingRaces = append(existingRaces, race)
 				} else {
 					race.RaceId = uuid.NewV4().String()

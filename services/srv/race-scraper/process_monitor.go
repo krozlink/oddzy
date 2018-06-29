@@ -34,7 +34,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 	log.Infof("Overdue races: %v", len(overdue))
 	log.Infof("Upcoming races: %v", len(upcoming))
 
-	scrapeQueue := make(chan *scheduledScrape, 1000)
+	scrapeQueue := make(chan *scheduledScrape)
 	updateQueue := make(chan *scheduledScrape, 10)
 
 	stopScrape := make(chan bool)
@@ -42,20 +42,15 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 
 	go func() {
 		for { // loop through all open races
-			race := popNext(overdue, upcoming) // get the next race to scrape (will remove it from the list)
+			race := popNext(&overdue, &upcoming) // get the next race to scrape (will remove it from the list)
 		processmessages:
 			for {
 				if race == nil { // no race found so wait for a previous race to be updated or wait for a while and check again for a new race
 					log.Debugf("No races found - waiting")
 					select {
 					case u := <-updateQueue: // a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
-						if time.Unix(u.race.ScheduledStart, 0).After(time.Now()) {
-							upcoming = append(upcoming, u)
-							sort.Sort(byNextScrapeTime(upcoming))
-						} else {
-							overdue = append(overdue, u)
-							sort.Sort(byNextScrapeTime(overdue))
-						}
+						requeueRace(u, &overdue, &upcoming)
+						break processmessages
 					case <-time.After(time.Minute * 5):
 						break processmessages
 					case <-stopScrape:
@@ -64,24 +59,21 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 				} else { // race found so wait until time to scrape and then queue it
 					wait := time.Until(race.next).Seconds()
 					if wait > 0 {
-						log.Debugf("Race %v found. Last scrape: %v  Next scrape: %v  - waiting %.2f seconds", race.race.RaceId, race.race.LastUpdated, race.next, wait)
+						log.Debugf("Race %v (%v) found. Last scrape: %v  Next scrape: %v  - waiting %.2f seconds", race.race.RaceId, race.race.Name, formatTime(time.Unix(race.race.LastUpdated, 0)), formatTime(race.next), wait)
 					} else {
 						wait = 0
-						log.Debugf("Race %v found. Last scrape: %v  Next scrape: %v  - scraping immediately", race.race.RaceId, race.race.LastUpdated, race.next)
+						log.Debugf("Race %v (%v) found. Last scrape: %v  Next scrape: %v  - scraping immediately", race.race.RaceId, race.race.Name, formatTime(time.Unix(race.race.LastUpdated, 0)), formatTime(race.next))
 					}
 
 					select {
-					case u := <-updateQueue: // a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
-						if time.Unix(u.race.ScheduledStart, 0).After(time.Now()) {
-							log.Debugf("Race %v added back on upcoming queue", u.race.RaceId)
-							upcoming = append(upcoming, u)
-							sort.Sort(byNextScrapeTime(upcoming))
-						} else {
-							log.Debugf("Race %v added back on overdue queue", u.race.RaceId)
-							overdue = append(overdue, u)
-							sort.Sort(byNextScrapeTime(overdue))
-						}
+					// a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
+					// once added re-retrieve a race off the queue as the newly updated race may still be the next one to be scraped again
+					case u := <-updateQueue:
+						requeueRace(u, &overdue, &upcoming)
+						requeueRace(race, &overdue, &upcoming)
+						break processmessages
 					case <-time.After(time.Second * time.Duration(wait)): // wait until it is time then queue it for scraping
+						log.Debugf("Race %v about to be scraped", race.race.RaceId)
 						scrapeQueue <- race
 						break processmessages
 					case <-stopScrape:
@@ -106,26 +98,24 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 					continue
 				}
 				updated := getRaceFromCalendar(cal, r.race)
+				updated.LastUpdated = time.Now().Unix()
 				p.racesByID[r.race.RaceId] = updated
 				p.racesBySource[r.race.SourceId] = updated
 
-				// if race has changed then call UpdateRaceUpdateRace
-				if raceChanged(r.race, updated) {
-					log.Debugf("Race %v has been updated - saving changes", r.race.RaceId)
-					req := &racing.UpdateRaceRequest{
-						ActualStart:    updated.ActualStart,
-						RaceId:         updated.RaceId,
-						Results:        updated.Results,
-						ScheduledStart: updated.ScheduledStart,
-						Status:         updated.Status,
-					}
-					_, err := p.racing.UpdateRace(context.Background(), req)
-					if err != nil {
-						log.Errorf("Unable to update race id '%v' - %v", r.race.RaceId, err)
-						log.Errorf("Skipping race %v", r.race.RaceId)
-						continue
-					}
+				req := &racing.UpdateRaceRequest{
+					ActualStart:    updated.ActualStart,
+					RaceId:         updated.RaceId,
+					Results:        updated.Results,
+					ScheduledStart: updated.ScheduledStart,
+					Status:         updated.Status,
 				}
+				_, err = p.racing.UpdateRace(context.Background(), req)
+				if err != nil {
+					log.Errorf("Unable to update race id '%v' - %v", r.race.RaceId, err)
+					log.Errorf("Skipping race %v", r.race.RaceId)
+					continue
+				}
+
 				// if status is still open put back on either overdue or upcoming depending on start time
 				if updated.Status == "OPEN" {
 					log.Debugf("Race %v has has been scraped but has not ended - pushing back on the update queue", r.race.RaceId)
@@ -135,7 +125,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 					}
 					updateQueue <- s
 				} else {
-					log.Debugf("Race %v has has been scraped and is now %v - removing from update queue", r.race.RaceId, r.race.Status)
+					log.Debugf("Race %v has has been scraped and is now %v - removing from update queue", r.race.RaceId, updated.Status)
 				}
 			case <-stopUpdate:
 				return
@@ -196,13 +186,16 @@ func nextScrapeTime(r *racing.Race) time.Time {
 	// upcoming races are scraped:
 	//		every 6 hours > 12 hours before
 	//		every 1 hour <= 12 hours before
-	//		every 10 minutes < 1 hour before
+	//		every 10 minutes < 1 hour before (or on scheduled start time, whichever comes first)
 	if time.Until(scheduled).Hours() > 12 {
 		next = lastUpdate.Add(time.Hour * 6)
 	} else if time.Until(scheduled).Hours() > 1 {
 		next = lastUpdate.Add(time.Hour * 1)
 	} else {
 		next = lastUpdate.Add(time.Minute * 10)
+		if scheduled.Before(next) {
+			next = scheduled
+		}
 	}
 
 	return max(next, now)
@@ -215,26 +208,40 @@ func max(t1, t2 time.Time) time.Time {
 	return t2
 }
 
-func popNext(overdue, upcoming []*scheduledScrape) *scheduledScrape {
-	if len(overdue) == 0 && len(upcoming) == 0 {
+func requeueRace(r *scheduledScrape, overdue, upcoming *[]*scheduledScrape) {
+	log := logWithField("function", "requeueRace")
+
+	if time.Unix(r.race.ScheduledStart, 0).After(time.Now()) {
+		log.Debugf("Race %v added back on upcoming queue for scraping on %v", r.race.RaceId, formatTime(r.next))
+		*upcoming = append(*upcoming, r)
+		sort.Sort(byNextScrapeTime(*upcoming))
+	} else {
+		log.Debugf("Race %v added back on overdue queue for scraping on %v", r.race.RaceId, formatTime(r.next))
+		*overdue = append(*overdue, r)
+		sort.Sort(byNextScrapeTime(*overdue))
+	}
+}
+
+func popNext(overdue, upcoming *[]*scheduledScrape) *scheduledScrape {
+	if len(*overdue) == 0 && len(*upcoming) == 0 {
 		return nil
-	} else if len(overdue) == 0 {
-		first := upcoming[0]
-		upcoming = upcoming[1:]
+	} else if len(*overdue) == 0 {
+		first := (*upcoming)[0]
+		*upcoming = (*upcoming)[1:]
 		return first
-	} else if len(upcoming) == 0 {
-		first := overdue[0]
-		overdue = overdue[1:]
+	} else if len(*upcoming) == 0 {
+		first := (*overdue)[0]
+		*overdue = (*overdue)[1:]
 		return first
 	}
 
-	if upcoming[0].next.Before(overdue[0].next) {
-		first := upcoming[0]
-		upcoming = upcoming[1:]
+	if (*upcoming)[0].next.Before((*overdue)[0].next) {
+		first := (*upcoming)[0]
+		*upcoming = (*upcoming)[1:]
 		return first
 	}
-	first := overdue[0]
-	overdue = overdue[1:]
+	first := (*overdue)[0]
+	*overdue = (*overdue)[1:]
 	return first
 }
 
@@ -288,4 +295,8 @@ func (s byNextScrapeTime) Swap(i, j int) {
 
 func (s byNextScrapeTime) Less(i, j int) bool {
 	return s[i].next.Before(s[j].next)
+}
+
+func formatTime(t time.Time) string {
+	return t.Local().Format("02-01-2006 15:04:05")
 }
