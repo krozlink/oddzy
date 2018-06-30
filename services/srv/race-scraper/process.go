@@ -169,12 +169,14 @@ func newScrapeProcess() scrapeProcess {
 
 	r := racing.NewRacingService(racingServiceName, microclient.DefaultClient)
 
+	h := newHTTPHandler()
+
 	return scrapeProcess{
 		status: "INITIALISING",
 		done:   make(chan bool),
 		// http:      handler{},
 		racing:  r,
-		scraper: NewOddsScraper(&handler{}),
+		scraper: NewOddsScraper(h),
 		//TODO - change back to -1, 2
 		dateRange:        [2]int{0, 0}, // scrape from 1 day ago to 2 days in the future (4 days total)
 		meetingsByID:     make(map[string]*racing.Meeting),

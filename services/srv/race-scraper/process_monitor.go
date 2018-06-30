@@ -16,10 +16,6 @@ type scheduledScrape struct {
 	next time.Time
 }
 
-const (
-	overdueInterval = 30
-)
-
 func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-chan bool) {
 	log := logWithField("function", "monitorOpenRaces")
 	p.status = "RACE_MONITORING"
@@ -179,7 +175,7 @@ func nextScrapeTime(r *racing.Race) time.Time {
 
 	var next time.Time
 	if scheduled.Before(now) { // if overdue race
-		next = lastUpdate.Add(time.Second * overdueInterval)
+		next = lastUpdate.Add(time.Second * 60)
 		return max(next, now) // scrape max of (last update + overdue interval) and now
 	}
 
