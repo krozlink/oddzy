@@ -57,6 +57,7 @@ loop:
 		start, end := getDateRange(p.dateRange)
 
 		log.Infof("Reading races between %v and %v", start.Format("02 Jan 2006"), end.Format("02 Jan 2006"))
+		log.Infof("Scraping for the day will run for %v", tomorrow)
 		open, missing := readRaces(p, start, end)
 
 		log.Infof("There are %v races requiring scraping", len(missing))

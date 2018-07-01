@@ -86,7 +86,10 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 			case r := <-scrapeQueue:
 				log.Debugf("Scraping race %v", r.race.RaceId)
 				mDate := time.Unix(r.race.MeetingStart, 0).Format("2006-01-02")
-				m := p.meetingsByID[r.race.MeetingId]
+				m, ok := p.meetingsByID[r.race.MeetingId]
+				if !ok {
+					log.Fatalf("race %v (%v) does not have an existing meeting (%v)", r.race.RaceId, r.race.Name, r.race.MeetingId)
+				}
 				cal, err := p.scraper.ScrapeRaceCalendar(m.RaceType, mDate)
 				if err != nil {
 					log.Errorf("Unable to scrape calendar for event type '%v' on %v' - %v", m.RaceType, mDate, err)
@@ -113,8 +116,8 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 				}
 
 				// if status is still open put back on either overdue or upcoming depending on start time
-				if updated.Status == "OPEN" {
-					log.Debugf("Race %v has has been scraped but has not ended - pushing back on the update queue", r.race.RaceId)
+				if updated.Status == "OPEN" || updated.Status == "INTERIM" {
+					log.Debugf("Race %v has has been scraped but has not ended (status %v) - pushing back on the update queue", r.race.RaceId, updated.Status)
 					s := &scheduledScrape{
 						race: updated,
 						next: nextScrapeTime(updated),
