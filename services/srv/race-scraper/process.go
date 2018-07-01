@@ -56,7 +56,7 @@ loop:
 		tomorrow := today.Add(time.Hour * 24).Sub(time.Now())
 		start, end := getDateRange(p.dateRange)
 
-		log.Infof("Reading races between %v and %v", start.Format("02 Jan 2006"), end.Format("02 Jan 2006"))
+		log.Infof("Reading races between %v and %v", start.Format("02 Jan 2006 15:04:05"), end.Format("02 Jan 2006 15:04:05"))
 		log.Infof("Scraping for the day will run for %v", tomorrow)
 		open, missing := readRaces(p, start, end)
 
