@@ -53,11 +53,12 @@ loop:
 		// calculate date range
 		now := time.Now()
 		today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		tomorrow := today.Add(time.Hour * 24).Sub(time.Now())
+		tomorrow := today.Add(time.Hour * 24)
+		until := tomorrow.Sub(now)
 		start, end := getDateRange(p.dateRange)
 
 		log.Infof("Reading races between %v and %v", start.Format("02 Jan 2006 15:04:05"), end.Format("02 Jan 2006 15:04:05"))
-		log.Infof("Scraping for the day will run for %v", tomorrow)
+		log.Infof("Scraping for the day will run for %v", until)
 		open, missing := readRaces(p, start, end)
 
 		log.Infof("There are %v races requiring scraping", len(missing))
@@ -68,7 +69,7 @@ loop:
 		case <-done: // something else has killed off the monitor
 			log.Info("Scraper flagged as done")
 			break loop
-		case <-time.After(tomorrow): // channel starting following day
+		case <-time.After(until): // channel starting following day
 			log.Info("Day complete. Exit current scraping loop")
 			stop <- true // kill the current scrape session
 			<-done       // wait for it to exit
