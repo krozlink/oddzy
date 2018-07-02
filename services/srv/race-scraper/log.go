@@ -23,7 +23,7 @@ const (
 
 func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, resp interface{}) error {
-		baseLog.Printf("Server request: %v", req.Method())
+		baseLog.Debugf("Server request: %v", req.Method())
 		return fn(ctx, req, resp)
 	}
 }
