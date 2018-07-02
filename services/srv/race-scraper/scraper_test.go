@@ -60,6 +60,20 @@ func TestScrapeRaceCalendar(t *testing.T) {
 	}
 }
 
+func TestScrapeRaceCalendarHandlesUnexpectedRaceResults(t *testing.T) {
+
+	decoded, err := ioutil.ReadFile("./testdata/race_calendar_unexpected_results.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	original := &RaceCalendar{}
+	err = json.Unmarshal(decoded, original)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestScraperUsesThrottling(t *testing.T) {
 	encoded, _ := ioutil.ReadFile("./testdata/race_calendar_encoded.json")
 

@@ -80,6 +80,7 @@ func TestReadInternalReturnsData(t *testing.T) {
 }
 
 func TestReadExternalReturnsData(t *testing.T) {
+	baseLog, _ = getTestLogger()
 	c := &mockRacingClient{}
 	s := &mockScraper{}
 

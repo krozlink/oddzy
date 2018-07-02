@@ -1,6 +1,9 @@
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strconv"
+)
 
 // RaceCalendar is the format odds.com.au uses to represent a race calendar
 type RaceCalendar struct {
@@ -34,6 +37,67 @@ type Event struct {
 	Resulted     int32  `json:"resulted"`
 	Results      string `json:"results"`
 	EventURL     string `json:"eventUrl"`
+}
+
+// UnmarshalJSON unmarshalls the event response from odds.com.au to an Event object.
+// There are some inconsistencies with the data returned and this manual unmarshal is required
+// to handle them. e.g "results" can be null, a string or an int
+func (e *Event) UnmarshalJSON(b []byte) error {
+	var values map[string]interface{}
+	err := json.Unmarshal(b, &values)
+
+	if err != nil {
+		return err
+	}
+
+	for item, value := range values {
+		switch item {
+		case "eventId":
+			e.EventID = int32(value.(float64))
+		case "dateWithYear":
+			e.DateWithYear = value.(string)
+		case "eventNumber":
+			e.EventNumber = int32(value.(float64))
+		case "eventUrl":
+			e.EventURL = value.(string)
+		case "results":
+			if value == nil {
+				e.Results = ""
+			} else if r, ok := value.(string); ok {
+				e.Results = r
+			} else if r, ok := value.(int); ok {
+				e.Results = strconv.Itoa(r)
+			}
+		case "eventName":
+			if value == nil {
+				e.EventName = ""
+			} else {
+				e.EventName = value.(string)
+			}
+		case "isImminent":
+			if value == nil {
+				e.IsImminent = false
+			} else {
+				e.IsImminent = value.(bool)
+			}
+		case "startTime":
+			e.StartTime = int64(value.(float64))
+		case "resulted":
+			if value == nil {
+				e.Resulted = 0
+			} else {
+				e.Resulted = int32(value.(float64))
+			}
+		case "isAbandoned":
+			if value == nil {
+				e.IsAbandoned = 0
+			} else {
+				e.IsAbandoned = int32(value.(float64))
+			}
+		}
+	}
+
+	return nil
 }
 
 // RaceCard is the format odds.com.au uses to represent a race card
