@@ -253,7 +253,15 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 		}
 	}
 
+	for _, m := range data.newMeetings {
+		p.meetingsByID[m.MeetingId] = m
+		p.meetingsBySource[m.SourceId] = m
+	}
+
 	for _, r := range data.newRaces {
+		p.racesByID[r.RaceId] = r
+		p.racesBySource[r.SourceId] = r
+
 		if r.Status == "OPEN" {
 			open = append(open, r)
 		}
