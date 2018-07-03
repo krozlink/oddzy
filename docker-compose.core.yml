@@ -13,9 +13,9 @@ services:
       - oddzy
   micro-web:
     image: microhq/micro
-    command: web --address=0.0.0.0:8080
+    command: web --address=0.0.0.0:8090
     ports:
-      - "8080:8080"
+      - "8090:8090"
     environment:
       - MICRO_REGISTRY=consul
       - MICRO_REGISTRY_ADDRESS=consul
