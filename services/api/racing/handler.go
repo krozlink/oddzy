@@ -10,6 +10,10 @@ import (
 	"github.com/micro/go-micro/errors"
 )
 
+var (
+	headerCorrelationID = "X-Correlation-Id"
+)
+
 // Racing is the handler for the racing api
 type Racing struct{}
 
@@ -29,9 +33,15 @@ func (r *Racing) Racecard(ctx context.Context, req *api.Request, rsp *api.Respon
 	// call racing.ListSelections
 
 	b, _ := json.Marshal(map[string]string{
-		"message": "racecard request received",
+		"message": "request received",
 	})
 
+	rsp.Header = make(map[string]*api.Pair)
+	corr := &api.Pair{
+		Key:    headerCorrelationID,
+		Values: []string{ctx.Value(correlationID).(string)},
+	}
+	rsp.Header[headerCorrelationID] = corr
 	rsp.StatusCode = 200
 	rsp.Body = string(b)
 
@@ -55,6 +65,12 @@ func (r *Racing) Schedule(ctx context.Context, req *api.Request, rsp *api.Respon
 		"message": "schedule request received",
 	})
 
+	rsp.Header = make(map[string]*api.Pair)
+	corr := &api.Pair{
+		Key:    headerCorrelationID,
+		Values: []string{ctx.Value(correlationID).(string)},
+	}
+	rsp.Header[headerCorrelationID] = corr
 	rsp.StatusCode = 200
 	rsp.Body = string(b)
 
