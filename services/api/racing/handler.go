@@ -10,9 +10,10 @@ import (
 	"github.com/micro/go-micro/errors"
 )
 
+// Racing is the handler for the racing api
 type Racing struct{}
 
-// RaceCard  is called by the API as /racing/racecard
+// Racecard is called by the API as /racing/racecard
 func (r *Racing) Racecard(ctx context.Context, req *api.Request, rsp *api.Response) error {
 	log.Log("Received handler.RaceCard request")
 
