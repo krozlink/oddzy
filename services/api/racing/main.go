@@ -12,7 +12,9 @@ func main() {
 		micro.Version("latest"),
 	)
 
-	service.Init()
+	service.Init(
+		micro.WrapHandler(RacingWrapper(service)),
+	)
 
 	proto.RegisterRacingHandler(service.Server(), new(handler))
 

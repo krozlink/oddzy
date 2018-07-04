@@ -45,15 +45,15 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/micro/cli"
-  packages = ["."]
-  revision = "3d2263bb092286dde294a31049c92665f8373820"
+  name = "github.com/krozlink/oddzy"
+  packages = ["services/srv/racing/proto"]
+  revision = "b72df4b9f92bbc4568256aa165b2e1f5ec7c2ecc"
 
 [[projects]]
   branch = "master"
-  name = "github.com/micro/examples"
-  packages = ["template/srv/proto/example"]
-  revision = "2c8f2f0dc1321b2b38a8996c18763f19d51303d9"
+  name = "github.com/micro/cli"
+  packages = ["."]
+  revision = "3d2263bb092286dde294a31049c92665f8373820"
 
 [[projects]]
   name = "github.com/micro/go-api"
@@ -180,6 +180,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d11b35e51cd4e4146c9c87852e9f2a38f5b4bbdb1bd7f8b550b4cd33d3dd0b51"
+  inputs-digest = "1c6440a137b3d5b2d426afeeb1846f01c23c9ea6e4f99b723b26122576a513a2"
   solver-name = "gps-cdcl"
   solver-version = 1

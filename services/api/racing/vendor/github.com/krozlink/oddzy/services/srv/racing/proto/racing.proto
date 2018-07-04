@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package go.micro.srv.racing;
+
+service RacingService {
+    rpc ListMeetingsByDate (ListMeetingsByDateRequest) returns (ListMeetingsByDateResponse) {}
+    rpc ListRacesByMeetingDate (ListRacesByMeetingDateRequest) returns (ListRacesByMeetingDateResponse) {}
+    rpc AddMeetings (AddMeetingsRequest) returns (AddMeetingsResponse);
+    rpc AddRaces (AddRacesRequest) returns (AddRacesResponse);
+    rpc UpdateRace (UpdateRaceRequest) returns (UpdateRaceResponse);
+    rpc GetNextRace (GetNextRaceRequest) returns (GetNextRaceResponse);
+    rpc GetRace (GetRaceRequest) returns (GetRaceResponse);
+}
+
+message RaceUpdatedMessage {
+    string race_id = 1;
+    int64 scheduled_start = 2;
+    int64 actual_start = 3;
+    string status = 4;
+    string results = 5;
+    repeated Selection selections = 6;
+}
+
+message ListMeetingsByDateRequest {
+    int64 start_date = 1; 
+    int64 end_date = 2; 
+}
+
+message ListMeetingsByDateResponse {
+    repeated Meeting meetings = 1;
+}
+
+message ListRacesByMeetingDateRequest {
+    int64 start_date = 1; 
+    int64 end_date = 2; 
+}
+
+message ListRacesByMeetingDateResponse {
+    repeated Race races = 1;
+}
+
+message AddRacesRequest {
+    repeated Race races = 1;
+}
+
+message AddRacesResponse {
+    bool created = 1;
+}
+
+message AddMeetingsRequest {
+    repeated Meeting meetings = 1;
+}
+
+message AddMeetingsResponse {
+    bool created = 1;
+}
+
+message UpdateRaceRequest {
+    string race_id = 1;
+    int64 scheduled_start = 2;
+    int64 actual_start = 3;
+    string status = 4;
+    string results = 5;
+    repeated Selection selections = 6;
+}
+
+message UpdateRaceResponse {
+    bool updated = 1;
+}
+
+message GetNextRaceRequest {
+    string meeting_id = 1;
+}
+
+message GetNextRaceResponse {
+    Race race = 1;
+}
+
+message GetRaceRequest {
+    string race_id = 1;
+}
+
+message GetRaceResponse {
+    Race race = 1;
+}
+
+message Meeting {
+    string meeting_id = 1;
+    string source_id = 2;
+    string name = 3;
+    string country = 4;
+    string race_type = 5;
+    int64 scheduled_start = 6;
+    repeated string race_ids = 7;
+    int64 date_created = 8;
+    int64 last_updated = 9;    
+}
+
+message Competitor {
+    string competitor_id = 1;
+    string source_id = 2;
+    string name = 3;
+    string date_of_birth = 4;
+    string country = 5;
+    string trainer = 6;
+    string gender = 7;
+    string image_url = 8;
+}
+
+message Selection {
+    string selection_id = 1;
+    string source_id = 2;
+    string competitor_id = 3;
+    string source_competitor_id = 4;
+    string race_id = 5;
+    string name = 6;
+    string jockey = 7;
+    int32 number = 8;
+    int32 barrier_number = 9;
+    bool scratched = 10;
+    int64 date_created = 11;
+    int64 last_updated = 12;
+}
+
+message Race {
+    string race_id = 1;
+    string source_id = 2;
+    string meeting_id = 3;
+    int32 number = 4;
+    string name = 5;
+    int64 scheduled_start = 6;
+    int64 actual_start = 7;
+    string status = 8;
+    string results = 9;
+    int64 meeting_start = 10;
+    bool is_scraped = 11;
+    int64 date_created = 12;
+    int64 last_updated = 13;
+}
