@@ -18,7 +18,7 @@ type scheduledScrape struct {
 }
 
 func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-chan bool) {
-	log := logWithField("function", "monitorOpenRaces")
+	log := logWithContext(p.ctx, "monitorOpenRaces")
 	p.status = "RACE_MONITORING"
 
 	log.Info("Starting race monitoring")
@@ -46,7 +46,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 					log.Debugf("No races found - waiting")
 					select {
 					case u := <-updateQueue: // a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
-						requeueRace(u, &overdue, &upcoming)
+						requeueRace(p.ctx, u, &overdue, &upcoming)
 						break processmessages
 					case <-time.After(time.Minute * 5):
 						break processmessages
@@ -66,8 +66,8 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 					// a race has been scraped and updated - put it back on either upcoming or overdue depending on start time
 					// once added re-retrieve a race off the queue as the newly updated race may still be the next one to be scraped again
 					case u := <-updateQueue:
-						requeueRace(u, &overdue, &upcoming)
-						requeueRace(race, &overdue, &upcoming)
+						requeueRace(p.ctx, u, &overdue, &upcoming)
+						requeueRace(p.ctx, race, &overdue, &upcoming)
 						break processmessages
 					case <-time.After(time.Second * time.Duration(wait)): // wait until it is time then queue it for scraping
 						log.Debugf("Race %v about to be scraped", race.race.RaceId)
@@ -91,7 +91,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 				if !ok {
 					log.Fatalf("race %v (%v) does not have an existing meeting (%v)", r.race.RaceId, r.race.Name, r.race.MeetingId)
 				}
-				cal, err := p.scraper.ScrapeRaceSchedule(m.RaceType, mDate)
+				cal, err := p.scraper.ScrapeRaceSchedule(p.ctx, m.RaceType, mDate)
 				if err != nil {
 					log.Errorf("Unable to scrape schedule for event type '%v' on %v' - %v\nSkipping race", m.RaceType, mDate, err)
 					continue
@@ -211,8 +211,8 @@ func max(t1, t2 time.Time) time.Time {
 	return t2
 }
 
-func requeueRace(r *scheduledScrape, overdue, upcoming *[]*scheduledScrape) {
-	log := logWithField("function", "requeueRace")
+func requeueRace(ctx context.Context, r *scheduledScrape, overdue, upcoming *[]*scheduledScrape) {
+	log := logWithContext(ctx, "requeueRace")
 
 	if time.Unix(r.race.ScheduledStart, 0).After(time.Now()) {
 		log.Debugf("Race %v added back on upcoming queue for scraping on %v", r.race.RaceId, formatTime(r.next))

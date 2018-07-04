@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"reflect"
@@ -43,8 +44,9 @@ func TestScrapeRaceSchedule(t *testing.T) {
 		response: encoded,
 	}
 
+	ctx := context.Background()
 	scraper := getMockScraper(h)
-	cal, err := scraper.ScrapeRaceSchedule("test", "test")
+	cal, err := scraper.ScrapeRaceSchedule(ctx, "test", "test")
 	if err != nil {
 		t.Error(err)
 	}
@@ -88,10 +90,12 @@ func TestScraperUsesThrottling(t *testing.T) {
 		mux:         sync.Mutex{},
 	}
 
+	ctx := context.Background()
+
 	// expect the difference to be at least 500ms as this is the throttled time delay
 	start := time.Now()
-	scraper.ScrapeRaceSchedule("test", "test")
-	scraper.ScrapeRaceSchedule("test", "test")
+	scraper.ScrapeRaceSchedule(ctx, "test", "test")
+	scraper.ScrapeRaceSchedule(ctx, "test", "test")
 	end := time.Now()
 
 	diffMS := int(end.Sub(start).Nanoseconds() / 1000000)

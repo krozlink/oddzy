@@ -23,7 +23,7 @@ const (
 
 func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, resp interface{}) error {
-		baseLog.Debugf("Server request: %v", req.Method())
+		baseLog.Printf("Server request: %v", req.Method())
 		return fn(ctx, req, resp)
 	}
 }
@@ -75,12 +75,17 @@ func getLog() *logrus.Logger {
 	return l
 }
 
-func logWithField(key string, value interface{}) *logrus.Entry {
-	return baseLog.WithField(key, value)
+func logWithContext(ctx context.Context, functionName string) *logrus.Entry {
+	log := baseLog.WithField("function", functionName)
+	if id, ok := ctx.Value("correlation-id").(string); ok {
+		log = log.WithField("correlation-id", id)
+	}
+
+	return log
 }
 
-func addField(l *logrus.Entry, key string, value interface{}) *logrus.Entry {
-	return l.WithField(key, value)
+func logFunction(functionName string) *logrus.Entry {
+	return baseLog.WithField("function", functionName)
 }
 
 type logField struct {

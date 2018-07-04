@@ -114,6 +114,7 @@ func TestReadExternalReturnsData(t *testing.T) {
 func TestUpdateExistingRacesHandlesMultipleRaces(t *testing.T) {
 	baseLog, _ = getTestLogger()
 	c := &mockRacingClient{}
+	ctx := context.Background()
 
 	// create 3 races and update them
 	m := getTestMeeting("m123", "meeting-123", 3)
@@ -123,7 +124,7 @@ func TestUpdateExistingRacesHandlesMultipleRaces(t *testing.T) {
 		getTestRace(m, 1003, 3),
 	}
 
-	updateExistingRaces(c, races)
+	updateExistingRaces(ctx, c, races)
 
 	// confirm update race was called 3 times
 	assert.Equal(t, len(races), c.updateRaceCount)
@@ -322,6 +323,7 @@ func getTestProcess(c *mockRacingClient, s *mockScraper) *scrapeProcess {
 		done:             make(chan bool),
 		racing:           c,
 		scraper:          s,
+		ctx:              context.Background(),
 		meetingsByID:     make(map[string]*racing.Meeting),
 		meetingsBySource: make(map[string]*racing.Meeting),
 		racesByID:        make(map[string]*racing.Race),
@@ -460,13 +462,13 @@ type mockScraper struct {
 	schedules []*RaceSchedule
 }
 
-func (c *mockScraper) ScrapeRaceCard(sourceID string) (*RaceCard, error) {
+func (c *mockScraper) ScrapeRaceCard(ctx context.Context, sourceID string) (*RaceCard, error) {
 	card := c.cards[c.scrapeRaceCardCount]
 	c.scrapeRaceCardCount++
 	return card, nil
 }
 
-func (c *mockScraper) ScrapeRaceSchedule(eventType string, date string) (*RaceSchedule, error) {
+func (c *mockScraper) ScrapeRaceSchedule(ctx context.Context, eventType string, date string) (*RaceSchedule, error) {
 	cal := c.schedules[c.scrapeScheduleCount]
 	c.scrapeScheduleCount++
 	return cal, nil

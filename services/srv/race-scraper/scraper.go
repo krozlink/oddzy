@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -18,8 +19,8 @@ const (
 
 // Scraper reads racing data from a source
 type Scraper interface {
-	ScrapeRaceCard(sourceID string) (*RaceCard, error)
-	ScrapeRaceSchedule(eventType string, date string) (*RaceSchedule, error)
+	ScrapeRaceCard(ctx context.Context, sourceID string) (*RaceCard, error)
+	ScrapeRaceSchedule(ctx context.Context, eventType string, date string) (*RaceSchedule, error)
 }
 
 // OddscomauScraper scrapes racing data from odds.com.au
@@ -45,10 +46,10 @@ func NewOddsScraper(h requestHandler) *OddscomauScraper {
 }
 
 // ScrapeRaceSchedule reads and parses a racing schedule for the provided event type and date
-func (o *OddscomauScraper) ScrapeRaceSchedule(eventType string, date string) (*RaceSchedule, error) {
+func (o *OddscomauScraper) ScrapeRaceSchedule(ctx context.Context, eventType string, date string) (*RaceSchedule, error) {
 	throttle(o)
 
-	logContext := logWithField("function", "ScrapeRaceSchedule").WithField("parameters", fmt.Sprintf("Event Type: %v, Date: %v", eventType, date))
+	logContext := logWithContext(ctx, "ScrapeRaceSchedule").WithField("parameters", fmt.Sprintf("Event Type: %v, Date: %v", eventType, date))
 
 	url := fmt.Sprintf(meetingDataURL, eventType, date)
 	logContext.Debugf("Requesting race schedule from %v", url)
@@ -99,10 +100,10 @@ func (o *OddscomauScraper) ScrapeRaceSchedule(eventType string, date string) (*R
 }
 
 // ScrapeRaceCard reads and parses a race card for the provided odds.com.au event id
-func (o *OddscomauScraper) ScrapeRaceCard(eventID string) (*RaceCard, error) {
+func (o *OddscomauScraper) ScrapeRaceCard(ctx context.Context, eventID string) (*RaceCard, error) {
 	throttle(o)
 
-	logContext := logWithField("method", "ScrapeRaceCard")
+	logContext := logWithContext(ctx, "ScrapeRaceCard")
 
 	url := fmt.Sprintf(raceDataURL, eventID)
 	encodedResponse, err := o.http.getResponse(url)
