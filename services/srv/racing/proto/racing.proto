@@ -9,6 +9,7 @@ service RacingService {
     rpc AddRaces (AddRacesRequest) returns (AddRacesResponse);
     rpc UpdateRace (UpdateRaceRequest) returns (UpdateRaceResponse);
     rpc GetNextRace (GetNextRaceRequest) returns (GetNextRaceResponse);
+    rpc GetRace (GetRaceRequest) returns (GetRaceResponse);
 }
 
 message RaceUpdatedMessage {
@@ -72,6 +73,14 @@ message GetNextRaceRequest {
 }
 
 message GetNextRaceResponse {
+    Race race = 1;
+}
+
+message GetRaceRequest {
+    string race_id = 1;
+}
+
+message GetRaceResponse {
     Race race = 1;
 }
 

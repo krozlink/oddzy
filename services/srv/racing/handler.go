@@ -29,6 +29,9 @@ const (
 	handlerGetNextRaceTiming   = "racing.service.handler.getnextrace.timing"
 	handlerGetNextRaceSuccess  = "racing.service.handler.getnextrace.success"
 	handlerGetNextRaceFailed   = "racing.service.handler.getnextrace.failed"
+	handlerGetRaceTiming       = "racing.service.handler.getrace.timing"
+	handlerGetRaceSuccess      = "racing.service.handler.getrace.success"
+	handlerGetRaceFailed       = "racing.service.handler.getrace.failed"
 )
 
 // RacingService is for interacing with racing data such as meetings and races
@@ -377,6 +380,24 @@ func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceR
 	}
 
 	resp.Race = nil
+	stats.Increment(handlerGetNextRaceSuccess)
+	return nil
+}
+
+// GetRace returns the race with the requested race id
+func (s *RacingService) GetRace(ctx context.Context, req *proto.GetRaceRequest, resp *proto.GetRaceResponse) error {
+	timing := stats.NewTiming()
+	defer timing.Send(handlerGetRaceTiming)
+
+	repo := s.GetRepo()
+
+	race, err := repo.GetRace(req.RaceId)
+	if err != nil {
+		stats.Increment(handlerGetRaceFailed)
+		return err
+	}
+
+	resp.Race = race
 	stats.Increment(handlerGetNextRaceSuccess)
 	return nil
 }
