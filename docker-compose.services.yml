@@ -44,6 +44,7 @@ services:
   #     - MICRO_SERVER_ADDRESS=:8080
   #     - STATSD=statsd:9125
   #   depends_on:
+  #     - racing-service
   #   networks:
   #     - oddzy
   # racing-service:

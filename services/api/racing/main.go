@@ -16,7 +16,7 @@ func main() {
 		micro.WrapHandler(RacingWrapper(service)),
 	)
 
-	proto.RegisterRacingHandler(service.Server(), new(handler))
+	proto.RegisterRacingHandler(service.Server(), new(Racing))
 
 	if err := service.Run(); err != nil {
 		log.Fatal(err)

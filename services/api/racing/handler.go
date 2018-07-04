@@ -10,10 +10,10 @@ import (
 	"github.com/micro/go-micro/errors"
 )
 
-type handler struct{}
+type Racing struct{}
 
 // RaceCard  is called by the API as /racing/racecard
-func (r *handler) Racecard(ctx context.Context, req *api.Request, rsp *api.Response) error {
+func (r *Racing) Racecard(ctx context.Context, req *api.Request, rsp *api.Response) error {
 	log.Log("Received handler.RaceCard request")
 
 	id, ok := req.Get["race_id"]
@@ -36,7 +36,7 @@ func (r *handler) Racecard(ctx context.Context, req *api.Request, rsp *api.Respo
 }
 
 // Schedule is called by the API as /racing/schedule
-func (r *handler) Schedule(ctx context.Context, req *api.Request, rsp *api.Response) error {
+func (r *Racing) Schedule(ctx context.Context, req *api.Request, rsp *api.Response) error {
 	log.Log("Received handler.Schedule request")
 
 	date, ok := req.Get["date"]
