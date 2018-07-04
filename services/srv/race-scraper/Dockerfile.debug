@@ -9,6 +9,6 @@ RUN go get github.com/derekparker/delve/cmd/dlv
 COPY . /opt/go/src/github.com/krozlink/oddzy/services/srv/race-scraper
 WORKDIR /opt/go/src/github.com/krozlink/oddzy/services/srv/race-scraper
 
-RUN GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build -o race-scraper-service
+RUN GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build -o race-scraper
 
 CMD [ "./race-scraper" ]

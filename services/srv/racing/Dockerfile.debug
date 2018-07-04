@@ -11,4 +11,4 @@ WORKDIR /opt/go/src/github.com/krozlink/oddzy/services/srv/racing
 
 RUN GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build -o racing-service
 
-CMD [ "./racing" ]
+CMD [ "./racing-service" ]
