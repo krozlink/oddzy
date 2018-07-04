@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	model "github.com/krozlink/oddzy/services/srv/racing/model"
 	proto "github.com/krozlink/oddzy/services/srv/racing/proto"
 	"gopkg.in/mgo.v2"
@@ -59,19 +60,19 @@ const (
 
 // Repository interface used to access racing data
 type Repository interface {
-	AddMeetings(meetings []*proto.Meeting) error
-	GetMeeting(meetingID string) (*proto.Meeting, error)
-	ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error)
-	ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error)
+	AddMeetings(ctx context.Context, meetings []*proto.Meeting) error
+	GetMeeting(ctx context.Context, meetingID string) (*proto.Meeting, error)
+	ListMeetingsByDate(ctx context.Context, start, end int64) ([]*proto.Meeting, error)
+	ListRacesByMeetingDate(ctx context.Context, start, end int64) ([]*proto.Race, error)
 
-	AddRaces(races []*proto.Race) error
-	GetRace(raceID string) (*proto.Race, error)
-	ListRacesByMeetingID(meetingID string) ([]*proto.Race, error)
-	UpdateRace(race *proto.RaceUpdatedMessage) error
+	AddRaces(ctx context.Context, races []*proto.Race) error
+	GetRace(ctx context.Context, raceID string) (*proto.Race, error)
+	ListRacesByMeetingID(ctx context.Context, meetingID string) ([]*proto.Race, error)
+	UpdateRace(ctx context.Context, race *proto.RaceUpdatedMessage) error
 
-	AddSelections(races []*proto.Selection) error
-	ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error)
-	UpdateSelection(selection *proto.Selection) error
+	AddSelections(ctx context.Context, races []*proto.Selection) error
+	ListSelectionsByRaceID(ctx context.Context, raceID string) ([]*proto.Selection, error)
+	UpdateSelection(ctx context.Context, selection *proto.Selection) error
 
 	Close()
 	NewSession() Repository
@@ -91,11 +92,11 @@ func (repo *RacingRepository) NewSession() Repository {
 }
 
 // ListMeetingsByDate will return all meetings between the provided start and end dates
-func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error) {
+func (repo *RacingRepository) ListMeetingsByDate(ctx context.Context, start, end int64) ([]*proto.Meeting, error) {
 	t := stats.NewTiming()
 	defer t.Send(repoListMeetingsByDateTiming)
 	var results []*model.Meeting
-	log := logWithField("function", "repository.ListMeetingsByDate")
+	log := logWithContext(ctx, "repository.ListMeetingsByDate")
 
 	log.Debugf("Finding meetings starting between %v and %v", start, end)
 	log.Debugf("Unix date range is %v and %v", time.Unix(start, 0), time.Unix(end, 0))
@@ -123,12 +124,12 @@ func (repo *RacingRepository) ListMeetingsByDate(start, end int64) ([]*proto.Mee
 }
 
 // ListRacesByMeetingDate will return all races between the provided start and end dates
-func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error) {
+func (repo *RacingRepository) ListRacesByMeetingDate(ctx context.Context, start, end int64) ([]*proto.Race, error) {
 	t := stats.NewTiming()
 	defer t.Send(repoListRacesByMeetingDateTiming)
 	var results []*model.Race
 
-	log := logWithField("function", "repository.ListRacesByMeetingDate")
+	log := logWithContext(ctx, "repository.ListRacesByMeetingDate")
 
 	err := repo.collection(raceCollection).Find(
 		bson.M{
@@ -154,11 +155,11 @@ func (repo *RacingRepository) ListRacesByMeetingDate(start, end int64) ([]*proto
 }
 
 // ListRacesByMeetingID returns all races for the provided meeting id
-func (repo *RacingRepository) ListRacesByMeetingID(meetingID string) ([]*proto.Race, error) {
+func (repo *RacingRepository) ListRacesByMeetingID(ctx context.Context, meetingID string) ([]*proto.Race, error) {
 	t := stats.NewTiming()
 	defer t.Send(repoListRacesByMeetingIDTiming)
 	var results []*model.Race
-	log := logWithField("function", "repository.ListRacesByMeetingID")
+	log := logWithContext(ctx, "repository.ListRacesByMeetingID")
 
 	err := repo.collection(raceCollection).Find(bson.M{"meeting_id": meetingID}).All(&results)
 	if err != nil {
@@ -172,11 +173,11 @@ func (repo *RacingRepository) ListRacesByMeetingID(meetingID string) ([]*proto.R
 }
 
 // AddMeetings will add the provided meetings to the repository
-func (repo *RacingRepository) AddMeetings(meetings []*proto.Meeting) error {
+func (repo *RacingRepository) AddMeetings(ctx context.Context, meetings []*proto.Meeting) error {
 	t := stats.NewTiming()
 	defer t.Send(repoAddMeetingsTiming)
 	m := model.MeetingProtoToModelCollection(meetings)
-	log := logWithField("function", "repository.AddMeetings")
+	log := logWithContext(ctx, "repository.AddMeetings")
 
 	in := make([]interface{}, len(m))
 	for i, v := range m {
@@ -196,11 +197,11 @@ func (repo *RacingRepository) AddMeetings(meetings []*proto.Meeting) error {
 }
 
 // AddRaces will add the provided races to the repository
-func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
+func (repo *RacingRepository) AddRaces(ctx context.Context, races []*proto.Race) error {
 	t := stats.NewTiming()
 	defer t.Send(repoAddRacesTiming)
 	r := model.RaceProtoToModelCollection(races)
-	log := logWithField("function", "repository.AddRaces")
+	log := logWithContext(ctx, "repository.AddRaces")
 
 	in := make([]interface{}, len(r))
 	for i, v := range r {
@@ -222,11 +223,11 @@ func (repo *RacingRepository) AddRaces(races []*proto.Race) error {
 }
 
 // AddSelections will add the provided selections to the repository
-func (repo *RacingRepository) AddSelections(selections []*proto.Selection) error {
+func (repo *RacingRepository) AddSelections(ctx context.Context, selections []*proto.Selection) error {
 	t := stats.NewTiming()
 	defer t.Send(repoAddSelectionsTiming)
 	s := model.SelectionProtoToModelCollection(selections)
-	log := logWithField("function", "repository.AddSelections")
+	log := logWithContext(ctx, "repository.AddSelections")
 
 	in := make([]interface{}, len(s))
 	for i, v := range s {
@@ -247,11 +248,11 @@ func (repo *RacingRepository) AddSelections(selections []*proto.Selection) error
 }
 
 // GetRace retrieves a race using the provided race id
-func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
+func (repo *RacingRepository) GetRace(ctx context.Context, raceID string) (*proto.Race, error) {
 	t := stats.NewTiming()
 	defer t.Send(repoGetRaceTiming)
 	r := &proto.Race{}
-	log := logWithField("function", "repository.GetRace")
+	log := logWithContext(ctx, "repository.GetRace")
 	err := repo.collection(raceCollection).FindId(raceID).One(r)
 	if err != nil {
 		stats.Increment(repoGetRaceFailed)
@@ -264,11 +265,11 @@ func (repo *RacingRepository) GetRace(raceID string) (*proto.Race, error) {
 }
 
 // GetMeeting retrieves a meeting using the provided meeting id
-func (repo *RacingRepository) GetMeeting(meetingID string) (*proto.Meeting, error) {
+func (repo *RacingRepository) GetMeeting(ctx context.Context, meetingID string) (*proto.Meeting, error) {
 	t := stats.NewTiming()
 	defer t.Send(repoGetMeetingTiming)
 	m := &proto.Meeting{}
-	log := logWithField("function", "repository.GetMeeting")
+	log := logWithContext(ctx, "repository.GetMeeting")
 	err := repo.collection(meetingCollection).FindId(meetingID).One(m)
 	if err != nil {
 		stats.Increment(repoGetMeetingFailed)
@@ -281,11 +282,11 @@ func (repo *RacingRepository) GetMeeting(meetingID string) (*proto.Meeting, erro
 }
 
 // ListSelectionsByRaceID retrieves all of the selections for the provided race id
-func (repo *RacingRepository) ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
+func (repo *RacingRepository) ListSelectionsByRaceID(ctx context.Context, raceID string) ([]*proto.Selection, error) {
 	t := stats.NewTiming()
 	defer t.Send(repoListSelectionsByRaceIDTiming)
 	var s []*model.Selection
-	log := logWithField("function", "repository.ListSelectionsByRaceID")
+	log := logWithContext(ctx, "repository.ListSelectionsByRaceID")
 	err := repo.collection(selectionCollection).Find(bson.M{"race_id": raceID}).All(&s)
 	if err != nil {
 		stats.Increment(repoListSelectionsByRaceIDFailed)
@@ -299,11 +300,11 @@ func (repo *RacingRepository) ListSelectionsByRaceID(raceID string) ([]*proto.Se
 }
 
 // UpdateRace updates the race record
-func (repo *RacingRepository) UpdateRace(race *proto.RaceUpdatedMessage) error {
+func (repo *RacingRepository) UpdateRace(ctx context.Context, race *proto.RaceUpdatedMessage) error {
 	t := stats.NewTiming()
 	defer t.Send(repoUpdateRaceTiming)
 	updated := model.RaceUpdateProtoToModel(race)
-	log := logWithField("function", "repository.UpdateRace")
+	log := logWithContext(ctx, "repository.UpdateRace")
 
 	change := mgo.Change{
 		Update: bson.M{"$set": bson.M{
@@ -330,10 +331,10 @@ func (repo *RacingRepository) UpdateRace(race *proto.RaceUpdatedMessage) error {
 }
 
 // UpdateSelection updates the selection record
-func (repo *RacingRepository) UpdateSelection(s *proto.Selection) error {
+func (repo *RacingRepository) UpdateSelection(ctx context.Context, s *proto.Selection) error {
 	t := stats.NewTiming()
 	defer t.Send(repoUpdateSelectionTiming)
-	log := logWithField("function", "repository.UpdateSelection")
+	log := logWithContext(ctx, "repository.UpdateSelection")
 	updated := model.SelectionProtoToModel(s)
 
 	var change mgo.Change

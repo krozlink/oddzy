@@ -63,7 +63,7 @@ func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListM
 	timing := stats.NewTiming()
 	defer timing.Send(handlerListMeetingsTiming)
 
-	log := logWithField("function", "handler.ListMeetingsByDate")
+	log := logWithContext(ctx, "handler.ListMeetingsByDate")
 
 	if req.StartDate == 0 {
 		err := fmt.Errorf("Start date is a mandatory field")
@@ -80,7 +80,7 @@ func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListM
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	meetings, err := repo.ListMeetingsByDate(req.StartDate, req.EndDate)
+	meetings, err := repo.ListMeetingsByDate(ctx, req.StartDate, req.EndDate)
 	if err != nil {
 		stats.Increment(handlerListMeetingsFailed)
 		log.Error(err)
@@ -97,7 +97,7 @@ func (s *RacingService) ListMeetingsByDate(ctx context.Context, req *proto.ListM
 func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.ListRacesByMeetingDateRequest, resp *proto.ListRacesByMeetingDateResponse) error {
 	timing := stats.NewTiming()
 	defer timing.Send(handlerListRacesTiming)
-	log := logWithField("function", "handler.ListRacesByMeetingDate")
+	log := logWithContext(ctx, "handler.ListRacesByMeetingDate")
 
 	if req.StartDate == 0 {
 		err := fmt.Errorf("Start date is a mandatory field")
@@ -114,7 +114,7 @@ func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.L
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	races, err := repo.ListRacesByMeetingDate(req.StartDate, req.EndDate)
+	races, err := repo.ListRacesByMeetingDate(ctx, req.StartDate, req.EndDate)
 	if err != nil {
 		stats.Increment(handlerListRacesFailed)
 		log.Error(err)
@@ -131,7 +131,7 @@ func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.L
 func (s *RacingService) ListSelections(ctx context.Context, req *proto.ListSelectionsRequest, resp *proto.ListSelectionsResponse) error {
 	timing := stats.NewTiming()
 	defer timing.Send(handlerListSelectionsTiming)
-	log := logWithField("function", "handler.ListSelections")
+	log := logWithContext(ctx, "handler.ListSelections")
 
 	if req.RaceId == "" {
 		err := fmt.Errorf("Race ID is a mandatory field")
@@ -142,7 +142,7 @@ func (s *RacingService) ListSelections(ctx context.Context, req *proto.ListSelec
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	selections, err := repo.ListSelectionsByRaceID(req.RaceId)
+	selections, err := repo.ListSelectionsByRaceID(ctx, req.RaceId)
 	if err != nil {
 		stats.Increment(handlerListSelectionsFailed)
 		log.Error(err)
@@ -157,7 +157,7 @@ func (s *RacingService) ListSelections(ctx context.Context, req *proto.ListSelec
 
 // AddMeetings will save the provided meetings
 func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsRequest, resp *proto.AddMeetingsResponse) error {
-	log := logWithField("function", "AddMeetings")
+	log := logWithContext(ctx, "handler.AddMeetings")
 	timing := stats.NewTiming()
 	defer timing.Send(handlerAddMeetingsTiming)
 
@@ -193,7 +193,7 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	err := repo.AddMeetings(req.Meetings)
+	err := repo.AddMeetings(ctx, req.Meetings)
 	if err != nil {
 		log.Errorf("Failed to add %v meetings - %v", len(req.Meetings), err)
 		stats.Increment(handlerAddMeetingsFailed)
@@ -209,7 +209,7 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 
 // AddRaces will save the provided races
 func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest, resp *proto.AddRacesResponse) error {
-	log := logWithField("function", "AddRaces")
+	log := logWithContext(ctx, "handler.AddRaces")
 	timing := stats.NewTiming()
 	defer timing.Send(handlerAddRacesTiming)
 
@@ -264,7 +264,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	err := repo.AddRaces(req.Races)
+	err := repo.AddRaces(ctx, req.Races)
 	if err != nil {
 		log.Errorf("Failed to add %v races - %v", len(req.Races), errors)
 		stats.Increment(handlerAddRacesFailed)
@@ -279,7 +279,7 @@ func (s *RacingService) AddRaces(ctx context.Context, req *proto.AddRacesRequest
 
 // UpdateRace will update the race and (optionally) selection data for the provided race
 func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceRequest, resp *proto.UpdateRaceResponse) error {
-	log := logWithField("function", "UpdateRace")
+	log := logWithContext(ctx, "handler.UpdateRace")
 	timing := stats.NewTiming()
 	defer timing.Send(handlerUpdateRaceTiming)
 
@@ -293,7 +293,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	repo := s.GetRepo()
 	defer repo.Close()
 
-	originalRace, err := repo.GetRace(req.RaceId)
+	originalRace, err := repo.GetRace(ctx, req.RaceId)
 	if err != nil {
 		stats.Increment(handlerUpdateRaceFailed)
 		return err
@@ -310,20 +310,20 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 
 	raceUpdated := hasRaceChanged(originalRace, race)
 	if raceUpdated {
-		err = repo.UpdateRace(race)
+		err = repo.UpdateRace(ctx, race)
 	}
 
 	selectionUpdated := false
 
 	if len(req.Selections) > 0 { // May not include selection data in an update
-		originalSelections, err := repo.ListSelectionsByRaceID(req.RaceId)
+		originalSelections, err := repo.ListSelectionsByRaceID(ctx, req.RaceId)
 		if err != nil {
 			stats.Increment(handlerUpdateRaceFailed)
 			return err
 		}
 
 		if len(originalSelections) == 0 { // Add selections if included and none already exist
-			err = repo.AddSelections(req.Selections)
+			err = repo.AddSelections(ctx, req.Selections)
 			if err != nil {
 				stats.Increment(handlerUpdateRaceFailed)
 				return err
@@ -342,7 +342,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 
 				if hasSelectionChanged(o, v) {
 					selectionUpdated = true
-					err = repo.UpdateSelection(v)
+					err = repo.UpdateSelection(ctx, v)
 					if err != nil {
 						stats.Increment(handlerUpdateRaceFailed)
 						return err
@@ -363,7 +363,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 							SelectionId: v.SelectionId,
 							Scratched:   true,
 						}
-						err = repo.UpdateSelection(u)
+						err = repo.UpdateSelection(ctx, u)
 						if err != nil {
 							stats.Increment(handlerUpdateRaceFailed)
 							return err
@@ -375,7 +375,7 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	}
 
 	if raceUpdated || selectionUpdated {
-		if err := s.publishRaceUpdate(race, req.Selections); err != nil {
+		if err := s.publishRaceUpdate(ctx, race, req.Selections); err != nil {
 			stats.Increment(handlerUpdateRaceFailed)
 			return err
 		}
@@ -392,7 +392,7 @@ func (s *RacingService) GetNextRace(ctx context.Context, req *proto.GetNextRaceR
 
 	repo := s.GetRepo()
 
-	races, err := repo.ListRacesByMeetingID(req.MeetingId)
+	races, err := repo.ListRacesByMeetingID(ctx, req.MeetingId)
 	if err != nil {
 		stats.Increment(handlerGetNextRaceFailed)
 		return err
@@ -422,7 +422,7 @@ func (s *RacingService) GetRace(ctx context.Context, req *proto.GetRaceRequest, 
 
 	repo := s.GetRepo()
 
-	race, err := repo.GetRace(req.RaceId)
+	race, err := repo.GetRace(ctx, req.RaceId)
 	if err != nil {
 		stats.Increment(handlerGetRaceFailed)
 		return err
@@ -433,8 +433,8 @@ func (s *RacingService) GetRace(ctx context.Context, req *proto.GetRaceRequest, 
 	return nil
 }
 
-func (s *RacingService) publishRaceUpdate(update *proto.RaceUpdatedMessage, selections []*proto.Selection) error {
-	log := logWithField("function", "publishRaceUpdate")
+func (s *RacingService) publishRaceUpdate(ctx context.Context, update *proto.RaceUpdatedMessage, selections []*proto.Selection) error {
+	log := logWithContext(ctx, "handler.publishRaceUpdate")
 	b, err := json.Marshal(update)
 	if err != nil {
 		return err

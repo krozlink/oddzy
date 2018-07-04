@@ -1760,7 +1760,7 @@ func getTestRace(meetingID string, number int32, actualStart int64) *proto.Race 
 	}
 }
 
-func (repo *MockRepo) ListMeetingsByDate(start, end int64) ([]*proto.Meeting, error) {
+func (repo *MockRepo) ListMeetingsByDate(ctx context.Context, start, end int64) ([]*proto.Meeting, error) {
 
 	var result []*proto.Meeting
 	for _, v := range repo.meetings {
@@ -1772,7 +1772,7 @@ func (repo *MockRepo) ListMeetingsByDate(start, end int64) ([]*proto.Meeting, er
 	return result, nil
 }
 
-func (repo *MockRepo) ListRacesByMeetingDate(start, end int64) ([]*proto.Race, error) {
+func (repo *MockRepo) ListRacesByMeetingDate(ctx context.Context, start, end int64) ([]*proto.Race, error) {
 
 	var result []*proto.Race
 	for _, v := range repo.races {
@@ -1784,23 +1784,23 @@ func (repo *MockRepo) ListRacesByMeetingDate(start, end int64) ([]*proto.Race, e
 	return result, nil
 }
 
-func (repo *MockRepo) AddMeetings(meetings []*proto.Meeting) error {
+func (repo *MockRepo) AddMeetings(ctx context.Context, meetings []*proto.Meeting) error {
 
 	repo.meetings = append(repo.meetings, meetings...)
 	return nil
 }
 
-func (repo *MockRepo) AddRaces(races []*proto.Race) error {
+func (repo *MockRepo) AddRaces(ctx context.Context, races []*proto.Race) error {
 	repo.races = append(repo.races, races...)
 	return nil
 }
 
-func (repo *MockRepo) AddSelections(selections []*proto.Selection) error {
+func (repo *MockRepo) AddSelections(ctx context.Context, selections []*proto.Selection) error {
 	repo.selections = append(repo.selections, selections...)
 	return nil
 }
 
-func (repo *MockRepo) UpdateRace(race *proto.RaceUpdatedMessage) error {
+func (repo *MockRepo) UpdateRace(ctx context.Context, race *proto.RaceUpdatedMessage) error {
 
 	var existing *proto.Race
 	for _, v := range repo.races {
@@ -1822,7 +1822,7 @@ func (repo *MockRepo) UpdateRace(race *proto.RaceUpdatedMessage) error {
 	return nil
 }
 
-func (repo *MockRepo) GetRace(raceID string) (*proto.Race, error) {
+func (repo *MockRepo) GetRace(ctx context.Context, raceID string) (*proto.Race, error) {
 
 	for _, v := range repo.races {
 		if v.RaceId == raceID {
@@ -1833,7 +1833,7 @@ func (repo *MockRepo) GetRace(raceID string) (*proto.Race, error) {
 	return nil, fmt.Errorf("No race found with id %v", raceID)
 }
 
-func (repo *MockRepo) GetMeeting(meetingID string) (*proto.Meeting, error) {
+func (repo *MockRepo) GetMeeting(ctx context.Context, meetingID string) (*proto.Meeting, error) {
 
 	for _, v := range repo.meetings {
 		if v.MeetingId == meetingID {
@@ -1844,7 +1844,7 @@ func (repo *MockRepo) GetMeeting(meetingID string) (*proto.Meeting, error) {
 	return nil, fmt.Errorf("No meeting found with id %v", meetingID)
 }
 
-func (repo *MockRepo) ListRacesByMeetingID(meetingID string) ([]*proto.Race, error) {
+func (repo *MockRepo) ListRacesByMeetingID(ctx context.Context, meetingID string) ([]*proto.Race, error) {
 	var result []*proto.Race
 	for _, v := range repo.races {
 		if v.MeetingId == meetingID {
@@ -1855,7 +1855,7 @@ func (repo *MockRepo) ListRacesByMeetingID(meetingID string) ([]*proto.Race, err
 	return result, nil
 }
 
-func (repo *MockRepo) ListSelectionsByRaceID(raceID string) ([]*proto.Selection, error) {
+func (repo *MockRepo) ListSelectionsByRaceID(ctx context.Context, raceID string) ([]*proto.Selection, error) {
 
 	var result []*proto.Selection
 	for _, v := range repo.selections {
@@ -1867,7 +1867,7 @@ func (repo *MockRepo) ListSelectionsByRaceID(raceID string) ([]*proto.Selection,
 	return result, nil
 }
 
-func (repo *MockRepo) UpdateSelection(selection *proto.Selection) error {
+func (repo *MockRepo) UpdateSelection(ctx context.Context, selection *proto.Selection) error {
 
 	var existing *proto.Selection
 	for _, v := range repo.selections {
