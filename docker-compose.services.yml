@@ -1,5 +1,16 @@
 version: "3"
 services:
+  racing-api:
+    build:
+      context: ./services/api/racing
+    environment:
+      - MICRO_REGISTRY_ADDRESS=consul:8500
+      - MICRO_SERVER_ADDRESS=:8080
+      - STATSD=statsd:9125
+    depends_on:
+      - racing-service
+    networks:
+      - oddzy
   racing-service:
     build: 
       context: ./services/srv/racing
@@ -15,6 +26,26 @@ services:
       - nats
     networks:
       - oddzy
+  # racing-api:
+  #   build: 
+  #     context: ./services/api/racing
+  #     dockerfile: Dockerfile.debug
+  #   security_opt:
+  #     - seccomp:unconfined
+  #   entrypoint: dlv debug github.com/krozlink/oddzy/services/api/racing -l 0.0.0.0:2302 --headless=true --log=true -- server
+  #   volumes:
+  #     - ./services/api/racing:/opt/go/src/github.com/krozlink/oddzy/services/api/racing
+  #   ports:
+  #     - "2302:2302"
+  #   expose:
+  #     - "2302"
+  #   environment:
+  #     - MICRO_REGISTRY_ADDRESS=consul:8500
+  #     - MICRO_SERVER_ADDRESS=:8080
+  #     - STATSD=statsd:9125
+  #   depends_on:
+  #   networks:
+  #     - oddzy
   # racing-service:
   #   build: 
   #     context: ./services/srv/racing

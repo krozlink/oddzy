@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package go.micro.api.racing;
+
+import "github.com/micro/go-api/proto/api.proto";
+
+service Racing {
+	rpc Racecard(go.api.Request) returns (go.api.Response) {} 
+	rpc Schedule(go.api.Request) returns (go.api.Response) {}
+}
