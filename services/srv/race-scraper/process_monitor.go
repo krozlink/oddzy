@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"sort"
@@ -92,11 +93,14 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 				}
 				cal, err := p.scraper.ScrapeRaceSchedule(m.RaceType, mDate)
 				if err != nil {
-					log.Errorf("Unable to scrape schedule for event type '%v' on %v' - %v", m.RaceType, mDate, err)
-					log.Errorf("Skipping race %v", r.race.RaceId)
+					log.Errorf("Unable to scrape schedule for event type '%v' on %v' - %v\nSkipping race", m.RaceType, mDate, err)
 					continue
 				}
-				updated := getRaceFromSchedule(cal, r.race)
+				updated, err := getRaceFromSchedule(cal, r.race)
+				if err != nil {
+					log.Errorf("Unable to scrape race %v (source id: %v) as is it could not be found in the race schedule\nSkipping race", r.race.RaceId, r.race.SourceId)
+					continue
+				}
 				updated.LastUpdated = time.Now().Unix()
 				p.racesByID[r.race.RaceId] = updated
 				p.racesBySource[r.race.SourceId] = updated
@@ -257,10 +261,9 @@ func pushRace(overdue, upcoming []*scheduledScrape, r *scheduledScrape) ([]*sche
 	return overdue, upcoming
 }
 
-func getRaceFromSchedule(cal *RaceSchedule, original *racing.Race) *racing.Race {
+func getRaceFromSchedule(cal *RaceSchedule, original *racing.Race) (*racing.Race, error) {
 	var race *racing.Race
 
-loop:
 	for _, rg := range cal.RegionGroups {
 		for _, m := range rg.Meetings {
 			for _, e := range m.Events {
@@ -276,12 +279,13 @@ loop:
 						Status:         getRaceStatusFromSchedule(e.IsAbandoned, e.Resulted, e.Results),
 						SourceId:       original.SourceId,
 					}
-					break loop
+					return race, nil
 				}
 			}
 		}
 	}
-	return race
+
+	return nil, fmt.Errorf("No race found in the schedule with source id %v", original.SourceId)
 }
 
 func (s byNextScrapeTime) Len() int {
