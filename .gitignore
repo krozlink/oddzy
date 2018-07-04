@@ -1,4 +1,2 @@
-.vscode/*
-!./vscode/launch.json
 bin/
 data/

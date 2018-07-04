@@ -1,0 +1,45 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+       {
+           "name": "Oddzy - Racing",
+           "type": "go",
+           "request": "launch",
+           "mode": "remote",
+           "remotePath": "/opt/go/src/github.com/krozlink/oddzy/services/srv/racing",
+           "port": 2302,
+           "host": "localhost",
+           "program": "${workspaceRoot}\\services\\srv\\racing",
+           "env": {},
+           "args": [],
+           "stopOnEntry": false,
+       },
+       {
+           "name": "Oddzy - Racing API",
+           "type": "go",
+           "request": "launch",
+           "mode": "remote",
+           "remotePath": "/opt/go/src/github.com/krozlink/oddzy/services/api/racing",
+           "port": 2302,
+           "host": "localhost",
+           "program": "${workspaceRoot}\\services\\api\\racing",
+           "env": {},
+           "args": [],
+           "stopOnEntry": false,
+       },
+       {
+           "name": "Oddzy - Race Scraper",
+           "type": "go",
+           "request": "launch",
+           "mode": "remote",
+           "remotePath": "/opt/go/src/github.com/krozlink/oddzy/services/srv/race-scraper",
+           "port": 2302,
+           "host": "localhost",
+           "program": "${workspaceRoot}\\services\\srv\\race-scraper",
+           "env": {},
+           "args": [],
+           "stopOnEntry": false,
+       }
+    ]
+}

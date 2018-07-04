@@ -1,0 +1,18 @@
+{
+    "go.buildOnSave": "package",
+    "go.vetOnSave": "off",
+    "todo-tree.flat": false,
+    "todo-tree.globs": [
+        "!**/vendor/**"
+    ],
+    "protoc": {
+        "options": [
+            "--proto_path=${workspaceRoot}/**/proto",
+            "--proto_path=${env.GOPATH}/src"
+        ]
+    },
+    "files.exclude": {
+        "**/vendor/**": true,
+        "**/Gopkg.*": true,
+    }
+}
