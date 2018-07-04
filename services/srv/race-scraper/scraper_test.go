@@ -26,15 +26,15 @@ func (h *mockHTTPHandler) getResponse(url string) ([]byte, error) {
 	return h.response, nil
 }
 
-func TestScrapeRaceCalendar(t *testing.T) {
-	// testdata contains an encoded and a decoded calendar
-	// this test performs a scrape that uses the encoded calendar and validates that the returned
-	// calendar matches the decoded calendar
-	encoded, err := ioutil.ReadFile("./testdata/race_calendar_encoded.json")
+func TestScrapeRaceSchedule(t *testing.T) {
+	// testdata contains an encoded and a decoded schedule
+	// this test performs a scrape that uses the encoded schedule and validates that the returned
+	// schedule matches the decoded schedule
+	encoded, err := ioutil.ReadFile("./testdata/race_schedule_encoded.json")
 	if err != nil {
 		t.Error(err)
 	}
-	decoded, err := ioutil.ReadFile("./testdata/race_calendar_decoded.json")
+	decoded, err := ioutil.ReadFile("./testdata/race_schedule_decoded.json")
 	if err != nil {
 		t.Error(err)
 	}
@@ -44,30 +44,30 @@ func TestScrapeRaceCalendar(t *testing.T) {
 	}
 
 	scraper := getMockScraper(h)
-	cal, err := scraper.ScrapeRaceCalendar("test", "test")
+	cal, err := scraper.ScrapeRaceSchedule("test", "test")
 	if err != nil {
 		t.Error(err)
 	}
 
-	original := &RaceCalendar{}
+	original := &RaceSchedule{}
 	err = json.Unmarshal(decoded, original)
 	if err != nil {
 		t.Error(err)
 	}
 
 	if !reflect.DeepEqual(cal, original) {
-		t.Error("scraped encoded calendar does not match the decoded calendar")
+		t.Error("scraped encoded schedule does not match the decoded schedule")
 	}
 }
 
-func TestScrapeRaceCalendarHandlesUnexpectedRaceResults(t *testing.T) {
+func TestScrapeRaceScheduleHandlesUnexpectedRaceResults(t *testing.T) {
 
-	decoded, err := ioutil.ReadFile("./testdata/race_calendar_unexpected_results.json")
+	decoded, err := ioutil.ReadFile("./testdata/race_schedule_unexpected_results.json")
 	if err != nil {
 		t.Error(err)
 	}
 
-	original := &RaceCalendar{}
+	original := &RaceSchedule{}
 	err = json.Unmarshal(decoded, original)
 	if err != nil {
 		t.Error(err)
@@ -75,7 +75,7 @@ func TestScrapeRaceCalendarHandlesUnexpectedRaceResults(t *testing.T) {
 }
 
 func TestScraperUsesThrottling(t *testing.T) {
-	encoded, _ := ioutil.ReadFile("./testdata/race_calendar_encoded.json")
+	encoded, _ := ioutil.ReadFile("./testdata/race_schedule_encoded.json")
 
 	h := &mockHTTPHandler{
 		response: encoded,
@@ -90,8 +90,8 @@ func TestScraperUsesThrottling(t *testing.T) {
 
 	// expect the difference to be at least 500ms as this is the throttled time delay
 	start := time.Now()
-	scraper.ScrapeRaceCalendar("test", "test")
-	scraper.ScrapeRaceCalendar("test", "test")
+	scraper.ScrapeRaceSchedule("test", "test")
+	scraper.ScrapeRaceSchedule("test", "test")
 	end := time.Now()
 
 	diffMS := int(end.Sub(start).Nanoseconds() / 1000000)

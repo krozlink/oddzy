@@ -5,8 +5,8 @@ import (
 	"strconv"
 )
 
-// RaceCalendar is the format odds.com.au uses to represent a race calendar
-type RaceCalendar struct {
+// RaceSchedule is the format odds.com.au uses to represent a race schedule
+type RaceSchedule struct {
 	HasResults   bool          `json:"hasResults"`
 	RegionGroups []RegionGroup `json:"regionGroups"`
 }
@@ -17,7 +17,7 @@ type RegionGroup struct {
 	Meetings  []Meeting `json:"meetings"`
 }
 
-// Meeting is the format odds.com.au uses to represent a race meet in their race calendar response
+// Meeting is the format odds.com.au uses to represent a race meet in their race schedule response
 type Meeting struct {
 	MeetingName       string  `json:"meetingName"`
 	RegionDescription string  `json:"regionDescription"`
@@ -25,7 +25,7 @@ type Meeting struct {
 	Events            []Event `json:"events"`
 }
 
-// Event is the format odds.com.au uses to represent a race in their race calendar response
+// Event is the format odds.com.au uses to represent a race in their race schedule response
 type Event struct {
 	EventID      int32  `json:"eventId"`
 	EventNumber  int32  `json:"eventNumber"`

@@ -285,17 +285,17 @@ func readRaces(p *scrapeProcess, start, end time.Time) ([]*racing.Race, []*racin
 func readExternal(p *scrapeProcess, start, end time.Time) (*externalRaceData, error) {
 	data := &externalRaceData{}
 
-	// read race calendars from scraping period
+	// read race schedules from scraping period
 	for _, t := range raceTypes {
 		for d := start; d.Before(end) || d.Equal(end); d = d.Add(time.Hour * 24) {
-			cal, err := p.scraper.ScrapeRaceCalendar(t, d.Format("2006-01-02"))
+			cal, err := p.scraper.ScrapeRaceSchedule(t, d.Format("2006-01-02"))
 			if err != nil {
-				return nil, fmt.Errorf("Unable to read race calendar for %v on %v - %v", t, d, err)
+				return nil, fmt.Errorf("Unable to read race schedule for %v on %v - %v", t, d, err)
 			}
 
-			c, err := processRaceCalendar(p, t, cal)
+			c, err := processRaceSchedule(p, t, cal)
 			if err != nil {
-				return nil, fmt.Errorf("Unable to process race calendar for %v on %v - %v", t, d, err)
+				return nil, fmt.Errorf("Unable to process race schedule for %v on %v - %v", t, d, err)
 			}
 
 			data.existingMeetings = append(data.existingMeetings, c.existingMeetings...)
@@ -338,8 +338,8 @@ func readInternal(p *scrapeProcess, start, end time.Time) ([]*racing.Meeting, []
 	return mResp.Meetings, rResp.Races, nil
 }
 
-func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*externalRaceData, error) {
-	log := logWithField("function", "processRaceCalendar")
+func processRaceSchedule(p *scrapeProcess, eventType string, c *RaceSchedule) (*externalRaceData, error) {
+	log := logWithField("function", "processRaceSchedule")
 
 	newMeetings := make([]*racing.Meeting, 0)
 	newRaces := make([]*racing.Race, 0)
@@ -397,7 +397,7 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 					Number:         e.EventNumber,
 					Results:        e.Results,
 					ScheduledStart: e.StartTime,
-					Status:         getRaceStatusFromCalendar(e.IsAbandoned, e.Resulted, e.Results),
+					Status:         getRaceStatusFromSchedule(e.IsAbandoned, e.Resulted, e.Results),
 					SourceId:       rSource,
 					MeetingStart:   meeting.ScheduledStart,
 				}
@@ -417,7 +417,7 @@ func processRaceCalendar(p *scrapeProcess, eventType string, c *RaceCalendar) (*
 		}
 	}
 
-	log.Debugf("Race calendar processed.   Existing Meetings: %v    Existing Races: %v    New Meetings: %v    New Races: %v", len(existingMeetings), len(existingRaces), len(newMeetings), len(newRaces))
+	log.Debugf("Race schedule processed.   Existing Meetings: %v    Existing Races: %v    New Meetings: %v    New Races: %v", len(existingMeetings), len(existingRaces), len(newMeetings), len(newRaces))
 
 	data := &externalRaceData{
 		existingMeetings,
@@ -495,7 +495,7 @@ func getMeetingSourceID(date, url string) (string, error) {
 	return fmt.Sprintf("%v-%v-%v", d.Format("20060102"), u[2], u[1]), nil
 }
 
-func getRaceStatusFromCalendar(isAbandoned int32, resulted int32, results string) string {
+func getRaceStatusFromSchedule(isAbandoned int32, resulted int32, results string) string {
 	if isAbandoned == 1 {
 		return "ABANDONED"
 	} else if resulted == 1 && results == "" {

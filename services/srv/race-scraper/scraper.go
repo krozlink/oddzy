@@ -19,7 +19,7 @@ const (
 // Scraper reads racing data from a source
 type Scraper interface {
 	ScrapeRaceCard(sourceID string) (*RaceCard, error)
-	ScrapeRaceCalendar(eventType string, date string) (*RaceCalendar, error)
+	ScrapeRaceSchedule(eventType string, date string) (*RaceSchedule, error)
 }
 
 // OddscomauScraper scrapes racing data from odds.com.au
@@ -44,18 +44,18 @@ func NewOddsScraper(h requestHandler) *OddscomauScraper {
 	}
 }
 
-// ScrapeRaceCalendar reads and parses a racing calendar for the provided event type and date
-func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*RaceCalendar, error) {
+// ScrapeRaceSchedule reads and parses a racing schedule for the provided event type and date
+func (o *OddscomauScraper) ScrapeRaceSchedule(eventType string, date string) (*RaceSchedule, error) {
 	throttle(o)
 
-	logContext := logWithField("function", "ScrapeRaceCalendar").WithField("parameters", fmt.Sprintf("Event Type: %v, Date: %v", eventType, date))
+	logContext := logWithField("function", "ScrapeRaceSchedule").WithField("parameters", fmt.Sprintf("Event Type: %v, Date: %v", eventType, date))
 
 	url := fmt.Sprintf(meetingDataURL, eventType, date)
-	logContext.Debugf("Requesting race calendar from %v", url)
+	logContext.Debugf("Requesting race schedule from %v", url)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
 		stats.Increment(oddsComAuRequestFailed)
-		msg := fmt.Sprintf("error retrieving race calendar response - %v", err)
+		msg := fmt.Sprintf("error retrieving race calenscheduledar response - %v", err)
 		logContext.Errorf(msg)
 		return nil, fmt.Errorf(msg)
 	}
@@ -86,16 +86,16 @@ func (o *OddscomauScraper) ScrapeRaceCalendar(eventType string, date string) (*R
 
 	logContext.Debugf("Decoded response: %v", string(d))
 
-	calendar := &RaceCalendar{}
-	err = json.Unmarshal(d, calendar)
+	schedule := &RaceSchedule{}
+	err = json.Unmarshal(d, schedule)
 
 	if err != nil {
-		msg := fmt.Sprintf("unable to unmarshal decoded response into race calendar - %v", err)
+		msg := fmt.Sprintf("unable to unmarshal decoded response into race schedule - %v", err)
 		logContext.Errorf(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	return calendar, nil
+	return schedule, nil
 }
 
 // ScrapeRaceCard reads and parses a race card for the provided odds.com.au event id

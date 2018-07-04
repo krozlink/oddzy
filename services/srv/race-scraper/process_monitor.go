@@ -90,13 +90,13 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 				if !ok {
 					log.Fatalf("race %v (%v) does not have an existing meeting (%v)", r.race.RaceId, r.race.Name, r.race.MeetingId)
 				}
-				cal, err := p.scraper.ScrapeRaceCalendar(m.RaceType, mDate)
+				cal, err := p.scraper.ScrapeRaceSchedule(m.RaceType, mDate)
 				if err != nil {
-					log.Errorf("Unable to scrape calendar for event type '%v' on %v' - %v", m.RaceType, mDate, err)
+					log.Errorf("Unable to scrape schedule for event type '%v' on %v' - %v", m.RaceType, mDate, err)
 					log.Errorf("Skipping race %v", r.race.RaceId)
 					continue
 				}
-				updated := getRaceFromCalendar(cal, r.race)
+				updated := getRaceFromSchedule(cal, r.race)
 				updated.LastUpdated = time.Now().Unix()
 				p.racesByID[r.race.RaceId] = updated
 				p.racesBySource[r.race.SourceId] = updated
@@ -257,7 +257,7 @@ func pushRace(overdue, upcoming []*scheduledScrape, r *scheduledScrape) ([]*sche
 	return overdue, upcoming
 }
 
-func getRaceFromCalendar(cal *RaceCalendar, original *racing.Race) *racing.Race {
+func getRaceFromSchedule(cal *RaceSchedule, original *racing.Race) *racing.Race {
 	var race *racing.Race
 
 loop:
@@ -273,7 +273,7 @@ loop:
 						Number:         e.EventNumber,
 						Results:        e.Results,
 						ScheduledStart: e.StartTime,
-						Status:         getRaceStatusFromCalendar(e.IsAbandoned, e.Resulted, e.Results),
+						Status:         getRaceStatusFromSchedule(e.IsAbandoned, e.Resulted, e.Results),
 						SourceId:       original.SourceId,
 					}
 					break loop
