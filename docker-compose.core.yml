@@ -23,6 +23,18 @@ services:
       - consul
     networks:
       - oddzy
+  micro-api:
+    image: microhq/micro
+    command: api --address=0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    environment:
+      - MICRO_REGISTRY=consul
+      - MICRO_REGISTRY_ADDRESS=consul
+    links:
+      - consul
+    networks:
+      - oddzy
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.3.0
     ports: 
