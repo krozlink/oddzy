@@ -14,6 +14,7 @@ func main() {
 
 	service.Init(
 		micro.WrapHandler(RacingWrapper(service)),
+		micro.WrapHandler(CorrelationWrapper(service)),
 	)
 
 	proto.RegisterRacingHandler(service.Server(), new(Racing))

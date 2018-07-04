@@ -23,6 +23,8 @@ func (r *Racing) Racecard(ctx context.Context, req *api.Request, rsp *api.Respon
 	}
 
 	// call racing.GetRace
+
+	// if valid:
 	// call racing.GetMeeting
 	// call racing.ListSelections
 

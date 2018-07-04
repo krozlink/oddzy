@@ -5,14 +5,30 @@ import (
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/server"
+	"github.com/pborman/uuid"
 )
 
-type serviceKey struct{}
+type metaContext string
+
+const (
+	racingService metaContext = "racing-service"
+	correlationID metaContext = "correlation-id"
+)
 
 // RacingFromContext retrieves the racing client from the Context
 func RacingFromContext(ctx context.Context) (racing.RacingService, bool) {
-	c, ok := ctx.Value(serviceKey{}).(racing.RacingService)
+	c, ok := ctx.Value(racingService).(racing.RacingService)
 	return c, ok
+}
+
+// CorrelationWrapper adds a correlation id to each request
+func CorrelationWrapper(service micro.Service) server.HandlerWrapper {
+	return func(fn server.HandlerFunc) server.HandlerFunc {
+		return func(ctx context.Context, req server.Request, rsp interface{}) error {
+			ctx = context.WithValue(ctx, correlationID, uuid.NewUUID().String())
+			return fn(ctx, req, rsp)
+		}
+	}
 }
 
 // RacingWrapper returns a wrapper for the RacingClient
@@ -21,7 +37,7 @@ func RacingWrapper(service micro.Service) server.HandlerWrapper {
 
 	return func(fn server.HandlerFunc) server.HandlerFunc {
 		return func(ctx context.Context, req server.Request, rsp interface{}) error {
-			ctx = context.WithValue(ctx, serviceKey{}, client)
+			ctx = context.WithValue(ctx, racingService, client)
 			return fn(ctx, req, rsp)
 		}
 	}
