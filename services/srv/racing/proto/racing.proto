@@ -10,6 +10,7 @@ service RacingService {
     rpc UpdateRace (UpdateRaceRequest) returns (UpdateRaceResponse);
     rpc GetNextRace (GetNextRaceRequest) returns (GetNextRaceResponse);
     rpc GetRace (GetRaceRequest) returns (GetRaceResponse);
+    rpc ListSelections (ListSelectionsRequest) returns (ListSelectionsResponse);
 }
 
 message RaceUpdatedMessage {
@@ -82,6 +83,14 @@ message GetRaceRequest {
 
 message GetRaceResponse {
     Race race = 1;
+}
+
+message ListSelectionsRequest {
+    string race_id = 1;
+}
+
+message ListSelectionsResponse {
+    repeated Selection selections = 1;
 }
 
 message Meeting {

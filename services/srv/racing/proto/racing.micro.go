@@ -23,6 +23,8 @@ It has these top-level messages:
 	GetNextRaceResponse
 	GetRaceRequest
 	GetRaceResponse
+	ListSelectionsRequest
+	ListSelectionsResponse
 	Meeting
 	Competitor
 	Selection
@@ -66,6 +68,7 @@ type RacingService interface {
 	UpdateRace(ctx context.Context, in *UpdateRaceRequest, opts ...client.CallOption) (*UpdateRaceResponse, error)
 	GetNextRace(ctx context.Context, in *GetNextRaceRequest, opts ...client.CallOption) (*GetNextRaceResponse, error)
 	GetRace(ctx context.Context, in *GetRaceRequest, opts ...client.CallOption) (*GetRaceResponse, error)
+	ListSelections(ctx context.Context, in *ListSelectionsRequest, opts ...client.CallOption) (*ListSelectionsResponse, error)
 }
 
 type racingService struct {
@@ -156,6 +159,16 @@ func (c *racingService) GetRace(ctx context.Context, in *GetRaceRequest, opts ..
 	return out, nil
 }
 
+func (c *racingService) ListSelections(ctx context.Context, in *ListSelectionsRequest, opts ...client.CallOption) (*ListSelectionsResponse, error) {
+	req := c.c.NewRequest(c.name, "RacingService.ListSelections", in)
+	out := new(ListSelectionsResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for RacingService service
 
 type RacingServiceHandler interface {
@@ -166,6 +179,7 @@ type RacingServiceHandler interface {
 	UpdateRace(context.Context, *UpdateRaceRequest, *UpdateRaceResponse) error
 	GetNextRace(context.Context, *GetNextRaceRequest, *GetNextRaceResponse) error
 	GetRace(context.Context, *GetRaceRequest, *GetRaceResponse) error
+	ListSelections(context.Context, *ListSelectionsRequest, *ListSelectionsResponse) error
 }
 
 func RegisterRacingServiceHandler(s server.Server, hdlr RacingServiceHandler, opts ...server.HandlerOption) {
@@ -177,6 +191,7 @@ func RegisterRacingServiceHandler(s server.Server, hdlr RacingServiceHandler, op
 		UpdateRace(ctx context.Context, in *UpdateRaceRequest, out *UpdateRaceResponse) error
 		GetNextRace(ctx context.Context, in *GetNextRaceRequest, out *GetNextRaceResponse) error
 		GetRace(ctx context.Context, in *GetRaceRequest, out *GetRaceResponse) error
+		ListSelections(ctx context.Context, in *ListSelectionsRequest, out *ListSelectionsResponse) error
 	}
 	type RacingService struct {
 		racingService
@@ -215,4 +230,8 @@ func (h *racingServiceHandler) GetNextRace(ctx context.Context, in *GetNextRaceR
 
 func (h *racingServiceHandler) GetRace(ctx context.Context, in *GetRaceRequest, out *GetRaceResponse) error {
 	return h.RacingServiceHandler.GetRace(ctx, in, out)
+}
+
+func (h *racingServiceHandler) ListSelections(ctx context.Context, in *ListSelectionsRequest, out *ListSelectionsResponse) error {
+	return h.RacingServiceHandler.ListSelections(ctx, in, out)
 }

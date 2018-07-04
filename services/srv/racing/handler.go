@@ -11,27 +11,30 @@ import (
 )
 
 const (
-	handlerListMeetingsTiming  = "racing.service.handler.listmeetings.timing"
-	handlerListMeetingsSuccess = "racing.service.handler.listmeetings.success"
-	handlerListMeetingsFailed  = "racing.service.handler.listmeetings.failed"
-	handlerListRacesTiming     = "racing.service.handler.listraces.timing"
-	handlerListRacesSuccess    = "racing.service.handler.listraces.success"
-	handlerListRacesFailed     = "racing.service.handler.listraces.failed"
-	handlerAddMeetingsTiming   = "racing.service.handler.addmeetings.timing"
-	handlerAddMeetingsSuccess  = "racing.service.handler.addmeetings.success"
-	handlerAddMeetingsFailed   = "racing.service.handler.addmeetings.failed"
-	handlerAddRacesTiming      = "racing.service.handler.addraces.timing"
-	handlerAddRacesSuccess     = "racing.service.handler.addraces.success"
-	handlerAddRacesFailed      = "racing.service.handler.addraces.failed"
-	handlerUpdateRaceTiming    = "racing.service.handler.updaterace.timing"
-	handlerUpdateRaceSuccess   = "racing.service.handler.updaterace.success"
-	handlerUpdateRaceFailed    = "racing.service.handler.updaterace.failed"
-	handlerGetNextRaceTiming   = "racing.service.handler.getnextrace.timing"
-	handlerGetNextRaceSuccess  = "racing.service.handler.getnextrace.success"
-	handlerGetNextRaceFailed   = "racing.service.handler.getnextrace.failed"
-	handlerGetRaceTiming       = "racing.service.handler.getrace.timing"
-	handlerGetRaceSuccess      = "racing.service.handler.getrace.success"
-	handlerGetRaceFailed       = "racing.service.handler.getrace.failed"
+	handlerListMeetingsTiming    = "racing.service.handler.listmeetings.timing"
+	handlerListMeetingsSuccess   = "racing.service.handler.listmeetings.success"
+	handlerListMeetingsFailed    = "racing.service.handler.listmeetings.failed"
+	handlerListRacesTiming       = "racing.service.handler.listraces.timing"
+	handlerListRacesSuccess      = "racing.service.handler.listraces.success"
+	handlerListRacesFailed       = "racing.service.handler.listraces.failed"
+	handlerAddMeetingsTiming     = "racing.service.handler.addmeetings.timing"
+	handlerAddMeetingsSuccess    = "racing.service.handler.addmeetings.success"
+	handlerAddMeetingsFailed     = "racing.service.handler.addmeetings.failed"
+	handlerAddRacesTiming        = "racing.service.handler.addraces.timing"
+	handlerAddRacesSuccess       = "racing.service.handler.addraces.success"
+	handlerAddRacesFailed        = "racing.service.handler.addraces.failed"
+	handlerUpdateRaceTiming      = "racing.service.handler.updaterace.timing"
+	handlerUpdateRaceSuccess     = "racing.service.handler.updaterace.success"
+	handlerUpdateRaceFailed      = "racing.service.handler.updaterace.failed"
+	handlerGetNextRaceTiming     = "racing.service.handler.getnextrace.timing"
+	handlerGetNextRaceSuccess    = "racing.service.handler.getnextrace.success"
+	handlerGetNextRaceFailed     = "racing.service.handler.getnextrace.failed"
+	handlerGetRaceTiming         = "racing.service.handler.getrace.timing"
+	handlerGetRaceSuccess        = "racing.service.handler.getrace.success"
+	handlerGetRaceFailed         = "racing.service.handler.getrace.failed"
+	handlerListSelectionsTiming  = "racing.service.handler.listselections.timing"
+	handlerListSelectionsSuccess = "racing.service.handler.listselections.success"
+	handlerListSelectionsFailed  = "racing.service.handler.listselections.failed"
 )
 
 // RacingService is for interacing with racing data such as meetings and races
@@ -121,6 +124,34 @@ func (s *RacingService) ListRacesByMeetingDate(ctx context.Context, req *proto.L
 	resp.Races = races
 
 	stats.Increment(handlerListRacesSuccess)
+	return nil
+}
+
+// ListSelections will return all selections for the provided race id
+func (s *RacingService) ListSelections(ctx context.Context, req *proto.ListSelectionsRequest, resp *proto.ListSelectionsResponse) error {
+	timing := stats.NewTiming()
+	defer timing.Send(handlerListSelectionsTiming)
+	log := logWithField("function", "handler.ListSelections")
+
+	if req.RaceId == "" {
+		err := fmt.Errorf("Race ID is a mandatory field")
+		log.Error(err)
+		return err
+	}
+
+	repo := s.GetRepo()
+	defer repo.Close()
+
+	selections, err := repo.ListSelectionsByRaceID(req.RaceId)
+	if err != nil {
+		stats.Increment(handlerListSelectionsFailed)
+		log.Error(err)
+		return err
+	}
+
+	resp.Selections = selections
+
+	stats.Increment(handlerListSelectionsSuccess)
 	return nil
 }
 
