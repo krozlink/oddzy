@@ -12,7 +12,7 @@ type metaContext string
 
 const (
 	racingService metaContext = "racing-service"
-	correlationID metaContext = "correlation-id"
+	correlationID metaContext = "correlation_id"
 )
 
 // RacingFromContext retrieves the racing client from the Context

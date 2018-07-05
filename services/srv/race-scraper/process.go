@@ -37,10 +37,6 @@ type externalRaceData struct {
 	newRaces         []*racing.Race
 }
 
-type metaContext string
-
-const correlationID metaContext = "correlation-id"
-
 const (
 	scrapeRaceTiming  = "race-scraper.service.scraperace.timing"
 	scrapeRaceSuccess = "race-scraper.service.scraperace.success"

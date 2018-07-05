@@ -11,7 +11,11 @@ import (
 	"time"
 )
 
+type metaContext string
+
 var baseLog *logrus.Logger
+
+const correlationID metaContext = "correlation_id"
 
 const (
 	loggerEnv           = "ODDZY_LOGGER"
@@ -77,8 +81,8 @@ func getLog() *logrus.Logger {
 
 func logWithContext(ctx context.Context, functionName string) *logrus.Entry {
 	log := baseLog.WithField("function", functionName)
-	if id, ok := ctx.Value("correlation-id").(string); ok {
-		log = log.WithField("correlation-id", id)
+	if id, ok := ctx.Value(correlationID).(string); ok {
+		log = log.WithField(string(correlationID), id)
 	}
 
 	return log
