@@ -53,9 +53,8 @@ func (p *scrapeProcess) run() {
 loop:
 	for { // this should only loop once a day, with the loop ending when the day ends
 		// calculate date range
-		aest := time.FixedZone("AEST", 36000)
-		now := time.Now().In(aest)
-		today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, aest)
+		now := nowLocal()
+		today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 		tomorrow := today.Add(time.Hour * 24).Sub(now)
 		start, end := getDateRange(p.dateRange)
 
@@ -91,6 +90,12 @@ func reset(p *scrapeProcess) {
 	p.meetingsBySource = make(map[string]*racing.Meeting)
 	p.racesByID = make(map[string]*racing.Race)
 	p.racesBySource = make(map[string]*racing.Race)
+}
+
+func nowLocal() time.Time {
+	aest := time.FixedZone("AEST", 36000)
+	now := time.Now().In(aest)
+	return now
 }
 
 func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
@@ -163,7 +168,7 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 func getDateRange(r [2]int) (time.Time, time.Time) {
 	//r[0] - number of days ago to start scraping from. e.g -1 is yesterday
 	//r[1] - number of days ago to scrape to. e.g 2 is day after tomorrow
-	now := time.Now()
+	now := nowLocal()
 	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Add(time.Hour * time.Duration(-24*r[0]))
 	end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location()).Add(time.Hour * time.Duration(24*r[1]))
 	return start, end
