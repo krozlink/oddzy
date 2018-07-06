@@ -2,6 +2,13 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/bshuster-repo/logrus-logstash-hook"
+  packages = ["."]
+  revision = "1e961e8e173c48bdddbf90e4fc4df8eaf8a7e918"
+  source = "github.com/bshuster-repo/logrus-logstash-hook"
+
+[[projects]]
   name = "github.com/go-log/log"
   packages = [
     ".",
@@ -47,7 +54,7 @@
   branch = "master"
   name = "github.com/krozlink/oddzy"
   packages = ["services/srv/racing/proto"]
-  revision = "b72df4b9f92bbc4568256aa165b2e1f5ec7c2ecc"
+  revision = "e5e5e625b60e19aa089e5f13028a91492a40a09f"
 
 [[projects]]
   branch = "master"
@@ -156,11 +163,18 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
+  version = "v1.0.5"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
     "ed25519",
-    "ed25519/internal/edwards25519"
+    "ed25519/internal/edwards25519",
+    "ssh/terminal"
   ]
   revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
 
@@ -175,11 +189,26 @@
     "ipv4",
     "ipv6"
   ]
-  revision = "ed29d75add3d7c4bf7ca65aac0c6df3d1420216f"
+  revision = "32a936f46389aa10549d60bd7833e54b01685d09"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows"
+  ]
+  revision = "ce36f3865eeb42541ce3f87f32f8462c5687befa"
+
+[[projects]]
+  name = "gopkg.in/alexcesaro/statsd.v2"
+  packages = ["."]
+  revision = "7fea3f0d2fab1ad973e641e51dba45443a311a90"
+  version = "v2.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1c6440a137b3d5b2d426afeeb1846f01c23c9ea6e4f99b723b26122576a513a2"
+  inputs-digest = "2332e9c8419dd1e71e91a28c25b107bafdb68790f377ad3ff2f17bf88d8ec9d4"
   solver-name = "gps-cdcl"
   solver-version = 1

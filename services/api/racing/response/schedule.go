@@ -14,18 +14,18 @@ type RaceScheduleMeeting struct {
 	Name           string   `json:"name"`
 	Country        string   `json:"country"`
 	RaceType       string   `json:"race_type"`
-	ScheduledStart int      `json:"scheduled_start"`
+	ScheduledStart int64    `json:"scheduled_start"`
 	RaceIds        []string `json:"race_ids"`
-	LastUpdated    int      `json:"last_update"`
+	LastUpdated    int64    `json:"last_update"`
 }
 
 // RaceScheduleRace contains the race data shown on a race schedule
 type RaceScheduleRace struct {
 	RaceID         string `json:"race_id"`
 	Name           string `json:"name"`
-	Number         int    `json:"number"`
+	Number         int32  `json:"number"`
 	Status         string `json:"status"`
 	Results        string `json:"results"`
-	ScheduledStart int    `json:"scheduled_start"`
-	LastUpdated    int    `json:"last_update"`
+	ScheduledStart int64  `json:"scheduled_start"`
+	LastUpdated    int64  `json:"last_update"`
 }

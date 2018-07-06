@@ -11,7 +11,7 @@ import (
 type metaContext string
 
 const (
-	racingService metaContext = "racing-service"
+	racingService metaContext = "racing_service"
 	correlationID metaContext = "correlation_id"
 )
 
@@ -33,7 +33,7 @@ func CorrelationWrapper(service micro.Service) server.HandlerWrapper {
 
 // RacingWrapper returns a wrapper for the RacingClient
 func RacingWrapper(service micro.Service) server.HandlerWrapper {
-	client := racing.NewRacingService("go.micro.srv.racing", service.Client())
+	client := racing.NewRacingService(racingServiceName, service.Client())
 
 	return func(fn server.HandlerFunc) server.HandlerFunc {
 		return func(ctx context.Context, req server.Request, rsp interface{}) error {
