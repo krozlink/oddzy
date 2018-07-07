@@ -14,6 +14,9 @@ const (
 	handlerListMeetingsTiming    = "racing.service.handler.listmeetings.timing"
 	handlerListMeetingsSuccess   = "racing.service.handler.listmeetings.success"
 	handlerListMeetingsFailed    = "racing.service.handler.listmeetings.failed"
+	handlerGetMeetingTiming      = "racing.service.handler.getmeeting.timing"
+	handlerGetMeetingSuccess     = "racing.service.handler.getmeeting.success"
+	handlerGetMeetingFailed      = "racing.service.handler.getmeeting.failed"
 	handlerListRacesTiming       = "racing.service.handler.listraces.timing"
 	handlerListRacesSuccess      = "racing.service.handler.listraces.success"
 	handlerListRacesFailed       = "racing.service.handler.listraces.failed"
@@ -204,6 +207,24 @@ func (s *RacingService) AddMeetings(ctx context.Context, req *proto.AddMeetingsR
 
 	log.Debugf("%v meetings successfully added", len(req.Meetings))
 	stats.Increment(handlerAddMeetingsSuccess)
+	return nil
+}
+
+// GetRace returns the race with the requested race id
+func (s *RacingService) GetMeeting(ctx context.Context, req *proto.GetMeetingRequest, resp *proto.GetMeetingResponse) error {
+	timing := stats.NewTiming()
+	defer timing.Send(handlerGetMeetingTiming)
+
+	repo := s.GetRepo()
+
+	meeting, err := repo.GetMeeting(ctx, req.MeetingId)
+	if err != nil {
+		stats.Increment(handlerGetMeetingFailed)
+		return err
+	}
+
+	resp.Meeting = meeting
+	stats.Increment(handlerGetMeetingSuccess)
 	return nil
 }
 

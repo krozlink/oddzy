@@ -17,6 +17,8 @@ It has these top-level messages:
 	AddRacesResponse
 	AddMeetingsRequest
 	AddMeetingsResponse
+	GetMeetingRequest
+	GetMeetingResponse
 	UpdateRaceRequest
 	UpdateRaceResponse
 	GetNextRaceRequest
@@ -64,6 +66,7 @@ type RacingService interface {
 	ListMeetingsByDate(ctx context.Context, in *ListMeetingsByDateRequest, opts ...client.CallOption) (*ListMeetingsByDateResponse, error)
 	ListRacesByMeetingDate(ctx context.Context, in *ListRacesByMeetingDateRequest, opts ...client.CallOption) (*ListRacesByMeetingDateResponse, error)
 	AddMeetings(ctx context.Context, in *AddMeetingsRequest, opts ...client.CallOption) (*AddMeetingsResponse, error)
+	GetMeeting(ctx context.Context, in *GetMeetingRequest, opts ...client.CallOption) (*GetMeetingResponse, error)
 	AddRaces(ctx context.Context, in *AddRacesRequest, opts ...client.CallOption) (*AddRacesResponse, error)
 	UpdateRace(ctx context.Context, in *UpdateRaceRequest, opts ...client.CallOption) (*UpdateRaceResponse, error)
 	GetNextRace(ctx context.Context, in *GetNextRaceRequest, opts ...client.CallOption) (*GetNextRaceResponse, error)
@@ -112,6 +115,16 @@ func (c *racingService) ListRacesByMeetingDate(ctx context.Context, in *ListRace
 func (c *racingService) AddMeetings(ctx context.Context, in *AddMeetingsRequest, opts ...client.CallOption) (*AddMeetingsResponse, error) {
 	req := c.c.NewRequest(c.name, "RacingService.AddMeetings", in)
 	out := new(AddMeetingsResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *racingService) GetMeeting(ctx context.Context, in *GetMeetingRequest, opts ...client.CallOption) (*GetMeetingResponse, error) {
+	req := c.c.NewRequest(c.name, "RacingService.GetMeeting", in)
+	out := new(GetMeetingResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -175,6 +188,7 @@ type RacingServiceHandler interface {
 	ListMeetingsByDate(context.Context, *ListMeetingsByDateRequest, *ListMeetingsByDateResponse) error
 	ListRacesByMeetingDate(context.Context, *ListRacesByMeetingDateRequest, *ListRacesByMeetingDateResponse) error
 	AddMeetings(context.Context, *AddMeetingsRequest, *AddMeetingsResponse) error
+	GetMeeting(context.Context, *GetMeetingRequest, *GetMeetingResponse) error
 	AddRaces(context.Context, *AddRacesRequest, *AddRacesResponse) error
 	UpdateRace(context.Context, *UpdateRaceRequest, *UpdateRaceResponse) error
 	GetNextRace(context.Context, *GetNextRaceRequest, *GetNextRaceResponse) error
@@ -187,6 +201,7 @@ func RegisterRacingServiceHandler(s server.Server, hdlr RacingServiceHandler, op
 		ListMeetingsByDate(ctx context.Context, in *ListMeetingsByDateRequest, out *ListMeetingsByDateResponse) error
 		ListRacesByMeetingDate(ctx context.Context, in *ListRacesByMeetingDateRequest, out *ListRacesByMeetingDateResponse) error
 		AddMeetings(ctx context.Context, in *AddMeetingsRequest, out *AddMeetingsResponse) error
+		GetMeeting(ctx context.Context, in *GetMeetingRequest, out *GetMeetingResponse) error
 		AddRaces(ctx context.Context, in *AddRacesRequest, out *AddRacesResponse) error
 		UpdateRace(ctx context.Context, in *UpdateRaceRequest, out *UpdateRaceResponse) error
 		GetNextRace(ctx context.Context, in *GetNextRaceRequest, out *GetNextRaceResponse) error
@@ -214,6 +229,10 @@ func (h *racingServiceHandler) ListRacesByMeetingDate(ctx context.Context, in *L
 
 func (h *racingServiceHandler) AddMeetings(ctx context.Context, in *AddMeetingsRequest, out *AddMeetingsResponse) error {
 	return h.RacingServiceHandler.AddMeetings(ctx, in, out)
+}
+
+func (h *racingServiceHandler) GetMeeting(ctx context.Context, in *GetMeetingRequest, out *GetMeetingResponse) error {
+	return h.RacingServiceHandler.GetMeeting(ctx, in, out)
 }
 
 func (h *racingServiceHandler) AddRaces(ctx context.Context, in *AddRacesRequest, out *AddRacesResponse) error {

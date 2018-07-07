@@ -6,6 +6,7 @@ service RacingService {
     rpc ListMeetingsByDate (ListMeetingsByDateRequest) returns (ListMeetingsByDateResponse) {}
     rpc ListRacesByMeetingDate (ListRacesByMeetingDateRequest) returns (ListRacesByMeetingDateResponse) {}
     rpc AddMeetings (AddMeetingsRequest) returns (AddMeetingsResponse);
+    rpc GetMeeting (GetMeetingRequest) returns (GetMeetingResponse);
     rpc AddRaces (AddRacesRequest) returns (AddRacesResponse);
     rpc UpdateRace (UpdateRaceRequest) returns (UpdateRaceResponse);
     rpc GetNextRace (GetNextRaceRequest) returns (GetNextRaceResponse);
@@ -55,6 +56,15 @@ message AddMeetingsRequest {
 message AddMeetingsResponse {
     bool created = 1;
 }
+
+message GetMeetingRequest {
+    string meeting_id = 1;
+}
+
+message GetMeetingResponse {
+    Meeting meeting = 1;
+}
+
 
 message UpdateRaceRequest {
     string race_id = 1;
