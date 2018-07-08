@@ -54,7 +54,7 @@
   branch = "master"
   name = "github.com/krozlink/oddzy"
   packages = ["services/srv/racing/proto"]
-  revision = "e5e5e625b60e19aa089e5f13028a91492a40a09f"
+  revision = "d3b5eb5ded928edf09ebb5491f0e867a9e7e07b2"
 
 [[projects]]
   branch = "master"
@@ -198,7 +198,7 @@
     "unix",
     "windows"
   ]
-  revision = "ce36f3865eeb42541ce3f87f32f8462c5687befa"
+  revision = "3c6ecd8f22c6f40fbeec94c000a069d7d87c7624"
 
 [[projects]]
   name = "gopkg.in/alexcesaro/statsd.v2"

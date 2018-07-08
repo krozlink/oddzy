@@ -4,10 +4,10 @@ package response
 type RaceCard struct {
 	RaceID         string              `json:"race_id"`
 	Name           string              `json:"name"`
-	Number         string              `json:"number"`
-	ScheduledStart int                 `json:"scheduled_start"`
+	Number         int32               `json:"number"`
+	ScheduledStart int64               `json:"scheduled_start"`
 	Results        string              `json:"results"`
-	LastUpdated    int                 `json:"last_update"`
+	LastUpdated    int64               `json:"last_update"`
 	Status         string              `json:"status"`
 	Meeting        RaceCardMeeting     `json:"meeting"`
 	Selections     []RaceCardSelection `json:"selections"`
@@ -24,8 +24,8 @@ type RaceCardMeeting struct {
 type RaceCardSelection struct {
 	SelectionID string `json:"selection_id"`
 	Name        string `json:"name"`
-	Barrier     int    `json:"barrier"`
-	Number      int    `json:"number"`
+	Barrier     int32  `json:"barrier"`
+	Number      int32  `json:"number"`
 	Jockey      string `json:"jockey"`
 	IsScratched bool   `json:"is_scratched"`
 }

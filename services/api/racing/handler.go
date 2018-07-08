@@ -17,6 +17,9 @@ const (
 	handlerScheduleTiming  = "racing.api.handler.schedule.timing"
 	handlerScheduleSuccess = "racing.api.handler.schedule.success"
 	handlerScheduleFailed  = "racing.api.handler.schedule.failed"
+	handlerRacecardTiming  = "racing.api.handler.racecard.timing"
+	handlerRacecardSuccess = "racing.api.handler.racecard.success"
+	handlerRacecardFailed  = "racing.api.handler.racecard.failed"
 )
 
 // Racing is the handler for the racing api
@@ -25,31 +28,79 @@ type Racing struct{}
 // Racecard is called by the API as /racing/racecard
 func (r *Racing) Racecard(ctx context.Context, req *api.Request, rsp *api.Response) error {
 
-	// log := logWithContext(ctx, "handler.Racecard")
+	timing := stats.NewTiming()
+	defer timing.Send(handlerRacecardTiming)
+	log := logWithContext(ctx, "handler.Racecard")
 
-	id, ok := req.Get["race_id"]
-	if !ok || len(id.Values) == 0 {
+	v, ok := req.Get["race_id"]
+	if !ok || len(v.Values) == 0 {
+		stats.Increment(handlerScheduleFailed)
 		return errors.BadRequest("go.micro.api.racing", "no race id")
 	}
 
-	// call racing.GetRace
+	raceID := v.Values[0]
 
-	// if valid:
-	// call racing.GetMeeting
-	// call racing.ListSelections
+	client, ok := RacingFromContext(ctx)
+	if !ok {
+		stats.Increment(handlerScheduleFailed)
+		log.Error("No racing client exists in context")
+		return errors.InternalServerError("go.micro.api.racing", "invalid context")
+	}
 
-	b, _ := json.Marshal(map[string]string{
-		"message": "request received",
-	})
+	raceReq := &racing.GetRaceRequest{
+		RaceId: raceID,
+	}
+	raceResp, err := client.GetRace(ctx, raceReq)
+	if err != nil {
+		log.Errorf("Unable to read race with id %v - %v", raceID, err)
+		stats.Increment(handlerScheduleFailed)
+		return errors.BadRequest("go.micro.api.racing", "invalid race id")
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+
+	var meetingResp *racing.GetMeetingResponse
+	var selectionsResp *racing.ListSelectionsResponse
+
+	go func() {
+		defer wg.Done()
+		meetingReq := &racing.GetMeetingRequest{
+			MeetingId: raceResp.Race.MeetingId,
+		}
+		meetingResp, err = client.GetMeeting(ctx, meetingReq)
+		if err != nil {
+			log.Fatalf("Unable to read meeting with id %v - %v", raceResp.Race.MeetingId, err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		selectionsReq := &racing.ListSelectionsRequest{
+			RaceId: raceResp.Race.RaceId,
+		}
+		selectionsResp, err = client.ListSelections(ctx, selectionsReq)
+		if err != nil {
+			log.Fatalf("Unable to read selections for race %v - %v", raceID, err)
+		}
+	}()
+
+	wg.Wait()
+
+	resp, err := createRacecard(meetingResp.Meeting, raceResp.Race, selectionsResp.Selections)
+
+	b, _ := json.Marshal(resp)
 
 	rsp.Header = make(map[string]*api.Pair)
 	corr := &api.Pair{
 		Key:    headerCorrelationID,
-		Values: []string{ctx.Value(correlationID).(string)},
+		Values: []string{getValueFromMetadata(ctx, string(correlationID))},
 	}
 	rsp.Header[headerCorrelationID] = corr
 	rsp.StatusCode = 200
 	rsp.Body = string(b)
+
+	stats.Increment(handlerRacecardSuccess)
 
 	return nil
 }
@@ -106,14 +157,14 @@ func (r *Racing) Schedule(ctx context.Context, req *api.Request, rsp *api.Respon
 
 	wg.Wait()
 
-	resp, err := createSchedule(start, meetingResp, raceResp)
+	resp, err := createSchedule(start, meetingResp.Meetings, raceResp.Races)
 
 	b, _ := json.Marshal(resp)
 
 	rsp.Header = make(map[string]*api.Pair)
 	corr := &api.Pair{
 		Key:    headerCorrelationID,
-		Values: []string{ctx.Value(correlationID).(string)},
+		Values: []string{getValueFromMetadata(ctx, string(correlationID))},
 	}
 	rsp.Header[headerCorrelationID] = corr
 	rsp.StatusCode = 200
@@ -133,7 +184,7 @@ func validateScheduleRequest(req *api.Request) (*time.Time, *time.Time, error) {
 	} else if len(date.Values) > 1 {
 		return nil, nil, errors.BadRequest("go.micro.api.racing", "only one date required")
 	} else {
-		d, err := time.Parse("00", date.Values[0])
+		d, err := time.Parse("2006-01-02", date.Values[0])
 		if err != nil {
 			return nil, nil, errors.BadRequest("go.micro.api.racing", "invalid date format")
 		}
@@ -144,15 +195,49 @@ func validateScheduleRequest(req *api.Request) (*time.Time, *time.Time, error) {
 	return &start, &end, nil
 }
 
-func createSchedule(date *time.Time, m *racing.ListMeetingsByDateResponse, r *racing.ListRacesByMeetingDateResponse) (*response.RaceSchedule, error) {
-	schedule := &response.RaceSchedule{
-		HasRaces: len(r.Races) > 0,
-		RaceDate: date.Format("2006-01-02"),
-		Meetings: make([]response.RaceScheduleMeeting, len(m.Meetings)),
-		Races:    make([]response.RaceScheduleRace, len(r.Races)),
+func createRacecard(meeting *racing.Meeting, race *racing.Race, selections []*racing.Selection) (*response.RaceCard, error) {
+	m := response.RaceCardMeeting{
+		MeetingID: meeting.MeetingId,
+		Name:      meeting.Name,
+		RaceIds:   meeting.RaceIds,
 	}
 
-	for i, r := range r.Races {
+	s := make([]response.RaceCardSelection, len(selections))
+	for i, v := range selections {
+		s[i] = response.RaceCardSelection{
+			Barrier:     v.BarrierNumber,
+			IsScratched: v.Scratched,
+			Jockey:      v.Jockey,
+			Name:        v.Name,
+			Number:      v.Number,
+			SelectionID: v.SelectionId,
+		}
+	}
+
+	racecard := &response.RaceCard{
+		LastUpdated:    race.LastUpdated,
+		Meeting:        m,
+		Name:           race.Name,
+		Number:         race.Number,
+		RaceID:         race.RaceId,
+		Results:        race.Results,
+		ScheduledStart: race.ScheduledStart,
+		Selections:     s,
+		Status:         race.Status,
+	}
+
+	return racecard, nil
+}
+
+func createSchedule(date *time.Time, meetings []*racing.Meeting, races []*racing.Race) (*response.RaceSchedule, error) {
+	schedule := &response.RaceSchedule{
+		HasRaces: len(races) > 0,
+		RaceDate: date.Format("2006-01-02"),
+		Meetings: make([]response.RaceScheduleMeeting, len(meetings)),
+		Races:    make([]response.RaceScheduleRace, len(races)),
+	}
+
+	for i, r := range races {
 		schedule.Races[i] = response.RaceScheduleRace{
 			LastUpdated:    r.LastUpdated,
 			Name:           r.Name,
@@ -164,7 +249,7 @@ func createSchedule(date *time.Time, m *racing.ListMeetingsByDateResponse, r *ra
 		}
 	}
 
-	for i, m := range m.Meetings {
+	for i, m := range meetings {
 		schedule.Meetings[i] = response.RaceScheduleMeeting{
 			Country:        m.Country,
 			LastUpdated:    m.LastUpdated,
