@@ -251,14 +251,16 @@ func (repo *RacingRepository) AddSelections(ctx context.Context, selections []*p
 func (repo *RacingRepository) GetRace(ctx context.Context, raceID string) (*proto.Race, error) {
 	t := stats.NewTiming()
 	defer t.Send(repoGetRaceTiming)
-	r := &proto.Race{}
+	m := &model.Race{}
 	log := logWithContext(ctx, "repository.GetRace")
-	err := repo.collection(raceCollection).FindId(raceID).One(r)
+	err := repo.collection(raceCollection).FindId(raceID).One(m)
 	if err != nil {
 		stats.Increment(repoGetRaceFailed)
 		log.Errorf("An error occurred retrieving race with id %v - %v", raceID, err)
 		return nil, err
 	}
+
+	r := model.RaceModelToProto(m)
 
 	stats.Increment(repoGetRaceSuccess)
 	return r, nil
@@ -268,14 +270,16 @@ func (repo *RacingRepository) GetRace(ctx context.Context, raceID string) (*prot
 func (repo *RacingRepository) GetMeeting(ctx context.Context, meetingID string) (*proto.Meeting, error) {
 	t := stats.NewTiming()
 	defer t.Send(repoGetMeetingTiming)
-	m := &proto.Meeting{}
+	mod := &model.Meeting{}
 	log := logWithContext(ctx, "repository.GetMeeting")
-	err := repo.collection(meetingCollection).FindId(meetingID).One(m)
+	err := repo.collection(meetingCollection).FindId(meetingID).One(mod)
 	if err != nil {
 		stats.Increment(repoGetMeetingFailed)
 		log.Errorf("An error occurred retrieving meeting with id %v - %v", meetingID, err)
 		return nil, err
 	}
+
+	m := model.MeetingModelToProto(mod)
 
 	stats.Increment(repoGetMeetingSuccess)
 	return m, nil
