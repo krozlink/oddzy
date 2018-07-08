@@ -5,6 +5,7 @@ import (
 	"fmt"
 	racing "github.com/krozlink/oddzy/services/srv/racing/proto"
 	microclient "github.com/micro/go-micro/client"
+	"github.com/micro/go-micro/metadata"
 	_ "github.com/micro/go-plugins/registry/consul"
 	"github.com/satori/go.uuid"
 	"strconv"
@@ -48,7 +49,7 @@ var raceTypes = []string{"horse-racing"} //, "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
 	log := logWithContext(p.ctx, "run")
-	log.Infof("Race scraper launched with id %v", p.ctx.Value(correlationID).(string))
+	log.Infof("Race scraper launched with id %v", getValueFromMetadata(p.ctx, string(correlationID)))
 
 loop:
 	for { // this should only loop once a day, with the loop ending when the day ends
@@ -180,7 +181,9 @@ func newScrapeProcess() scrapeProcess {
 
 	h := newHTTPHandler()
 
-	ctx := context.WithValue(context.Background(), correlationID, uuid.NewV4().String())
+	ctx := metadata.NewContext(context.Background(), map[string]string{
+		string(correlationID): uuid.NewV4().String(),
+	})
 
 	return scrapeProcess{
 		status: "INITIALISING",

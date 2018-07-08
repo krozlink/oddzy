@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/bshuster-repo/logrus-logstash-hook"
+	"github.com/micro/go-micro/metadata"
 	"github.com/micro/go-micro/server"
 	"github.com/sirupsen/logrus"
 	defaultLog "log"
@@ -27,7 +28,8 @@ const (
 
 func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, resp interface{}) error {
-		baseLog.Printf("Server request: %v", req.Method())
+		l := logWithContext(ctx, req.Method())
+		l.Printf("Server request: %v", req.Method())
 		return fn(ctx, req, resp)
 	}
 }
@@ -81,11 +83,22 @@ func getLog() *logrus.Logger {
 
 func logWithContext(ctx context.Context, functionName string) *logrus.Entry {
 	log := baseLog.WithField("function", functionName)
-	if id, ok := ctx.Value(correlationID).(string); ok {
+
+	if id := getValueFromMetadata(ctx, string(correlationID)); id != "" {
 		log = log.WithField(string(correlationID), id)
 	}
 
 	return log
+}
+
+func getValueFromMetadata(ctx context.Context, key string) string {
+	if md, ok := metadata.FromContext(ctx); ok {
+		if id, ok := md[key]; ok {
+			return id
+		}
+	}
+
+	return ""
 }
 
 func logFunction(functionName string) *logrus.Entry {
