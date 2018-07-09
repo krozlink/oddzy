@@ -14,12 +14,12 @@ import (
 const (
 	headerCorrelationID = "X-Correlation-Id"
 
-	handlerScheduleTiming  = "racing.api.handler.schedule.timing"
-	handlerScheduleSuccess = "racing.api.handler.schedule.success"
-	handlerScheduleFailed  = "racing.api.handler.schedule.failed"
-	handlerRacecardTiming  = "racing.api.handler.racecard.timing"
-	handlerRacecardSuccess = "racing.api.handler.racecard.success"
-	handlerRacecardFailed  = "racing.api.handler.racecard.failed"
+	handlerScheduleTiming  = "oddzy.racing.api.handler.schedule.timing"
+	handlerScheduleSuccess = "oddzy.racing.api.handler.schedule.success"
+	handlerScheduleFailed  = "oddzy.racing.api.handler.schedule.failed"
+	handlerRacecardTiming  = "oddzy.racing.api.handler.racecard.timing"
+	handlerRacecardSuccess = "oddzy.racing.api.handler.racecard.success"
+	handlerRacecardFailed  = "oddzy.racing.api.handler.racecard.failed"
 )
 
 // Racing is the handler for the racing api

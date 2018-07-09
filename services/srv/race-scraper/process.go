@@ -39,9 +39,9 @@ type externalRaceData struct {
 }
 
 const (
-	scrapeRaceTiming  = "race-scraper.service.scraperace.timing"
-	scrapeRaceSuccess = "race-scraper.service.scraperace.success"
-	scrapeRaceFailed  = "race-scraper.service.scraperace.failed"
+	scrapeRaceTiming  = "oddzy.race-scraper.service.process.scraperace.timing"
+	scrapeRaceSuccess = "oddzy.race-scraper.service.process.scraperace.success"
+	scrapeRaceFailed  = "oddzy.race-scraper.service.process.scraperace.failed"
 )
 
 // TODO put harness and greyhounds back
