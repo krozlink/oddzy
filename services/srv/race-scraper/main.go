@@ -50,7 +50,8 @@ func registerProcessMonitor(process *scrapeProcess) {
 	srv.Init()
 
 	proto.RegisterMonitorServiceHandler(srv.Server(), monitor)
-	baseLog.Infof("Registered monitor successfully")
+	log := logWithContext(process.ctx, "main.registerProcessMonitor")
+	log.Infof("Registered monitor successfully")
 
 	go func() {
 		if err := srv.Run(); err != nil {

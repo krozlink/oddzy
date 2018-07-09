@@ -112,7 +112,7 @@ func monitorOpenRaces(p *scrapeProcess, open []*racing.Race) (chan<- bool, <-cha
 					ScheduledStart: updated.ScheduledStart,
 					Status:         updated.Status,
 				}
-				_, err = p.racing.UpdateRace(context.Background(), req)
+				_, err = p.racing.UpdateRace(p.ctx, req)
 				if err != nil {
 					log.Errorf("Unable to update race id '%v' - %v", r.race.RaceId, err)
 					log.Errorf("Skipping race %v", r.race.RaceId)

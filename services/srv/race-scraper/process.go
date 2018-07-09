@@ -152,9 +152,8 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 	}()
 
 	// Updated scraped races
-	ctx := context.Background()
 	for r := range update {
-		_, err := p.racing.UpdateRace(ctx, r)
+		_, err := p.racing.UpdateRace(p.ctx, r)
 		if err != nil {
 			lock.Lock()
 			errors = append(errors, err)
@@ -327,12 +326,11 @@ func readInternal(p *scrapeProcess, start, end time.Time) ([]*racing.Meeting, []
 	// read all internal meeting data for scraping period (yesterday to 2 days from now)
 	//		ListMeetingsByDate
 	//		ListRacesByMeetingDate
-	ctx := context.Background()
 	mReq := &racing.ListMeetingsByDateRequest{
 		StartDate: start.Unix(),
 		EndDate:   end.Unix(),
 	}
-	mResp, err := p.racing.ListMeetingsByDate(ctx, mReq)
+	mResp, err := p.racing.ListMeetingsByDate(p.ctx, mReq)
 	if err != nil {
 		log.Errorf("Error calling ListMeetingsByDate - %v", err)
 		return nil, nil, err
@@ -342,7 +340,7 @@ func readInternal(p *scrapeProcess, start, end time.Time) ([]*racing.Meeting, []
 		StartDate: start.Unix(),
 		EndDate:   end.Unix(),
 	}
-	rResp, err := p.racing.ListRacesByMeetingDate(ctx, rReq)
+	rResp, err := p.racing.ListRacesByMeetingDate(p.ctx, rReq)
 	if err != nil {
 		log.Errorf("Error calling ListRacesByMeetingDate - %v", err)
 		return nil, nil, err
