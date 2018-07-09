@@ -24,7 +24,7 @@ func CorrelationWrapper(service micro.Service) server.HandlerWrapper {
 	return func(fn server.HandlerFunc) server.HandlerFunc {
 		return func(ctx context.Context, req server.Request, rsp interface{}) error {
 			ctx = metadata.NewContext(ctx, map[string]string{
-				string(correlationID): uuid.NewUUID().String(),
+				string(correlationID): uuid.NewRandom().String(),
 			})
 			return fn(ctx, req, rsp)
 		}
