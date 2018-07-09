@@ -16,7 +16,7 @@ type metaContext string
 
 var baseLog *logrus.Logger
 
-const correlationID metaContext = "correlation_id"
+const correlationID metaContext = "Correlation-Id"
 
 const (
 	loggerEnv           = "ODDZY_LOGGER"
