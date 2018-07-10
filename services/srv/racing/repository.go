@@ -19,9 +19,9 @@ const (
 
 const (
 	repoSessionOpenedTiming = "oddzy.racing.service.repository.sessionopened.timing"
-	repoSessionOpenedCount  = "oddzy.racing.service.repository.sessionopened.count"
+	repoSessionOpenedCount  = "oddzy.racing.service.repository.sessionopened.success"
 	repoSessionClosedTiming = "oddzy.racing.service.repository.sessionclosed.timing"
-	repoSessionClosedCount  = "oddzy.racing.service.repository.sessionclosed.count"
+	repoSessionClosedCount  = "oddzy.racing.service.repository.sessionclosed.success"
 
 	repoListMeetingsByDateTiming      = "oddzy.racing.service.repository.listmeetingsbydate.timing"
 	repoListMeetingsByDateSuccess     = "oddzy.racing.service.repository.listmeetingsbydate.success"

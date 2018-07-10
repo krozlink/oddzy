@@ -85,6 +85,11 @@ services:
       - oddzy
   statsd:
     image: prom/statsd-exporter
+    command: "-statsd.mapping-config=/tmp/statsd_mapping.conf"
+    ports:
+      - "9102:9102"
+    volumes:
+      - ./deploy/statsd/statsd_mapping.conf:/tmp/statsd_mapping.conf
     networks:
       - oddzy
 volumes:
