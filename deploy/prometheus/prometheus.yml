@@ -6,25 +6,25 @@ scrape_configs:
   - job_name: 'statsd'
     static_configs:
       - targets: ['statsd:9102']
-    metric_relabel_configs:
+    metric_relabel_configs: #oddzy_[service]_[layer]_[file]_[function]_[metric]
       - source_labels: ["__name__"]
-        regex: "oddzy_([A-z]+)_([A-z]+)_([A-z]+)_([A-z]+)_(.*)" #oddzy_[service]_[layer]_[file]_[function]_[metric]
+        regex: "oddzy_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_(.*)" 
         target_label: "service"
         replacement: "$1"
       - source_labels: ["__name__"]
-        regex: "oddzy_([A-z]+)_([A-z]+)_([A-z]+)_([A-z]+)_(.*)"
+        regex: "oddzy_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_(.*)" 
         target_label: "layer"
         replacement: "$2"
       - source_labels: ["__name__"]
-        regex: "oddzy_([A-z]+)_([A-z]+)_([A-z]+)_([A-z]+)_(.*)"
+        regex: "oddzy_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_(.*)" 
         target_label: "file"
         replacement: "$3"
       - source_labels: ["__name__"]
-        regex: "oddzy_([A-z]+)_([A-z]+)_([A-z]+)_([A-z]+)_(.*)"
+        regex: "oddzy_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_(.*)" 
         target_label: "function"
         replacement: "$4"
       - source_labels: ["__name__"]
-        regex: "oddzy_([A-z]+)_([A-z]+)_([A-z]+)_([A-z]+)_(.*)" #oddzy_[metric]
+        regex: "oddzy_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_([A-Za-z]+)_(.*)" #oddzy_[metric]
         target_label: "__name__"
         replacement: "oddzy_${5}"
 
