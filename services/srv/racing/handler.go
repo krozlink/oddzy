@@ -330,8 +330,10 @@ func (s *RacingService) UpdateRace(ctx context.Context, req *proto.UpdateRaceReq
 	}
 
 	raceUpdated := hasRaceChanged(originalRace, race)
-	if raceUpdated {
-		err = repo.UpdateRace(ctx, race)
+	if err = repo.UpdateRace(ctx, race); err != nil {
+		log.Errorf("Failed to update race. Error: %v", err)
+		stats.Increment(handlerUpdateRaceFailed)
+		return err
 	}
 
 	selectionUpdated := false
@@ -530,7 +532,8 @@ func hasRaceChanged(from *proto.Race, to *proto.RaceUpdatedMessage) bool {
 	return from.ScheduledStart != to.ScheduledStart ||
 		from.ActualStart != to.ActualStart ||
 		from.Status != to.Status ||
-		from.Results != to.Results
+		from.Results != to.Results ||
+		(!from.IsScraped && len(to.Selections) > 0)
 }
 
 func hasSelectionChanged(from, to *proto.Selection) bool {
