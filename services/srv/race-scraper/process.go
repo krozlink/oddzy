@@ -44,8 +44,7 @@ const (
 	scrapeRaceFailed  = "oddzy.race-scraper.service.process.scraperace.failed"
 )
 
-// TODO put harness and greyhounds back
-var raceTypes = []string{"horse-racing"} //, "harness", "greyhounds"}
+var raceTypes = []string{"horse-racing", "harness", "greyhounds"}
 
 func (p *scrapeProcess) run() {
 	log := logWithContext(p.ctx, "run")
@@ -188,10 +187,9 @@ func newScrapeProcess() scrapeProcess {
 		status: "INITIALISING",
 		done:   make(chan bool),
 		// http:      handler{},
-		racing:  r,
-		scraper: NewOddsScraper(h),
-		//TODO - change back to -1, 2
-		dateRange:        [2]int{0, 0}, // scrape from 1 day ago to 2 days in the future (4 days total)
+		racing:           r,
+		scraper:          NewOddsScraper(h),
+		dateRange:        [2]int{-1, 2}, // scrape from 1 day ago to 2 days in the future (4 days total)
 		meetingsByID:     make(map[string]*racing.Meeting),
 		meetingsBySource: make(map[string]*racing.Meeting),
 		racesByID:        make(map[string]*racing.Race),
