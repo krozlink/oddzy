@@ -168,7 +168,7 @@ func getDateRange(r [2]int) (time.Time, time.Time) {
 	//r[0] - number of days ago to start scraping from. e.g -1 is yesterday
 	//r[1] - number of days ago to scrape to. e.g 2 is day after tomorrow
 	now := nowLocal()
-	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Add(time.Hour * time.Duration(-24*r[0]))
+	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Add(time.Hour * time.Duration(24*r[0]))
 	end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location()).Add(time.Hour * time.Duration(24*r[1]))
 	return start, end
 }
