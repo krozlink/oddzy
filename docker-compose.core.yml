@@ -75,7 +75,7 @@ services:
       - 9090:9090
     networks:
       - oddzy
-  graphana:
+  grafana:
     image: grafana/grafana
     ports:
       - 3000:3000
@@ -83,6 +83,8 @@ services:
       - prometheus
     networks:
       - oddzy
+    volumes:
+      - grafana:/var/lib/grafana
   statsd:
     image: prom/statsd-exporter
     command: "-statsd.mapping-config=/tmp/statsd_mapping.conf"
@@ -94,6 +96,7 @@ services:
       - oddzy
 volumes:
   elasticsearch:
+  grafana:
 networks:
   oddzy:
       external: true
