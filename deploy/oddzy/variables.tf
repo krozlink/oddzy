@@ -3,7 +3,7 @@ variable "region" {
   default = "ap-southeast-2"
 }
 
-variable "stage" {
+variable "repository" {
   type    = "string"
-  default = "dev"
+  default = "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/"
 }
