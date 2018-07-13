@@ -1,7 +1,7 @@
 version: "3"
 services:
   consul:
-    image: consul:latest
+    image: consul:1.2.0
     hostname: consul
     ports:
      - "8500:8500"
@@ -68,7 +68,7 @@ services:
     networks:
       - oddzy
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.3.1
     volumes: 
       - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -76,7 +76,7 @@ services:
     networks:
       - oddzy
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:5.2.1
     ports:
       - 3000:3000
     links:
@@ -86,7 +86,7 @@ services:
     volumes:
       - grafana:/var/lib/grafana
   statsd:
-    image: prom/statsd-exporter
+    image: prom/statsd-exporter:v0.6.0
     command: "-statsd.mapping-config=/tmp/statsd_mapping.conf"
     ports:
       - "9102:9102"
