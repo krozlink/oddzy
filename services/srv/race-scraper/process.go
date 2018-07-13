@@ -7,7 +7,7 @@ import (
 	microclient "github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/metadata"
 	_ "github.com/micro/go-plugins/registry/consul"
-	"github.com/satori/go.uuid"
+	"github.com/pborman/uuid"
 	"strconv"
 	"strings"
 	"sync"
@@ -126,7 +126,7 @@ func scrapeRaces(p *scrapeProcess, missing []*racing.Race) error {
 			}
 			selections := parseRaceCard(card)
 			for _, s := range selections {
-				s.SelectionId = uuid.NewV4().String()
+				s.SelectionId = uuid.NewRandom().String()
 				s.RaceId = r.RaceId
 			}
 
@@ -180,7 +180,7 @@ func newScrapeProcess() scrapeProcess {
 	h := newHTTPHandler()
 
 	ctx := metadata.NewContext(context.Background(), map[string]string{
-		string(correlationID): uuid.NewV4().String(),
+		string(correlationID): uuid.NewRandom().String(),
 	})
 
 	return scrapeProcess{
@@ -394,7 +394,7 @@ func processRaceSchedule(p *scrapeProcess, eventType string, c *RaceSchedule) (*
 				existingMeetings = append(existingMeetings, meeting)
 			} else {
 				log.Debugf("Meeting with source id %v is new", mSource)
-				meeting.MeetingId = uuid.NewV4().String()
+				meeting.MeetingId = uuid.NewRandom().String()
 				newMeetings = append(newMeetings, meeting)
 			}
 
@@ -417,7 +417,7 @@ func processRaceSchedule(p *scrapeProcess, eventType string, c *RaceSchedule) (*
 					race.LastUpdated = val.LastUpdated
 					existingRaces = append(existingRaces, race)
 				} else {
-					race.RaceId = uuid.NewV4().String()
+					race.RaceId = uuid.NewRandom().String()
 					newRaces = append(newRaces, race)
 				}
 
