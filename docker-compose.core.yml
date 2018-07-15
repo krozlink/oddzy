@@ -62,7 +62,7 @@ services:
     ports:
       - 5000:5000
     volumes:
-      - ./deploy/logstash/logstash.conf:/etc/logstash/conf.d/logstash.conf
+      - ./deploy/volumes/logstash/logstash.conf:/etc/logstash/conf.d/logstash.conf
     links:
       - elasticsearch
     networks:
@@ -70,7 +70,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.3.1
     volumes: 
-      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./deploy/volumes/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090
     networks:
@@ -91,7 +91,7 @@ services:
     ports:
       - "9102:9102"
     volumes:
-      - ./deploy/statsd/statsd_mapping.conf:/tmp/statsd_mapping.conf
+      - ./deploy/volumes/statsd/statsd_mapping.conf:/tmp/statsd_mapping.conf
     networks:
       - oddzy
 volumes:
