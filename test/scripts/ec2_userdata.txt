@@ -1,0 +1,21 @@
+#!/bin/bash
+echo vm.max_map_count=262144 >> /etc/sysctl.conf
+sysctl -w vm.max_map_count=262144
+echo ECS_CLUSTER=oddzy-test >> /etc/ecs/ecs.config;echo ECS_BACKEND_HOST= >> /etc/ecs/ecs.config;
+
+#cloud-config
+repo_update: true
+repo_upgrade: all
+
+packages:
+- amazon-efs-utils
+
+runcmd:
+- file_system_id_01=fs-1da46724
+- efs_directory=/mnt/efs
+
+- mkdir -p ${efs_directory}
+- echo "${file_system_id_01}:/ ${efs_directory} efs tls,_netdev" >> /etc/fstab
+- mount -a -t efs defaults
+
+- chown -R 1000:1000 ${efs_directory}
