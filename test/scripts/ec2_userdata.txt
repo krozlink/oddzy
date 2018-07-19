@@ -18,4 +18,4 @@ runcmd:
 - echo "${file_system_id_01}:/ ${efs_directory} efs tls,_netdev" >> /etc/fstab
 - mount -a -t efs defaults
 
-- chown -R 1000:1000 ${efs_directory}
+- chmod 777 ${efs_directory}
