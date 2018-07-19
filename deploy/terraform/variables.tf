@@ -33,3 +33,11 @@ variable "ecs_desired_capacity" {
 variable "oddzy_ami_tag" {
   type = "string"
 }
+
+variable "efs_volume" {
+  type = "string"
+}
+
+variable "nat_eip_allocation_id" {
+  type = "string"
+}

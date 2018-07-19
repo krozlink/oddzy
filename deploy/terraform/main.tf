@@ -10,13 +10,6 @@ terraform {
   }
 }
 
-resource "aws_ecs_task_definition" "consul" {
-  family                = "consul"
-  container_definitions = "${file("task-definitions/consul.json")}"
-
-  network_mode = "bridge"
-}
-
 ### DATA ###
 
 
