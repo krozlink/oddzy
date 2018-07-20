@@ -39,22 +39,22 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
   key_name                    = "${var.ecs_key_pair}"
 
   user_data = <<EOF
-                #cloud-config
-                repo_update: true
-                repo_upgrade: all
+#cloud-config
+repo_update: true
+repo_upgrade: all
 
-                packages:
-                 - amazon-efs-utils
+packages:
+  - amazon-efs-utils
 
-                runcmd:
-                 - echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
-                 - file_system_id_01=fs-1da46724
-                 - efs_directory=/mnt/efs
-                 - mkdir -p $${efs_directory}
-                 - echo "$${file_system_id_01}:/ $${efs_directory} efs tls,_netdev" >> /etc/fstab
-                 - mount -a -t efs defaults
-                 - chmod 777 $${efs_directory}
-                EOF
+runcmd:
+  - echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
+  - file_system_id_01=fs-1da46724
+  - efs_directory=/mnt/efs
+  - mkdir -p $${efs_directory}
+  - echo "$${file_system_id_01}:/ $${efs_directory} efs tls,_netdev" >> /etc/fstab
+  - mount -a -t efs defaults
+  - chmod 777 $${efs_directory}
+EOF
 }
 
 // Auto-Scaling Group

@@ -12,7 +12,7 @@ ecs_min_instance_size = "0"
 
 ecs_max_instance_size = "1"
 
-ecs_desired_capacity = "1"
+ecs_desired_capacity = "0"
 
 oddzy_ami_tag = "latest"
 
@@ -20,4 +20,6 @@ efs_volume = "fs-1da46724"
 
 nat_eip_allocation_id = "eipalloc-9216e9af"
 
-hosted_zone = "oddzy.xyz"
+domain_name = "oddzy.xyz"
+
+bucket_name = "oddzy"

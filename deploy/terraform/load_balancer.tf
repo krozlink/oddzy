@@ -1,3 +1,20 @@
+resource aws_lb "main" {
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = ["${aws_subnet.public-a.id}", "${aws_subnet.public-b.id}"]
+  security_groups    = ["${aws_security_group.load_balancer.id}"]
+
+  access_logs {
+    bucket  = "${var.bucket_name}"
+    prefix  = "elb_logs"
+    enabled = true
+  }
+
+  tags {
+    Name = "${var.application_name}"
+  }
+}
+
 resource aws_lb_target_group "public" {
   port     = 80
   protocol = "HTTP"
@@ -15,16 +32,6 @@ resource aws_lb_target_group "private" {
 
   tags {
     Name = "${var.application_name}-private"
-  }
-}
-
-resource aws_lb "main" {
-  internal           = false
-  load_balancer_type = "application"
-  subnets            = ["${aws_subnet.public-a.id}", "${aws_subnet.public-b.id}"]
-
-  tags {
-    Name = "${var.application_name}"
   }
 }
 
@@ -52,4 +59,56 @@ resource aws_lb_listener_rule "internal" {
     field  = "host-header"
     values = ["internal.oddzy.xyz"]
   }
+}
+
+resource aws_security_group "load_balancer" {
+  description = "ELB Security Group"
+  vpc_id      = "${aws_vpc.main.id}"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource aws_s3_bucket_policy elb {
+  bucket = "${var.bucket_name}"
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Id": "ELBLogsPolicy",
+  "Statement": [
+    {
+      "Sid": "AllowELBLogs",
+      "Action": [
+        "s3:PutObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::${var.bucket_name}/elb_logs/*",
+      "Principal": {
+        "AWS": [
+          "783225319266"
+        ]
+      }
+    } 
+  ]
+}
+  POLICY
 }
