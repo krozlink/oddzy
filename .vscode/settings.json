@@ -14,5 +14,7 @@
     "files.exclude": {
         "**/vendor/**": true,
         "**/Gopkg.*": true,
-    }
+    },
+    "terraform.codelens.enabled": false,
+
 }
