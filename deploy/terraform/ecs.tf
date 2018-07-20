@@ -64,6 +64,7 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
   desired_capacity     = "${var.ecs_desired_capacity}"
   vpc_zone_identifier  = ["${aws_subnet.private.id}"]
   launch_configuration = "${aws_launch_configuration.ecs_launch_configuration.name}"
+  target_group_arns    = ["${aws_lb_target_group.public.arn}", "${aws_lb_target_group.private.arn}"]
   health_check_type    = "ELB"
 }
 

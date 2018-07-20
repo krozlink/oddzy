@@ -19,3 +19,5 @@ oddzy_ami_tag = "latest"
 efs_volume = "fs-1da46724"
 
 nat_eip_allocation_id = "eipalloc-9216e9af"
+
+hosted_zone = "oddzy.xyz"

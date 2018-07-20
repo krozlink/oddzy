@@ -21,7 +21,7 @@ resource aws_lb_target_group "private" {
 resource aws_lb "main" {
   internal           = false
   load_balancer_type = "application"
-  subnets            = ["${aws_subnet.public.id}", "${aws_subnet.public-b.id}"]
+  subnets            = ["${aws_subnet.public-a.id}", "${aws_subnet.public-b.id}"]
 
   tags {
     Name = "${var.application_name}"

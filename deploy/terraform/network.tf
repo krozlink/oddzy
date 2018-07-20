@@ -16,6 +16,7 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
+// NAT Gateway
 resource "aws_nat_gateway" "gw" {
   allocation_id = "${var.nat_eip_allocation_id}"
   subnet_id     = "${aws_subnet.private.id}"
@@ -27,8 +28,8 @@ resource "aws_nat_gateway" "gw" {
   }
 }
 
-// SUBNET - Public
-resource "aws_subnet" "public" {
+// Subnets - Public
+resource "aws_subnet" "public-a" {
   vpc_id                  = "${aws_vpc.main.id}"
   cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
@@ -36,18 +37,6 @@ resource "aws_subnet" "public" {
 
   tags {
     Name = "${var.application_name}-public-a"
-  }
-}
-
-// SUBNET - Private
-resource "aws_subnet" "private" {
-  vpc_id                  = "${aws_vpc.main.id}"
-  cidr_block              = "10.0.1.0/24"
-  map_public_ip_on_launch = false
-  availability_zone       = "ap-southeast-2a"
-
-  tags {
-    Name = "${var.application_name}-private-a"
   }
 }
 
@@ -59,6 +48,18 @@ resource "aws_subnet" "public-b" {
 
   tags {
     Name = "${var.application_name}-public-b"
+  }
+}
+
+// Subnet - Private
+resource "aws_subnet" "private" {
+  vpc_id                  = "${aws_vpc.main.id}"
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = false
+  availability_zone       = "ap-southeast-2a"
+
+  tags {
+    Name = "${var.application_name}-private-a"
   }
 }
 
@@ -76,7 +77,6 @@ resource "aws_route_table" "public" {
   }
 }
 
-// Route table
 resource "aws_route_table" "private" {
   vpc_id = "${aws_vpc.main.id}"
 
@@ -90,8 +90,9 @@ resource "aws_route_table" "private" {
   }
 }
 
-resource "aws_route_table_association" "public" {
-  subnet_id      = "${aws_subnet.public.id}"
+// Route associations
+resource "aws_route_table_association" "public-a" {
+  subnet_id      = "${aws_subnet.public-a.id}"
   route_table_id = "${aws_route_table.public.id}"
 }
 
