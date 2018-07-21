@@ -36,7 +36,7 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
 
   security_groups             = ["${aws_security_group.main_sg.id}"]
   associate_public_ip_address = false
-  key_name                    = "${var.ecs_key_pair}"
+  key_name                    = "${var.ec2_key_pair}"
 
   user_data = <<EOF
 #cloud-config

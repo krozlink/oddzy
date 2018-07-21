@@ -16,10 +16,15 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
+resource aws_eip "nat" {
+  vpc        = true
+  depends_on = ["aws_internet_gateway.gw"]
+}
+
 // NAT Gateway
 resource "aws_nat_gateway" "gw" {
-  allocation_id = "${var.nat_eip_allocation_id}"
-  subnet_id     = "${aws_subnet.private.id}"
+  allocation_id = "${aws_eip.nat.id}"
+  subnet_id     = "${aws_subnet.public-a.id}"
 
   depends_on = ["aws_internet_gateway.gw"]
 
@@ -111,7 +116,7 @@ resource "aws_security_group" "main_sg" {
   description = "Main VPC security group"
   vpc_id      = "${aws_vpc.main.id}"
 
-  egress {
+  ingress {
     from_port   = 0
     to_port     = 0
     protocol    = -1
