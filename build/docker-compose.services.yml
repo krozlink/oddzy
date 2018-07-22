@@ -4,7 +4,7 @@ services:
 
   racing-api:
     build:
-      context: ./services/api/racing
+      context: ../services/api/racing
     image: 675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/api/racing:latest
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
@@ -18,7 +18,7 @@ services:
 
   racing-service:
     build: 
-      context: ./services/srv/racing
+      context: ../services/srv/racing
     image: 675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/srv/racing:latest
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500
@@ -35,7 +35,7 @@ services:
 
 
   race-scraper-service:
-    build: ./services/srv/race-scraper
+    build: ../services/srv/race-scraper
     image: 675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/srv/race-scraper:latest
     environment:
       - MICRO_REGISTRY_ADDRESS=consul:8500

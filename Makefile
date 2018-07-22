@@ -1,21 +1,32 @@
+.PHONY: build deploy
+
 cup:
-	docker-compose -f docker-compose.core.yml up -d --build
+	OD_DEPLOY=local docker-compose -f ./build/docker-compose.core.yml up -d --build
 
 cdown:
-	docker-compose -f docker-compose.core.yml down
+	OD_DEPLOY=local docker-compose -f ./build/docker-compose.core.yml down
 
 up:
-	docker-compose -f docker-compose.services.yml up -d --build
+	OD_DEPLOY=local docker-compose -f ./build/docker-compose.services.yml up -d --build
 
 down:
-	docker-compose -f docker-compose.services.yml down
+	OD_DEPLOY=local docker-compose -f ./build/docker-compose.services.yml down
 
-push: build
+deploy: build
 	@eval $$(aws ecr get-login --no-include-email --region ap-southeast-2)
-	docker-compose -f docker-compose.services.yml push
+	OD_DEPLOY=remote docker-compose -f ./build/docker-compose.services.yml -f ./build/docker-compose.core.yml push
 
 build:
-	docker-compose -f docker-compose.services.yml build
+	OD_DEPLOY=remote docker-compose -f ./build/docker-compose.core.yml -f ./build/docker-compose.services.yml build
 
 init:
 	docker network create oddzy
+
+apply:
+	cd ./deploy/terraform; terraform apply -auto-approve
+
+plan:
+	cd ./deploy/terraform; terraform plan
+
+destroy:
+	cd ./deploy/terraform; terraform destroy -auto-approve
