@@ -1,0 +1,27 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/nginx",
+        "name": "nginx",
+        "memory": 64,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "nginx"
+            }
+        },
+        "portMappings": [
+            {
+                "hostPort": 80,
+                "protocol": "tcp",
+                "containerPort": 80
+            },
+            {
+                "hostPort": 8080,
+                "protocol": "tcp",
+                "containerPort": 8080
+            }
+        ] 
+    }
+]
