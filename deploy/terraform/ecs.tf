@@ -47,6 +47,8 @@ packages:
   - amazon-efs-utils
 
 runcmd:
+  - echo vm.max_map_count=262144 >> /etc/sysctl.conf
+  - sysctl -w vm.max_map_count=262144
   - echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
   - file_system_id_01=fs-1da46724
   - efs_directory=/mnt/efs

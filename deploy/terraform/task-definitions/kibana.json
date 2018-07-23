@@ -1,0 +1,28 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/kibana",
+        "name": "kibana",
+        "memory": 512,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "kibana"
+            }
+        },
+        "portMappings": [
+            {
+                "hostPort": 5601,
+                "protocol": "tcp",
+                "containerPort": 5601
+            }
+        ],
+        "environment": [
+            {
+                "name": "ELASTICSEARCH_URL",
+                "value": "http://localhost:9200"
+            }
+        ]
+    }
+]

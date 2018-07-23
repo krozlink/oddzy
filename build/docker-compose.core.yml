@@ -10,6 +10,9 @@ services:
     links:
       - grafana
       - kibana
+      - consul
+      - elasticsearch
+      - logstash
     networks:
       - oddzy
   consul:

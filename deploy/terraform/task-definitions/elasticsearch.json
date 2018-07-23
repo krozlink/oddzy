@@ -1,0 +1,40 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/elasticsearch",
+        "name": "elasticsearch",
+        "memory": 2048,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "elasticsearch"
+            }
+        },
+        "portMappings": [
+            {
+                "hostPort": 9200,
+                "protocol": "tcp",
+                "containerPort": 9200
+            },
+            {
+                "hostPort": 9300,
+                "protocol": "tcp",
+                "containerPort": 9300
+            }
+        ],
+        "environment": [
+            {
+                "name": "ES_JAVA_OPTS",
+                "value": "-Xms1g -Xmx1g"
+            }
+        ],
+        "ulimits": [
+          {
+            "name": "nofile",
+            "softLimit": 65536,
+            "hardLimit": 65536
+          }
+        ]
+    }
+]
