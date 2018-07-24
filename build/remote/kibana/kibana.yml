@@ -16,7 +16,7 @@ server.basePath: "/kibana"
 # `server.basePath` or require that they are rewritten by your reverse proxy.
 # This setting was effectively always `false` before Kibana 6.3 and will
 # default to `true` starting in Kibana 7.0.
-# server.rewriteBasePath: true
+server.rewriteBasePath: true
 
 # The maximum payload size in bytes for incoming server requests.
 #server.maxPayloadBytes: 1048576
@@ -25,7 +25,7 @@ server.basePath: "/kibana"
 #server.name: "your-hostname"
 
 # The URL of the Elasticsearch instance to use for all your queries.
-#elasticsearch.url: "http://localhost:9200"
+elasticsearch.url: "http://localhost:9200"
 
 # When this setting's value is true Kibana uses the hostname specified in the server.host
 # setting. When the value of this setting is false, Kibana uses the hostname of the host
