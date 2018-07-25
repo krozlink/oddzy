@@ -2,7 +2,7 @@
     {
         "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/logstash",
         "name": "logstash",
-        "memory": 1024,
+        "memoryReservation": 768,
         "logConfiguration": {
             "logDriver": "awslogs",
             "options": {

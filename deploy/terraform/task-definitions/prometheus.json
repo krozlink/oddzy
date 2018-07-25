@@ -2,7 +2,7 @@
     {
         "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/prometheus:latest",
         "name": "prometheus",
-        "memory": 256,
+        "memoryReservation": 128,
         "logConfiguration": {
             "logDriver": "awslogs",
             "options": {

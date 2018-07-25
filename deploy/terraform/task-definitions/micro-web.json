@@ -2,7 +2,7 @@
     {
         "image": "microhq/micro",
         "name": "micro-web",
-        "memory": 64,
+        "memoryReservation": 32,
         "command": ["web", "--address=0.0.0.0:8090"],
         "logConfiguration": {
             "logDriver": "awslogs",

@@ -2,7 +2,7 @@
     {
         "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/elasticsearch",
         "name": "elasticsearch",
-        "memory": 2048,
+        "memoryReservation": 1536,
         "logConfiguration": {
             "logDriver": "awslogs",
             "options": {

@@ -2,7 +2,7 @@
     {
         "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/kibana",
         "name": "kibana",
-        "memory": 512,
+        "memoryReservation": 256,
         "logConfiguration": {
             "logDriver": "awslogs",
             "options": {
