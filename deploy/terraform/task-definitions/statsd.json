@@ -1,0 +1,22 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/statsd:latest",
+        "name": "statsd",
+        "memory": 64,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "statsd"
+            }
+        },
+        "portMappings": [
+            {
+                "hostPort": 9102,
+                "protocol": "tcp",
+                "containerPort": 9102
+            }
+        ]
+    }
+]

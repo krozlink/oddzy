@@ -1,0 +1,33 @@
+[
+    {
+        "image": "microhq/micro",
+        "name": "micro-web",
+        "memory": 64,
+        "command": ["web", "--address=0.0.0.0:8090"],
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "micro-web"
+            }
+        },
+        "portMappings": [
+            {
+                "hostPort": 8090,
+                "protocol": "tcp",
+                "containerPort": 8090
+            }
+        ],
+        "environment": [
+            {
+                "name": "MICRO_REGISTRY",
+                "value": "consul"
+            },
+            {
+                "name": "MICRO_REGISTRY_ADDRESS",
+                "value": "http://localhost:8500"
+            }
+        ]
+    }
+]

@@ -1,0 +1,28 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/grafana:latest",
+        "name": "grafana",
+        "memory": 128,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "grafana"
+            }
+        },
+        "portMappings": [
+            {
+                "hostPort": 3000,
+                "protocol": "tcp",
+                "containerPort": 3000
+            }
+        ],
+        "environment": [
+            {
+                "name": "GF_ROOT_URL",
+                "value": "http://localhost/grafana/"
+            }
+        ]
+    }
+]

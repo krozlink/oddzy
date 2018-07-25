@@ -87,3 +87,93 @@ resource aws_ecs_service logstash {
     type = "distinctInstance"
   }
 }
+
+// ------- Micro Web --------------
+resource aws_ecs_task_definition micro-web {
+  family                = "micro-web"
+  container_definitions = "${file("task-definitions/micro-web.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service micro-web {
+  name            = "micro-web"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.micro-web.arn}"
+  desired_count   = 1
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}
+
+// ------- Micro API --------------
+resource aws_ecs_task_definition micro-api {
+  family                = "micro-api"
+  container_definitions = "${file("task-definitions/micro-api.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service micro-api {
+  name            = "micro-api"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.micro-api.arn}"
+  desired_count   = 1
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}
+
+// ------- Prometheus --------------
+resource aws_ecs_task_definition prometheus {
+  family                = "prometheus"
+  container_definitions = "${file("task-definitions/prometheus.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service prometheus {
+  name            = "prometheus"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.prometheus.arn}"
+  desired_count   = 1
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}
+
+// ------- Grafana --------------
+resource aws_ecs_task_definition grafana {
+  family                = "grafana"
+  container_definitions = "${file("task-definitions/grafana.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service grafana {
+  name            = "grafana"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.grafana.arn}"
+  desired_count   = 1
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}
+
+// ------- Statsd --------------
+resource aws_ecs_task_definition statsd {
+  family                = "statsd"
+  container_definitions = "${file("task-definitions/statsd.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service statsd {
+  name            = "statsd"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.statsd.arn}"
+  desired_count   = 1
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}

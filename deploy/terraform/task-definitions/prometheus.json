@@ -1,0 +1,22 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/prometheus:latest",
+        "name": "prometheus",
+        "memory": 256,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "prometheus"
+            }
+        },
+        "portMappings": [
+            {
+                "hostPort": 9090,
+                "protocol": "tcp",
+                "containerPort": 9090
+            }
+        ]
+    }
+]
