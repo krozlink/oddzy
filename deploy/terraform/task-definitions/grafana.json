@@ -23,6 +23,12 @@
                 "name": "GF_ROOT_URL",
                 "value": "http://localhost/grafana/"
             }
+        ],
+        "mountPoints": [
+            {
+                "sourceVolume": "data",
+                "containerPath": "/var/lib/grafana"
+            }
         ]
     }
 ]

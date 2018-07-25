@@ -20,6 +20,17 @@ resource aws_lb_target_group "public" {
   protocol = "HTTP"
   vpc_id   = "${aws_vpc.main.id}"
 
+  health_check {
+    interval            = 30
+    path                = "/ping"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 5
+    healthy_threshold   = 5
+    unhealthy_threshold = 3
+    matcher             = "200"
+  }
+
   tags {
     Name = "${var.application_name}-public"
   }
@@ -29,6 +40,17 @@ resource aws_lb_target_group "private" {
   port     = 8080
   protocol = "HTTP"
   vpc_id   = "${aws_vpc.main.id}"
+
+  health_check {
+    interval            = 30
+    path                = "/ping"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 5
+    healthy_threshold   = 5
+    unhealthy_threshold = 3
+    matcher             = "200"
+  }
 
   tags {
     Name = "${var.application_name}-private"

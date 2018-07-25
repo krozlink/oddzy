@@ -35,6 +35,12 @@
             "softLimit": 65536,
             "hardLimit": 65536
           }
+        ],
+        "mountPoints": [
+            {
+                "sourceVolume": "data",
+                "containerPath": "/usr/share/elasticsearch/data"
+            }
         ]
     }
 ]

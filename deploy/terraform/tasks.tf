@@ -39,6 +39,11 @@ resource aws_ecs_task_definition elasticsearch {
   family                = "elasticsearch"
   container_definitions = "${file("task-definitions/elasticsearch.json")}"
   network_mode          = "host"
+
+  volume {
+    name      = "data"
+    host_path = "/mnt/efs/volumes/elasticsearch/data"
+  }
 }
 
 resource aws_ecs_service elasticsearch {
@@ -147,6 +152,11 @@ resource aws_ecs_task_definition grafana {
   family                = "grafana"
   container_definitions = "${file("task-definitions/grafana.json")}"
   network_mode          = "host"
+
+  volume {
+    name      = "data"
+    host_path = "/mnt/efs/volumes/grafana/data"
+  }
 }
 
 resource aws_ecs_service grafana {

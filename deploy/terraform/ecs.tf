@@ -55,7 +55,7 @@ runcmd:
   - mkdir -p $${efs_directory}
   - echo "$${file_system_id_01}:/ $${efs_directory} efs tls,_netdev" >> /etc/fstab
   - mount -a -t efs defaults
-  - chmod 777 $${efs_directory}
+  - chmod -R 777 $${efs_directory}
 EOF
 }
 
