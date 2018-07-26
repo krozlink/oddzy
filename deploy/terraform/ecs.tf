@@ -38,6 +38,8 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
   associate_public_ip_address = false
   key_name                    = "${var.ec2_key_pair}"
 
+  depends_on = ["aws_efs_mount_target.container"]
+
   user_data = <<EOF
 #cloud-config
 repo_update: true
