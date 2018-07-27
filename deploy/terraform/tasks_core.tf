@@ -1,7 +1,7 @@
 // ------- Consul --------------
 resource aws_ecs_task_definition consul {
   family                = "consul"
-  container_definitions = "${file("task-definitions/consul.json")}"
+  container_definitions = "${file("task-definitions/core/consul.json")}"
   network_mode          = "host"
 }
 
@@ -19,7 +19,7 @@ resource aws_ecs_service consul {
 // ------- Nginx --------------
 resource aws_ecs_task_definition nginx {
   family                = "nginx"
-  container_definitions = "${file("task-definitions/nginx.json")}"
+  container_definitions = "${file("task-definitions/core/nginx.json")}"
   network_mode          = "host"
 }
 
@@ -37,7 +37,7 @@ resource aws_ecs_service nginx {
 // ------- Elasticsearch --------------
 resource aws_ecs_task_definition elasticsearch {
   family                = "elasticsearch"
-  container_definitions = "${file("task-definitions/elasticsearch.json")}"
+  container_definitions = "${file("task-definitions/core/elasticsearch.json")}"
   network_mode          = "host"
 
   volume {
@@ -60,7 +60,7 @@ resource aws_ecs_service elasticsearch {
 // ------- Kibana --------------
 resource aws_ecs_task_definition kibana {
   family                = "kibana"
-  container_definitions = "${file("task-definitions/kibana.json")}"
+  container_definitions = "${file("task-definitions/core/kibana.json")}"
   network_mode          = "host"
 }
 
@@ -78,7 +78,7 @@ resource aws_ecs_service kibana {
 // ------- Logstash --------------
 resource aws_ecs_task_definition logstash {
   family                = "logstash"
-  container_definitions = "${file("task-definitions/logstash.json")}"
+  container_definitions = "${file("task-definitions/core/logstash.json")}"
   network_mode          = "host"
 }
 
@@ -96,7 +96,7 @@ resource aws_ecs_service logstash {
 // ------- Micro Web --------------
 resource aws_ecs_task_definition micro-web {
   family                = "micro-web"
-  container_definitions = "${file("task-definitions/micro-web.json")}"
+  container_definitions = "${file("task-definitions/core/micro-web.json")}"
   network_mode          = "host"
 }
 
@@ -114,7 +114,7 @@ resource aws_ecs_service micro-web {
 // ------- Micro API --------------
 resource aws_ecs_task_definition micro-api {
   family                = "micro-api"
-  container_definitions = "${file("task-definitions/micro-api.json")}"
+  container_definitions = "${file("task-definitions/core/micro-api.json")}"
   network_mode          = "host"
 }
 
@@ -132,7 +132,7 @@ resource aws_ecs_service micro-api {
 // ------- Prometheus --------------
 resource aws_ecs_task_definition prometheus {
   family                = "prometheus"
-  container_definitions = "${file("task-definitions/prometheus.json")}"
+  container_definitions = "${file("task-definitions/core/prometheus.json")}"
   network_mode          = "host"
 }
 
@@ -150,7 +150,7 @@ resource aws_ecs_service prometheus {
 // ------- Grafana --------------
 resource aws_ecs_task_definition grafana {
   family                = "grafana"
-  container_definitions = "${file("task-definitions/grafana.json")}"
+  container_definitions = "${file("task-definitions/core/grafana.json")}"
   network_mode          = "host"
 
   volume {
@@ -173,7 +173,7 @@ resource aws_ecs_service grafana {
 // ------- Statsd --------------
 resource aws_ecs_task_definition statsd {
   family                = "statsd"
-  container_definitions = "${file("task-definitions/statsd.json")}"
+  container_definitions = "${file("task-definitions/core/statsd.json")}"
   network_mode          = "host"
 }
 
@@ -181,6 +181,24 @@ resource aws_ecs_service statsd {
   name            = "statsd"
   cluster         = "${aws_ecs_cluster.main.name}"
   task_definition = "${aws_ecs_task_definition.statsd.arn}"
+  desired_count   = 1
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}
+
+// ------- NATS --------------
+resource aws_ecs_task_definition nats {
+  family                = "nats"
+  container_definitions = "${file("task-definitions/core/nats.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service nats {
+  name            = "nats"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.nats.arn}"
   desired_count   = 1
 
   placement_constraints {

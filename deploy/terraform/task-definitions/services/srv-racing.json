@@ -1,0 +1,67 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/srv/racing",
+        "name": "srv-racing",
+        "memoryReservation": 32,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "srv-racing"
+            }
+        },
+        "environment": [
+            {
+                "name": "MICRO_REGISTRY_ADDRESS",
+                "value": "localhost:8500"
+            },
+            {
+                "name": "MICRO_SERVER_ADDRESS",
+                "value": ":8081"
+            },
+            {
+                "name": "MICRO_BROKER",
+                "value": "nats"
+            },
+            {
+                "name": "MICRO_BROKER_ADDRESS",
+                "value": "nats:4222"
+            },
+            {
+                "name": "DB_HOST",
+                "value": "localhost:27017"
+            },
+            {
+                "name": "STATSD",
+                "value": "localhost:9125"
+            }
+        ]
+    },
+    {
+        "image": "mongo",
+        "name": "db-mongo",
+        "memoryReservation": 64,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "db-mongo"
+            }
+        },
+        "portMappings": [
+            {
+                "hostPort": 27017,
+                "protocol": "tcp",
+                "containerPort": 27017
+            }
+        ],
+        "mountPoints": [
+            {
+                "sourceVolume": "data",
+                "containerPath": "/data/db"
+            }
+        ]
+    }
+]
