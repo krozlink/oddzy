@@ -52,12 +52,19 @@ runcmd:
   - echo vm.max_map_count=262144 >> /etc/sysctl.conf
   - sysctl -w vm.max_map_count=262144
   - echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
-  - file_system_id_01=fs-1da46724
+  - file_system_id_01=${var.efs_volume}
   - efs_directory=/mnt/efs
   - mkdir -p $${efs_directory}
   - echo "$${file_system_id_01}:/ $${efs_directory} efs tls,_netdev" >> /etc/fstab
-  - mount -a -t efs defaults
-  - chmod -R 777 $${efs_directory}
+  - mount -t efs $${file_system_id_01}:/ $${efs_directory}
+
+  - mkdir -p $${efs_directory}/volumes/srv-racing/db-mongo/data
+
+  - mkdir -p $${efs_directory}/volumes/grafana/data
+  - chown -R 472:472 $${efs_directory}/volumes/grafana/data
+
+  - mkdir -p $${efs_directory}/volumes/elasticsearch/data
+  - chown -R 1000:1000 $${efs_directory}/volumes/elasticsearch/data
 EOF
 }
 
