@@ -18,7 +18,7 @@
             },
             {
                 "name": "MICRO_SERVER_ADDRESS",
-                "value": ":8081"
+                "value": "0.0.0.0:8082"
             },
             {
                 "name": "MICRO_BROKER",
@@ -26,7 +26,7 @@
             },
             {
                 "name": "MICRO_BROKER_ADDRESS",
-                "value": "nats:4222"
+                "value": "localhost:4222"
             },
             {
                 "name": "DB_HOST",
@@ -35,6 +35,10 @@
             {
                 "name": "STATSD",
                 "value": "localhost:9125"
+            },
+            {
+                "name": "ODDZY_LOGGER",
+                "value": "localhost:5000"
             }
         ]
     },
