@@ -23,3 +23,7 @@ domain_name = "oddzy.xyz"
 bucket_name = "oddzy"
 
 test_instance = true
+
+run_core_tasks = true
+
+run_service_tasks = true

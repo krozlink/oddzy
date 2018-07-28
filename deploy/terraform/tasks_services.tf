@@ -14,7 +14,7 @@ resource aws_ecs_service srv-racing {
   name            = "srv-racing"
   cluster         = "${aws_ecs_cluster.main.name}"
   task_definition = "${aws_ecs_task_definition.srv-racing.arn}"
-  desired_count   = 1
+  desired_count   = "${var.run_service_tasks ? 1 : 0}"
 
   placement_constraints {
     type = "distinctInstance"

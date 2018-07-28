@@ -23,3 +23,7 @@ variable "domain_name" {} // Domain name to use. Must be a hosted zone with this
 variable "bucket_name" {} // Bucket used for any storage required, e.g logs
 
 variable "test_instance" {}
+
+variable "run_core_tasks" {}
+
+variable "run_service_tasks" {}
