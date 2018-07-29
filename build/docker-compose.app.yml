@@ -29,7 +29,6 @@ services:
       - STATSD=statsd:9125
     depends_on:
       - db-mongo
-      - nats
     networks:
       - oddzy
 
