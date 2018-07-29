@@ -46,17 +46,10 @@ services:
     networks:
       - oddzy
 
-
-  nats:
-    image: nats
-    expose:
-      - "4222"
-    ports:
-      - "8222:8222"
-    networks:
-      - oddzy
   db-mongo:
-    image: mongo
+    build:
+      ./${OD_DEPLOY?}/mongo
+    image: 675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/mongo:latest
     volumes: 
       - mongodata:/data/db
     ports:

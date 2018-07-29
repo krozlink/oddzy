@@ -26,4 +26,4 @@ test_instance = true
 
 run_core_tasks = true
 
-run_service_tasks = true
+run_app_tasks = true

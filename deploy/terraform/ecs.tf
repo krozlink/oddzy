@@ -61,10 +61,10 @@ runcmd:
   - mkdir -p $${efs_directory}/volumes/srv-racing/db-mongo/data
 
   - mkdir -p $${efs_directory}/volumes/grafana/data
-  - chown -R 472:472 $${efs_directory}/volumes/grafana/data
+  - chmod -R 777 $${efs_directory}/volumes/grafana/data
 
   - mkdir -p $${efs_directory}/volumes/elasticsearch/data
-  - chown -R 1000:1000 $${efs_directory}/volumes/elasticsearch/data
+  - chmod -R 777 $${efs_directory}/volumes/elasticsearch/data
 EOF
 }
 

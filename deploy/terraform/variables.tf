@@ -26,4 +26,4 @@ variable "test_instance" {}
 
 variable "run_core_tasks" {}
 
-variable "run_service_tasks" {}
+variable "run_app_tasks" {}

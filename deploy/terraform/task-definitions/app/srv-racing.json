@@ -43,7 +43,7 @@
         ]
     },
     {
-        "image": "mongo",
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/mongo",
         "name": "db-mongo",
         "memoryReservation": 64,
         "logConfiguration": {

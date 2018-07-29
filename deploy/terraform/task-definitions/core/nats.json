@@ -1,6 +1,6 @@
 [
     {
-        "image": "nats",
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/nats",
         "name": "nats",
         "memoryReservation": 64,
         "logConfiguration": {
