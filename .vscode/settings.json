@@ -17,4 +17,9 @@
     },
     "terraform.codelens.enabled": false,
 
+    "docker.truncateLongRegistryPaths": false,
+    "docker-explorer.showAzureRegistries": false,
+    "docker-explorer.showDockerHubTreeView": false,
+    "docker-explorer.showSuggestedDockerImages": false,
+    "docker-explorer.showDockerImages": false,
 }
