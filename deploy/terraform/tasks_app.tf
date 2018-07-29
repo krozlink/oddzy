@@ -20,3 +20,21 @@ resource aws_ecs_service srv-racing {
     type = "distinctInstance"
   }
 }
+
+// ------- srv/race-scraper --------------
+resource aws_ecs_task_definition srv-race-scraper {
+  family                = "srv-race-scraper"
+  container_definitions = "${file("task-definitions/app/srv-race-scraper.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service srv-race-scraper {
+  name            = "srv-race-scraper"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.srv-race-scraper.arn}"
+  desired_count   = "${var.run_app_tasks ? 1 : 0}"
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}

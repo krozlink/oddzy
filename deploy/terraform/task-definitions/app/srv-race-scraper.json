@@ -1,0 +1,33 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/srv/race-scraper",
+        "name": "srv-race-scraper",
+        "memoryReservation": 32,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "srv-race-scraper"
+            }
+        },
+        "environment": [
+            {
+                "name": "MICRO_REGISTRY_ADDRESS",
+                "value": "localhost:8500"
+            },
+            {
+                "name": "MICRO_SERVER_ADDRESS",
+                "value": "0.0.0.0:7002"
+            },
+            {
+                "name": "STATSD",
+                "value": "localhost:9125"
+            },
+            {
+                "name": "ODDZY_LOGGER",
+                "value": "localhost:5000"
+            }
+        ]
+    }
+]
