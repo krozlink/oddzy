@@ -8,11 +8,7 @@ application_stage = "test"
 
 ec2_key_pair = "Oddzy"
 
-ecs_min_instance_size = "0"
-
-ecs_max_instance_size = "1"
-
-ecs_desired_capacity = "1"
+run_ec2_instance = true
 
 oddzy_ami_tag = "latest"
 

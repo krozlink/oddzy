@@ -70,9 +70,9 @@ EOF
 
 // Auto-Scaling Group
 resource "aws_autoscaling_group" "ecs_autoscaling_group" {
-  max_size             = "${var.ecs_max_instance_size}"
-  min_size             = "${var.ecs_min_instance_size}"
-  desired_capacity     = "${var.ecs_desired_capacity}"
+  max_size             = 1
+  min_size             = 0
+  desired_capacity     = "${var.run_ec2_instance ? 1 : 0}"
   vpc_zone_identifier  = ["${aws_subnet.private.id}"]
   launch_configuration = "${aws_launch_configuration.ecs_launch_configuration.name}"
   target_group_arns    = ["${aws_lb_target_group.public.arn}", "${aws_lb_target_group.private.arn}"]

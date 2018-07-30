@@ -8,11 +8,7 @@ variable "application_stage" {} // e.g test, dev, prod
 
 variable "ec2_key_pair" {} // KeyPair to use for logging into instances
 
-variable "ecs_min_instance_size" {}
-
-variable "ecs_max_instance_size" {}
-
-variable "ecs_desired_capacity" {}
+variable "run_ec2_instance" {}
 
 variable "oddzy_ami_tag" {}
 
