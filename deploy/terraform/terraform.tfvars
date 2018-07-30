@@ -10,8 +10,6 @@ ec2_key_pair = "Oddzy"
 
 run_ec2_instance = true
 
-oddzy_ami_tag = "latest"
-
 efs_volume = "fs-1da46724"
 
 domain_name = "oddzy.xyz"

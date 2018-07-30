@@ -1,3 +1,4 @@
+// EFS mount target for attaching an EFS volume to ECS instances
 resource aws_efs_mount_target container {
   file_system_id  = "${var.efs_volume}"
   subnet_id       = "${aws_subnet.private.id}"

@@ -1,3 +1,4 @@
+// EC2 instance deployed to the public subnet - used as a jump box for testing
 resource aws_instance testing {
   ami                         = "ami-d48623b6"
   instance_type               = "t2.medium"

@@ -1,3 +1,4 @@
+// Application Load Balancer used to route traffic to the auto scaling group instances
 resource aws_lb "main" {
   internal           = false
   load_balancer_type = "application"
@@ -15,6 +16,7 @@ resource aws_lb "main" {
   }
 }
 
+// Load Balancer target group for public traffic
 resource aws_lb_target_group "public" {
   port     = 80
   protocol = "HTTP"
@@ -36,6 +38,7 @@ resource aws_lb_target_group "public" {
   }
 }
 
+// Load Balancer target group for private traffic
 resource aws_lb_target_group "private" {
   port     = 8080
   protocol = "HTTP"
@@ -68,6 +71,7 @@ resource aws_lb_listener "main" {
   }
 }
 
+// Load Balancer listener rule to forward internal.oddzy.xyz traffic to the private target group
 resource aws_lb_listener_rule "internal" {
   listener_arn = "${aws_lb_listener.main.arn}"
   priority     = 100
@@ -109,6 +113,7 @@ resource aws_security_group "load_balancer" {
   }
 }
 
+// S3 bucket policy allowing the load balancer to write access logs
 resource aws_s3_bucket_policy elb {
   bucket = "${var.bucket_name}"
 

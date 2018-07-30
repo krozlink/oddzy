@@ -18,7 +18,7 @@ resource "aws_ecs_cluster" "main" {
   name = "${var.application_name}-${var.application_stage}"
 }
 
-// Launch Configuration
+// Launch Configuration for instances deployed in the auto scaling group
 resource "aws_launch_configuration" "ecs_launch_configuration" {
   image_id             = "${data.aws_ami.ecs_ami.id}"
   instance_type        = "t2.medium"
@@ -79,7 +79,7 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
   health_check_type    = "EC2"
 }
 
-// IAM
+// IAM policy / role used by EC2 instances for ECS
 
 resource "aws_iam_role" "ecs_service_role" {
   path               = "/"
