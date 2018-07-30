@@ -8,7 +8,7 @@ resource aws_instance testing {
   subnet_id                   = "${aws_subnet.public-a.id}"
   vpc_security_group_ids      = ["${aws_security_group.testing.id}"]
 
-  count = "${var.test_instance ? 1 : 0 }"
+  count = "${var.run_test_instance ? 1 : 0 }"
 
   user_data = <<EOF
 <powershell>
