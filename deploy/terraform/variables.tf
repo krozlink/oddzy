@@ -12,7 +12,7 @@ variable "run_ec2_instance" {} // Set to false to deploy resources without the E
 
 variable "efs_volume" {} // EFS volume to be used by ECS containers for persistent data - e.g elasticsearch logs, grafana, databases
 
-variable "domain_name" {} // Domain name to use. Must be a hosted zone with this domain name
+variable "domain_name" {} // Domain name to use. Must be a hosted zone with this domain name and a AWS managed certificate
 
 variable "bucket_name" {} // Bucket used for any storage required, e.g logs
 

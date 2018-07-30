@@ -60,7 +60,32 @@ resource aws_lb_target_group "private" {
   }
 }
 
-resource aws_lb_listener "main" {
+// SSL Certificate to use for HTTPS
+data aws_acm_certificate "https" {
+  domain      = "*.${var.domain_name}"
+  statuses    = ["ISSUED"]
+  most_recent = true
+}
+
+resource aws_lb_listener_certificate https {
+  listener_arn    = "${aws_lb_listener.https.arn}"
+  certificate_arn = "${data.aws_acm_certificate.https.arn}"
+}
+
+resource aws_lb_listener "https" {
+  load_balancer_arn = "${aws_lb.main.arn}"
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "${data.aws_acm_certificate.https.arn}"
+
+  default_action {
+    target_group_arn = "${aws_lb_target_group.public.arn}"
+    type             = "forward"
+  }
+}
+
+resource aws_lb_listener "http" {
   load_balancer_arn = "${aws_lb.main.arn}"
   port              = "80"
   protocol          = "HTTP"
@@ -72,8 +97,23 @@ resource aws_lb_listener "main" {
 }
 
 // Load Balancer listener rule to forward internal.oddzy.xyz traffic to the private target group
-resource aws_lb_listener_rule "internal" {
-  listener_arn = "${aws_lb_listener.main.arn}"
+resource aws_lb_listener_rule "internal-http" {
+  listener_arn = "${aws_lb_listener.http.arn}"
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = "${aws_lb_target_group.private.arn}"
+  }
+
+  condition {
+    field  = "host-header"
+    values = ["internal.oddzy.xyz"]
+  }
+}
+
+resource aws_lb_listener_rule "internal-https" {
+  listener_arn = "${aws_lb_listener.https.arn}"
   priority     = 100
 
   action {
