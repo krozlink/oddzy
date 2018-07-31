@@ -38,3 +38,21 @@ resource aws_ecs_service srv-race-scraper {
     type = "distinctInstance"
   }
 }
+
+// ------- api/racing --------------
+resource aws_ecs_task_definition api-racing {
+  family                = "api-racing"
+  container_definitions = "${file("task-definitions/app/api-racing.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service api-racing {
+  name            = "api-racing"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.api-racing.arn}"
+  desired_count   = "${var.run_app_tasks ? 1 : 0}"
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}
