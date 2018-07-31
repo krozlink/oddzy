@@ -47,6 +47,7 @@ repo_upgrade: all
 
 packages:
   - amazon-efs-utils
+  - aws-cli
 
 runcmd:
   - echo vm.max_map_count=262144 >> /etc/sysctl.conf
@@ -59,12 +60,14 @@ runcmd:
   - mount -t efs $${file_system_id_01}:/ $${efs_directory}
 
   - mkdir -p $${efs_directory}/volumes/srv-racing/db-mongo/data
-
   - mkdir -p $${efs_directory}/volumes/grafana/data
   - chmod -R 777 $${efs_directory}/volumes/grafana/data
-
   - mkdir -p $${efs_directory}/volumes/elasticsearch/data
   - chmod -R 777 $${efs_directory}/volumes/elasticsearch/data
+
+  # read httpasswd file contents from an encrypted KMS secret and save it to the instance
+  - mkdir -p /etc/nginx
+  - aws ssm get-parameter --name ${var.internal_password_parameter} --with-decryption --output text --region ${var.region} | awk '{print $4}' | sudo tee /etc/nginx/.htpasswd > /dev/null
 EOF
 }
 
@@ -79,7 +82,7 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
   health_check_type    = "EC2"
 }
 
-// IAM policy / role used by EC2 instances for ECS
+// IAM policy / role used by ECS containers
 
 resource "aws_iam_role" "ecs_service_role" {
   path               = "/"
@@ -102,6 +105,8 @@ data "aws_iam_policy_document" "ecs_service_policy" {
   }
 }
 
+// IAM policy / role used by the EC2 instances that run ECS
+
 resource "aws_iam_role" "ecs_instance_role" {
   path               = "/"
   assume_role_policy = "${data.aws_iam_policy_document.ecs_instance_policy.json}"
@@ -121,6 +126,32 @@ data "aws_iam_policy_document" "ecs_instance_policy" {
 resource "aws_iam_role_policy_attachment" "ecs_instance_role_attachment" {
   role       = "${aws_iam_role.ecs_instance_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_policy" "internal_password" {
+  name        = "OddzyInternalPasswordAccess"
+  description = "Policy allowing access to the encrypted internal password parameter"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ssm:GetParameter*",
+        "kms:Decrypt"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/${var.internal_password_parameter}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_instance_password_access" {
+  role       = "${aws_iam_role.ecs_instance_role.name}"
+  policy_arn = "${aws_iam_policy.internal_password.arn}"
 }
 
 resource "aws_iam_instance_profile" "ecs_instance_profile" {

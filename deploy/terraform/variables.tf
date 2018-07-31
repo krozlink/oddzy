@@ -14,6 +14,8 @@ variable "bucket_name" {} // Bucket used for any storage required, e.g logs
 
 variable "ec2_key_pair" {} // KeyPair to use for logging into instances
 
+variable "internal_password_parameter" {}
+
 variable "run_ec2_instance" {} // Set to false to deploy resources without the EC2 instance / ECS containers
 
 variable "run_test_instance" {} // Set to true to deploy a publicly-accessible jump box instance for testing

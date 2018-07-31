@@ -14,6 +14,8 @@ bucket_name = "oddzy"
 
 ec2_key_pair = "Oddzy"
 
+internal_password_parameter = "oddzy-internal-passwd"
+
 run_ec2_instance = true
 
 run_test_instance = true

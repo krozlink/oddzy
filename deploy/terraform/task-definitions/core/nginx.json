@@ -22,6 +22,13 @@
                 "protocol": "tcp",
                 "containerPort": 8080
             }
+        ]
+        ,
+        "mountPoints": [
+            {
+                "sourceVolume": "password",
+                "containerPath": "/etc/nginx/password"
+            }
         ] 
     }
 ]

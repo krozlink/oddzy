@@ -21,6 +21,11 @@ resource aws_ecs_task_definition nginx {
   family                = "nginx"
   container_definitions = "${file("task-definitions/core/nginx.json")}"
   network_mode          = "host"
+
+  volume {
+    name      = "password"
+    host_path = "/etc/nginx"
+  }
 }
 
 resource aws_ecs_service nginx {

@@ -9,3 +9,5 @@ terraform {
     region = "ap-southeast-2"
   }
 }
+
+data "aws_caller_identity" "current" {}
