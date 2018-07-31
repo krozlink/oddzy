@@ -24,7 +24,7 @@ resource aws_lb_target_group "public" {
 
   health_check {
     interval            = 30
-    path                = "/ping"
+    path                = "/healthcheck"
     port                = "traffic-port"
     protocol            = "HTTP"
     timeout             = 5
@@ -46,7 +46,7 @@ resource aws_lb_target_group "private" {
 
   health_check {
     interval            = 30
-    path                = "/ping"
+    path                = "/healthcheck"
     port                = "traffic-port"
     protocol            = "HTTP"
     timeout             = 5
