@@ -69,7 +69,7 @@ resource "aws_subnet" "private" {
   }
 }
 
-// Route table
+// Route table - Public
 resource "aws_route_table" "public" {
   vpc_id = "${aws_vpc.main.id}"
 
@@ -83,6 +83,7 @@ resource "aws_route_table" "public" {
   }
 }
 
+// Route table - Private
 resource "aws_route_table" "private" {
   vpc_id = "${aws_vpc.main.id}"
 

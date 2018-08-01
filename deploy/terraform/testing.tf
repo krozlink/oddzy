@@ -28,11 +28,11 @@ EOF
   }
 }
 
+// Security group allowing RDP to the jump box
 resource aws_security_group testing {
   description = "Used for testing"
   vpc_id      = "${aws_vpc.main.id}"
 
-  # WinRM access from anywhere
   ingress {
     from_port   = 3389
     to_port     = 3389
@@ -40,7 +40,6 @@ resource aws_security_group testing {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # outbound internet access
   egress {
     from_port   = 0
     to_port     = 0
