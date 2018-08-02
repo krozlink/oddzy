@@ -1,4 +1,9 @@
 bin/
 data/
 
+# Deploy
 **/.terraform/**
+
+# Web
+web/node_modules/**
+web/dist/
