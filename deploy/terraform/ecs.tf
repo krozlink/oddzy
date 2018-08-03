@@ -38,7 +38,7 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
   associate_public_ip_address = false
   key_name                    = "${var.ec2_key_pair}"
 
-  depends_on = ["aws_efs_mount_target.container"]
+  depends_on = ["aws_efs_mount_target.container", "aws_s3_bucket_object.website"]
 
   user_data = <<EOF
 #cloud-config
@@ -48,26 +48,39 @@ repo_upgrade: all
 packages:
   - amazon-efs-utils
   - aws-cli
+  - unzip
 
 runcmd:
+  # Increase max number of memory map areas - this is required by elasticsearch
   - echo vm.max_map_count=262144 >> /etc/sysctl.conf
   - sysctl -w vm.max_map_count=262144
+
+  # Connect instances to ECS cluster
   - echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
+
+  # Mount EFS volume
   - file_system_id_01=${var.efs_volume}
   - efs_directory=/mnt/efs
   - mkdir -p $${efs_directory}
   - echo "$${file_system_id_01}:/ $${efs_directory} efs tls,_netdev" >> /etc/fstab
   - mount -t efs $${file_system_id_01}:/ $${efs_directory}
 
+  # Create the directories used as container volumes
+  - mkdir -p $${efs_directory}/website/oddzy
   - mkdir -p $${efs_directory}/volumes/srv-racing/db-mongo/data
   - mkdir -p $${efs_directory}/volumes/grafana/data
   - chmod -R 777 $${efs_directory}/volumes/grafana/data
   - mkdir -p $${efs_directory}/volumes/elasticsearch/data
   - chmod -R 777 $${efs_directory}/volumes/elasticsearch/data
-
-  # read httpasswd file contents from an encrypted KMS secret and save it to the instance
   - mkdir -p /etc/nginx
+
+  # Read httpasswd file contents from an encrypted KMS secret and save it to the nginx container volume
   - aws ssm get-parameter --name ${var.internal_password_parameter} --with-decryption --output text --region ${var.region} | awk '{print $4}' | sudo tee /etc/nginx/.htpasswd > /dev/null
+
+  # Update the website volume with the latest version from s3
+  - rm -rf $${efs_directory}/website/oddzy/*
+  - aws s3 cp s3://oddzy/web/dist.zip /tmp/website.zip
+  - unzip /tmp/website.zip -d $${efs_directory}/website/oddzy
 EOF
 }
 
@@ -157,4 +170,30 @@ resource "aws_iam_role_policy_attachment" "ecs_instance_password_access" {
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
   path = "/"
   role = "${aws_iam_role.ecs_instance_role.id}"
+}
+
+
+resource "aws_iam_policy" "website" {
+  name        = "OddzyWebsiteAccess"
+  description = "Policy allowing access to the zipped website in s3"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::${var.bucket_name}/web/*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_instance_website_access" {
+  role       = "${aws_iam_role.ecs_instance_role.name}"
+  policy_arn = "${aws_iam_policy.website.arn}"
 }

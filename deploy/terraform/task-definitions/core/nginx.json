@@ -28,6 +28,10 @@
             {
                 "sourceVolume": "password",
                 "containerPath": "/etc/nginx/password"
+            },
+            {
+                "sourceVolume": "website",
+                "containerPath": "/var/oddzy/www"
             }
         ] 
     }

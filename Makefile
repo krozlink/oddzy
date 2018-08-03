@@ -23,7 +23,7 @@ wup:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.web.yml up -d --build
 
 wdown:
-	OD_DEPLOY=local docker-compose -f ./build/docker-compose.web.yml up down
+	OD_DEPLOY=local docker-compose -f ./build/docker-compose.web.yml down
 
 
 # build and deploy all images

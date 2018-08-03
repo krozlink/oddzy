@@ -26,6 +26,11 @@ resource aws_ecs_task_definition nginx {
     name      = "password"
     host_path = "/etc/nginx"
   }
+
+  volume {
+    name      = "website"
+    host_path = "/mnt/efs/website/oddzy"
+  }
 }
 
 resource aws_ecs_service nginx {
