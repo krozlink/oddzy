@@ -1,0 +1,14 @@
+version: "3"
+services:
+  nginx:
+    build:
+      context: ./${OD_DEPLOY?}/nginx
+    image: 675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/external/nginx:latest
+    ports:
+      - 80:80
+      - 8080:8080
+    networks:
+      - oddzy
+networks:
+  oddzy:
+      external: true
