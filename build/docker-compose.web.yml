@@ -8,7 +8,7 @@ services:
       - 80:80
       - 8080:8080
     volumes:
-      - ../web/dist:/var/oddzy/www
+      - ../web:/var/oddzy
     networks:
       - oddzy
 networks:
