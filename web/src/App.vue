@@ -1,29 +1,106 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+
+    <section class="hero is-dark">
+      <div class="column hero-body is-offset-1">
+        <h1 class="title">
+          Oddzy
+        </h1>
+      </div>
+    </section>
+
+
+    <div class="columns">
+      <div class="column is-1">
+      </div>
+      <div class="column is-2">
+        <nav class="menu">
+          <ul class="menu-list">
+            <li>
+              <a>
+                <span class="icon">
+                  <i class="fas fa-home"></i>
+                </span>
+              Home
+              </a>
+            </li>
+            <li>
+              <a>
+                <span class="icon">
+                  <i class="fab fa-sticker-mule"></i>
+                </span>
+              Racing
+              </a>
+            </li>
+            <li>
+              <a class="is-disable">
+                <span class="icon">
+                  <i class="fas fa-football-ball"></i>
+                </span>
+                Sports
+              </a>
+            </li>
+            <li>
+              <a class="is-disable">
+                <span class="icon">
+                  <i class="fas fa-dollar-sign"></i>
+                </span>
+                Promotions
+              </a>
+            </li>
+            <li>
+              <a class="is-disable">
+                <span class="icon">
+                  <i class="fas fa-user"></i>
+                </span>
+                My Account
+              </a>
+            </li>
+            <li>
+              <a class="is-disable">
+                <span class="icon">
+                  <i class="fas fa-phone"></i>
+                </span>
+                Contact Us
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <div class="column" id="content">
+        
+      </div>
+      <div class="column is-1"></div>
     </div>
-    <router-view/>
+
+
   </div>
 </template>
 
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+
+nav li {
+  height: 50px;
 }
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+
+.is-disable{
+  pointer-events: none;
+  opacity: .65;
 }
+
+// #content {
+//   background-color: cornsilk;
+// }
+
+
+
+// nav {
+//   border-width: 1px;
+//   border-style: solid;
+// }
+
+// div {
+//   border-width: 1px;
+//   border-style: solid;
+// }
 </style>

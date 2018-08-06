@@ -5,7 +5,13 @@ module.exports = {
   runtimeCompiler: undefined,
   productionSourceMap: undefined,
   parallel: undefined,
-  css: undefined,
+  css: {
+    loaderOptions: {
+      sass: {
+        data: `@import "@/styles/default.scss";`
+      }
+    }
+  },
 
   devServer: {
     port: 8081
