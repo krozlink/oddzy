@@ -1,32 +1,40 @@
 <template>
   <section class="section">
     <div class="container">
-      <nav class="level">
-        <div class="level-left">
-          <div class="level-item">
-            <h1>Today's Racing</h1>
-          </div>
+      <div class="columns">
+        <div class="column is-one-third">
+          <h4 class="title is-4">Today's Racing</h4>
         </div>
-        <div class="level-right">
-          <div class="level-item">
-            <div class="buttons has-addons">
-              <span class="button is-primary is-light is-selected">Today</span>
-              <span class="button is-light">Tomorrow</span>
-              <span class="button is-light">Saturday</span>
-              <span class="button is-light">Calendar</span>
+        <div class="column">
+          <nav class="level">
+            <div class="level-left">
+              <div class="level-item">
+                <div class="buttons has-addons">
+                  <span class="button is-primary is-light is-selected">Today</span>
+                  <span class="button is-light">Tomorrow</span>
+                  <span class="button is-light">Saturday</span>
+                  <span class="button is-light">
+                    <span class="icon is-large">
+                      <i class="fas fa-lg fa-calendar-alt"></i>
+                    </span>
+                    <span>Select Date</span>
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="level-item">
-            <div class="buttons has-addons">
-              <span class="button is-primary is-light is-selected">All</span>
-              <span class="button is-light">Horses</span>
-              <span class="button is-light">Harness</span>
-              <span class="button is-light">Greyhounds</span>
+            <div class="level-right">
+              <div class="level-item">
+                <div class="buttons has-addons">
+                <span class="button is-primary is-light is-selected">All</span>
+                <span class="button is-light">Horses</span>
+                <span class="button is-light">Harness</span>
+                <span class="button is-light">Greyhounds</span>
+              </div>
+              </div>
             </div>
-          </div>
+          </nav>
         </div>
-      </nav>
-
+      </div>
 
       <div class="columns race-catagory ">
         <div class="column race-location is-one-fifth">
