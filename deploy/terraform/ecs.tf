@@ -51,6 +51,11 @@ packages:
   - unzip
 
 runcmd:
+  # Install SSM Agent
+  - cd /tmp
+  - yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+  - start amazon-ssm-agent
+
   # Increase max number of memory map areas - this is required by elasticsearch
   - echo vm.max_map_count=262144 >> /etc/sysctl.conf
   - sysctl -w vm.max_map_count=262144
@@ -93,6 +98,12 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
   launch_configuration = "${aws_launch_configuration.ecs_launch_configuration.name}"
   target_group_arns    = ["${aws_lb_target_group.public.arn}", "${aws_lb_target_group.private.arn}"]
   health_check_type    = "EC2"
+  
+  tag {
+    key = "name"
+    value = "${var.application_name}"
+    propagate_at_launch = true
+  }
 }
 
 // IAM policy / role used by ECS containers
