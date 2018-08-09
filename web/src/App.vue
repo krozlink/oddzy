@@ -128,17 +128,27 @@ svg {
   margin-right: 10px;
 }
 
-// #content {
-//   background-color: cornsilk;
-// }
+@font-face {
+    font-family: 'oddzy';
+    src: url('./assets/fonts/oddzy.eot');
+    src: url('./assets/fonts/oddzy.eot?#iefix') format('embedded-opentype'),
+         url('./assets/fonts/oddzy.woff') format('woff'),
+         url('./assets/fonts/oddzy.ttf') format('truetype'),
+         url('./assets/fonts/oddzy.svg#oddzy') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+[class*='icon-']:before{
+	display: inline-block;
+   font-family: 'oddzy';
+   font-style: normal;
+   font-weight: normal;
+   line-height: 1;
+   -webkit-font-smoothing: antialiased;
+   -moz-osx-font-smoothing: grayscale
+}
+.icon-greyhound:before{content:'\0041';}
+.icon-harness:before{content:'\0042';}
+.icon-thoroughbred:before{content:'\0043';}
 
-// nav {
-//   border-width: 1px;
-//   border-style: solid;
-// }
-
-// div {
-//   border-width: 1px;
-//   border-style: solid;
-// }
 </style>
