@@ -145,6 +145,16 @@ data "aws_iam_policy_document" "ecs_instance_policy" {
       identifiers = ["ec2.amazonaws.com"]
     }
   }
+
+  statement {
+
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ssm.amazonaws.com"]
+    }
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_instance_role_attachment" {
@@ -207,4 +217,9 @@ EOF
 resource "aws_iam_role_policy_attachment" "ecs_instance_website_access" {
   role       = "${aws_iam_role.ecs_instance_role.name}"
   policy_arn = "${aws_iam_policy.website.arn}"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_instance_ssm" {
+  role       = "${aws_iam_role.ecs_instance_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
 }
