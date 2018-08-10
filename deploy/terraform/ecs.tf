@@ -139,7 +139,6 @@ resource "aws_iam_role" "ecs_instance_role" {
 data "aws_iam_policy_document" "ecs_instance_policy" {
   statement {
     actions = ["sts:AssumeRole"]
-
     principals {
       type        = "Service"
       identifiers = ["ec2.amazonaws.com"]
@@ -147,9 +146,7 @@ data "aws_iam_policy_document" "ecs_instance_policy" {
   }
 
   statement {
-
     actions = ["sts:AssumeRole"]
-
     principals {
       type        = "Service"
       identifiers = ["ssm.amazonaws.com"]
@@ -157,11 +154,18 @@ data "aws_iam_policy_document" "ecs_instance_policy" {
   }
 }
 
+resource "aws_iam_instance_profile" "ecs_instance_profile" {
+  path = "/"
+  role = "${aws_iam_role.ecs_instance_role.id}"
+}
+
+// Allow instance to connect to ECS cluster
 resource "aws_iam_role_policy_attachment" "ecs_instance_role_attachment" {
   role       = "${aws_iam_role.ecs_instance_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
+// Allow instance to read the internal password paramter
 resource "aws_iam_policy" "internal_password" {
   name        = "OddzyInternalPasswordAccess"
   description = "Policy allowing access to the encrypted internal password parameter"
@@ -188,12 +192,7 @@ resource "aws_iam_role_policy_attachment" "ecs_instance_password_access" {
   policy_arn = "${aws_iam_policy.internal_password.arn}"
 }
 
-resource "aws_iam_instance_profile" "ecs_instance_profile" {
-  path = "/"
-  role = "${aws_iam_role.ecs_instance_role.id}"
-}
-
-
+// Allow the instance to access the zipped website in s3
 resource "aws_iam_policy" "website" {
   name        = "OddzyWebsiteAccess"
   description = "Policy allowing access to the zipped website in s3"
@@ -219,6 +218,7 @@ resource "aws_iam_role_policy_attachment" "ecs_instance_website_access" {
   policy_arn = "${aws_iam_policy.website.arn}"
 }
 
+// Allow the instance to run the SSM Agent
 resource "aws_iam_role_policy_attachment" "ecs_instance_ssm" {
   role       = "${aws_iam_role.ecs_instance_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"

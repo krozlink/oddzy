@@ -51,3 +51,10 @@ plan:
 destroy:
 	cd ./deploy/terraform; terraform destroy -auto-approve
 
+# Build the website, upload it to s3 and trigger the remote update script
+webupdate:
+	cd ./web; npm run build
+	@eval $$(powershell Compress-Archive -Path .\web\dist\* -DestinationPath .\tmp\dist.zip -Force)
+	aws s3 cp ./tmp/dist.zip s3://oddzy/web/dist.zip 
+	aws ssm send-command --document-name oddzy-test-update-website --targets Key=tag:name,Values=oddzy
+	rm ./tmp/dist.zip
