@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	meetingDataURL          = "https://www.odds.com.au/api/web/public/Racing/getUpcomingRaces/?sport=%s&date=%s"
-	raceDataURL             = "https://www.odds.com.au/api/web/public/Odds/getOddsComparisonCacheable/?eventId=%s&includeTAB=1&includeOdds=1&arrangeOdds=0&betType=FixedWin&includeTote=true&allowGet=true"
+	meetingDataURL          = "uggcf://jjj.bqqf.pbz.nh/ncv/jro/choyvp/Enpvat/trgHcpbzvatEnprf/?fcbeg=%f&qngr=%f"
+	raceDataURL             = "uggcf://jjj.bqqf.pbz.nh/ncv/jro/choyvp/Bqqf/trgBqqfPbzcnevfbaPnpurnoyr/?riragVq=%f&vapyhqrGNO=1&vapyhqrBqqf=1&neenatrBqqf=0&orgGlcr=SvkrqJva&vapyhqrGbgr=gehr&nyybjTrg=gehr"
 	defaultInterval         = 1000
 	oddsComAuRequestSuccess = "race-scraper.service.odds-request.success"
 	oddsComAuRequestFailed  = "race-scraper.service.odds-request.failed"
@@ -23,8 +23,8 @@ type Scraper interface {
 	ScrapeRaceSchedule(ctx context.Context, eventType string, date string) (*RaceSchedule, error)
 }
 
-// OddscomauScraper scrapes racing data from odds.com.au
-type OddscomauScraper struct {
+// OddsScraper scrapes racing data from odds
+type OddsScraper struct {
 	http        requestHandler
 	lastRequest time.Time
 	interval    int
@@ -35,9 +35,9 @@ type response struct {
 	Value string `json:"r"`
 }
 
-// NewOddsScraper returns a new odds.com.au scraper that uses the provided request handler
-func NewOddsScraper(h requestHandler) *OddscomauScraper {
-	return &OddscomauScraper{
+// NewOddsScraper returns a new odds scraper that uses the provided request handler
+func NewOddsScraper(h requestHandler) *OddsScraper {
+	return &OddsScraper{
 		http:        h,
 		lastRequest: time.Time{},
 		interval:    defaultInterval,
@@ -46,12 +46,12 @@ func NewOddsScraper(h requestHandler) *OddscomauScraper {
 }
 
 // ScrapeRaceSchedule reads and parses a racing schedule for the provided event type and date
-func (o *OddscomauScraper) ScrapeRaceSchedule(ctx context.Context, eventType string, date string) (*RaceSchedule, error) {
+func (o *OddsScraper) ScrapeRaceSchedule(ctx context.Context, eventType string, date string) (*RaceSchedule, error) {
 	throttle(o)
 
 	logContext := logWithContext(ctx, "ScrapeRaceSchedule").WithField("parameters", fmt.Sprintf("Event Type: %v, Date: %v", eventType, date))
 
-	url := fmt.Sprintf(meetingDataURL, eventType, date)
+	url := fmt.Sprintf(rot13String(meetingDataURL), eventType, date)
 	logContext.Debugf("Requesting race schedule from %v", url)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
@@ -99,13 +99,13 @@ func (o *OddscomauScraper) ScrapeRaceSchedule(ctx context.Context, eventType str
 	return schedule, nil
 }
 
-// ScrapeRaceCard reads and parses a race card for the provided odds.com.au event id
-func (o *OddscomauScraper) ScrapeRaceCard(ctx context.Context, eventID string) (*RaceCard, error) {
+// ScrapeRaceCard reads and parses a race card for the provided odds event id
+func (o *OddsScraper) ScrapeRaceCard(ctx context.Context, eventID string) (*RaceCard, error) {
 	throttle(o)
 
 	logContext := logWithContext(ctx, "ScrapeRaceCard")
 
-	url := fmt.Sprintf(raceDataURL, eventID)
+	url := fmt.Sprintf(rot13String(raceDataURL), eventID)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
 		stats.Increment(oddsComAuRequestFailed)
@@ -142,7 +142,7 @@ func (o *OddscomauScraper) ScrapeRaceCard(ctx context.Context, eventID string) (
 	return card, nil
 }
 
-func throttle(o *OddscomauScraper) {
+func throttle(o *OddsScraper) {
 	o.mux.Lock()
 	diff := time.Since(o.lastRequest)
 	remainingMS := o.interval - int(diff.Nanoseconds()/1000000)
@@ -166,6 +166,14 @@ func decode(response string) ([]byte, error) {
 	}
 	result, err := base64.StdEncoding.DecodeString(string(rot))
 	return result, err
+}
+
+func rot13String(s string) string {
+	result := make([]rune, len(s))
+	for i, r := range s {
+		result[i] = rot13(r)
+	}
+	return string(result)
 }
 
 func rot13(r rune) rune {

@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-func getMockScraper(h requestHandler) *OddscomauScraper {
-	return &OddscomauScraper{
+func getMockScraper(h requestHandler) *OddsScraper {
+	return &OddsScraper{
 		http:        h,
 		lastRequest: time.Time{},
 		interval:    0,
@@ -83,7 +83,7 @@ func TestScraperUsesThrottling(t *testing.T) {
 		response: encoded,
 	}
 
-	scraper := &OddscomauScraper{
+	scraper := &OddsScraper{
 		http:        h,
 		lastRequest: time.Time{},
 		interval:    500,
