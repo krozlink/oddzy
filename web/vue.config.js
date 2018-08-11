@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 module.exports = {
   outputDir: undefined,
   baseUrl: undefined,
@@ -5,6 +7,7 @@ module.exports = {
   runtimeCompiler: undefined,
   productionSourceMap: undefined,
   parallel: undefined,
+
   css: {
     loaderOptions: {
       sass: {
@@ -15,5 +18,7 @@ module.exports = {
 
   devServer: {
     port: 8081
-  }
+  },
+
+  lintOnSave: undefined
 }

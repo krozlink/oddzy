@@ -164,16 +164,6 @@
 
 <style lang="scss" scoped>
 
-// div.container .race-location {
-//   background-color: lightblue;
-// }
-
-// div.container .race-item {
-//   background-color: lightcoral;
-//   border-style: solid;
-//   border-width: 1px;
-// }
-
 .racetype-icons .button {
   width: 70px;
 }

@@ -58,3 +58,6 @@ webupdate:
 	aws s3 cp ./tmp/dist.zip s3://oddzy/web/dist.zip 
 	aws ssm send-command --document-name oddzy-test-update-website --targets Key=tag:name,Values=oddzy
 	rm ./tmp/dist.zip
+
+make webserve:
+	cd ./web; npm run serve
