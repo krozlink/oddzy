@@ -9,14 +9,14 @@
 </template>
 
 <script>
-import PageHeader from './components/PageHeader'
+import PageHeader from './components/PageHeader.vue';
 
 export default {
   name: 'App',
   components: {
-    PageHeader
-  }
-}
+    PageHeader,
+  },
+};
 </script>
 
 
@@ -39,13 +39,13 @@ export default {
     font-style: normal;
 }
 [class*='icon-']:before{
-	display: inline-block;
-   font-family: 'oddzy';
-   font-style: normal;
-   font-weight: normal;
-   line-height: 1;
-   -webkit-font-smoothing: antialiased;
-   -moz-osx-font-smoothing: grayscale
+  display: inline-block;
+  font-family: 'oddzy';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale
 }
 .icon-greyhound:before{content:'\0041';}
 .icon-harness:before{content:'\0042';}

@@ -9,10 +9,10 @@
           <div class="level-left">
             <div class="level-item">
               <div class="buttons has-addons">
-                <span class="button is-primary is-light is-selected">Today</span>
-                <span class="button is-light">Tomorrow</span>
-                <span class="button is-light">Saturday</span>
-                <span class="button is-light">
+                <span v-on:click="dateToday" class="button is-primary is-light is-selected">Today</span>
+                <span v-on:click="dateTomorrow" class="button is-light">Tomorrow</span>
+                <span v-on:click="dateOvermorrow" class="button is-light">Saturday</span>
+                <span class="button is-light is-disable">
                   <span class="icon is-large">
                     <i class="fas fa-lg fa-calendar-alt"></i>
                   </span>
@@ -24,23 +24,23 @@
           <div class="level-right">
             <div class="level-item racetype-icons">
               <div class="buttons has-addons">
-              <span class="button is-primary is-light is-selected">All</span>
-              <span class="button is-light">
-                <span class="icon">
-                  <i class="icon-thoroughbred fa-3x"></i>
+                <span class="button is-primary is-light is-selected">All</span>
+                <span class="button is-light">
+                  <span class="icon">
+                    <i class="icon-thoroughbred fa-3x"></i>
+                  </span>
                 </span>
-              </span>
-              <span class="button is-light">
-                <span class="icon">
-                  <i class="icon-harness fa-3x"></i>
+                <span class="button is-light">
+                  <span class="icon">
+                    <i class="icon-harness fa-3x"></i>
+                  </span>
                 </span>
-              </span>
-              <span class="button is-light">
-                <span class="icon">
-                  <i class="icon-greyhound fa-3x"></i>
+                <span class="button is-light">
+                  <span class="icon">
+                    <i class="icon-greyhound fa-3x"></i>
+                  </span>
                 </span>
-              </span>
-            </div>
+              </div>
             </div>
           </div>
         </nav>
@@ -157,13 +157,57 @@
 
     </div>
 
-
   </div>
 </template>
 
+<script>
+export default {
+  created() {
+    // if last update > 1 minute ago then update racing schedule
+    this.$store.dispatch('racing/getRacingSchedule');
+  },
+
+  methods: {
+    dateToday() {
+      this.selectedDate = 'today';
+    },
+    dateTomorrow() {
+      this.selectedDate = 'tomorrow';
+    },
+    dateOvermorrow() {
+      this.selectedDate = 'overmorrow';
+    },
+    dateCustom() {
+      // todo
+    },
+
+    filterAll() {
+
+    },
+    filterHorseRacing() {
+
+    },
+    filterHarness() {
+
+    },
+    filterGreyhounds() {
+      this.showHorseRacing = false;
+    },
+  },
+
+  data() {
+    return {
+      lastUpdate: 0,
+      showHorseRacing: true,
+      showHarness: true,
+      showGreyhounds: true,
+      selectedDate: 'today',
+    };
+  },
+};
+</script>
 
 <style lang="scss" scoped>
-
 .racetype-icons .button {
   width: 70px;
 }
@@ -172,12 +216,11 @@
   padding-top: 5px;
 }
 
-#racing .section  {
+#racing .section {
   padding-top: 16px;
 }
 
-#racing .header  {
+#racing .header {
   padding-bottom: 0px;
 }
-
 </style>

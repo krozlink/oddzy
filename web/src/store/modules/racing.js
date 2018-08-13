@@ -10,7 +10,7 @@ const actions = {
     commit('setLoadingStatus', null);
     api.readSchedule()
       .then((result) => {
-        commit('updateRaces', { data: result.data });
+        commit('updateRaceSchedule', { data: result.data });
         commit('setLoadingStatus', 'successful');
       })
       .catch(() => commit('setLoadingStatus', 'failed'));
@@ -19,21 +19,14 @@ const actions = {
 
 const mutations = {
 
-  updateRaces(state, data) {
-    for (let i = 0; i <= data.meetings.length; i += 1) {
-      const meeting = data.meetings[i];
-      state.races[meeting.meeting_id] = meeting;
-    }
+  updateRaceSchedule(state, { data }) {
+    Object.values(data.meetings).forEach((m) => {
+      state.meetings[m.meeting_id] = { ...m, date: data.date };
+    });
 
-    for (let i = 0; i <= data.races.length; i += 1) {
-      const race = data.races[i];
-      state.races[race.race_id] = race;
-    }
-
-    for (let i = 0; i <= data.selections.length; i += 1) {
-      const selection = data.selections[i];
-      state.selections[selection.selection_id] = selection;
-    }
+    Object.values(data.races).forEach((r) => {
+      state.races[r.race_id] = r;
+    });
   },
 
   setLoadingStatus(state, status) {
