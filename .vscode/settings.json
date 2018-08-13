@@ -22,4 +22,19 @@
     "docker-explorer.showDockerHubTreeView": false,
     "docker-explorer.showSuggestedDockerImages": false,
     "docker-explorer.showDockerImages": false,
+    "eslint.validate": [
+        {
+          "language": "vue",
+          "autoFix": true
+        },
+        {
+          "language": "html",
+          "autoFix": true
+        },
+        {
+          "language": "javascript",
+          "autoFix": true
+        }
+      ],
+      "eslint.autoFixOnSave": true
 }
