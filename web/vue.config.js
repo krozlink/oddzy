@@ -3,7 +3,7 @@
 module.exports = {
   outputDir: undefined,
   baseUrl: undefined,
-  assetsDir: undefined,
+  assetsDir: 'assets',
   runtimeCompiler: undefined,
   productionSourceMap: undefined,
   parallel: undefined,
@@ -11,7 +11,7 @@ module.exports = {
   css: {
     loaderOptions: {
       sass: {
-        data: `@import "@/styles/default.scss";`
+        data: '@import "@/styles/default.scss";'
       }
     }
   },
