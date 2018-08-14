@@ -1,8 +1,9 @@
 import axios from 'axios';
+import date from './date-helper';
 
-function readSchedule() {
-  console.log(`${process.env.VUE_APP_API}/racing/schedule`);
-  return axios.get(`${process.env.VUE_APP_API}/racing/schedule?date=2018-08-11`);
+function readSchedule(scheduleDate) {
+  const param = scheduleDate === '' ? date.formatDate(date.todayDate()) : scheduleDate;
+  return axios.get(`${process.env.VUE_APP_API}/racing/schedule?date=${param}`);
 }
 
 export default {

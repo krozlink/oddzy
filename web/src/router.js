@@ -15,12 +15,12 @@ export default new Router({
     },
     {
       path: '/racing',
-      name: 'racing',
+      name: 'racing-today',
       component: Racing,
     },
     {
       path: '/racing/:date',
-      name: 'racing',
+      name: 'racing-date',
       component: Racing,
     },
   ],
