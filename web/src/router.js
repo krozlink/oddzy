@@ -18,5 +18,10 @@ export default new Router({
       name: 'racing',
       component: Racing,
     },
+    {
+      path: '/racing/:date',
+      name: 'racing',
+      component: Racing,
+    },
   ],
 });
