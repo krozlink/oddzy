@@ -12,16 +12,12 @@
                 <router-link active-class="is-primary" exact class="button" to="/racing">
                   <span>Today</span>
                 </router-link>
-                <!-- <span v-on:click="dateToday" v-bind:class="{'is-primary': filterDate ==='today'}" class="button is-light">Today</span> -->
                 <router-link active-class="is-primary" class="button" :to="{name: 'racing-date', params: {date: getTomorrow()}}">
                   <span>Tomorrow</span>
                 </router-link>
-                <!-- <span v-on:click="dateTomorrow" v-bind:class="{'is-primary': filterDate ==='tomorrow'}" class="button is-light">Tomorrow</span> -->
                 <router-link active-class="is-primary" class="button" :to="{name: 'racing-date', params: {date: getOvermorrow()}}">
                   <span v-text="getOvermorrowDay()"></span>
                 </router-link>
-
-                <!-- <span v-on:click="dateOvermorrow" v-bind:class="{'is-primary': filterDate ==='overmorrow'}" class="button is-light">Saturday</span> -->
                 <span class="button is-light is-disable">
                   <span class="icon is-large">
                     <i class="fas fa-lg fa-calendar-alt"></i>
@@ -57,159 +53,101 @@
       </div>
     </div>
 
-    <div class="section race-section">
-      <div class="columns">
-        <div class="column">
-          <h6 class="title is-6">Horse Racing - Australia & New Zealand</h6>
-        </div>
-      </div>
-
-      <div class="columns race-catagory ">
-        <div class="column race-location is-one-fifth">
-          Flemington
-        </div>
-        <div class="column race-list">
-          <div class="columns">
-            <div class="column race-item">
-              Race 1
-            </div>
-            <div class="column race-item">
-              Race 2
-            </div>
-            <div class="column race-item">
-              Race 3
-            </div>
-            <div class="column race-item">
-              Race 4
-            </div>
-            <div class="column race-item">
-              Race 5
-            </div>
-            <div class="column race-item">
-              Race 6
-            </div>
-            <div class="column race-item">
-              Race 7
-            </div>
-            <div class="column race-item">
-              Race 8
-            </div>
-            <div class="column race-item">
-              Race 9
-            </div>
-            <div class="column race-item">
-              Race 10
-            </div>
-            <div class="column race-item">
-              Race 11
-            </div>
-            <div class="column race-item">
-              Race 12
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div v-if="loading">
+      Loading
     </div>
 
-    <div class="section race-section">
-      <div class="columns">
-        <div class="column">
-          <h6 class="title is-6">Horse Racing - International</h6>
-        </div>
-      </div>
+    <race-section
+      v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
+      v-bind:racedate="this.filterDate"
+      racetype='horse-racing'
+      v-bind:racelocal="true">
+    </race-section>
 
-      <div class="columns race-catagory ">
-        <div class="column race-location is-one-fifth">
-          Flemington
-        </div>
-        <div class="column race-list">
-          <div class="columns">
-            <div class="column race-item">
-              Race 1
-            </div>
-            <div class="column race-item">
-              Race 2
-            </div>
-            <div class="column race-item">
-              Race 3
-            </div>
-            <div class="column race-item">
-              Race 4
-            </div>
-            <div class="column race-item">
-              Race 5
-            </div>
-            <div class="column race-item">
-              Race 6
-            </div>
-            <div class="column race-item">
-              Race 7
-            </div>
-            <div class="column race-item">
-              Race 8
-            </div>
-            <div class="column race-item">
-              Race 9
-            </div>
-            <div class="column race-item">
-              Race 10
-            </div>
-            <div class="column race-item">
-              Race 11
-            </div>
-            <div class="column race-item">
-              Race 12
-            </div>
-          </div>
-        </div>
-      </div>
+    <race-section
+      v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
+      v-bind:racedate="this.filterDate"
+      racetype='horse-racing'
+      v-bind:racelocal="false">
+    </race-section>
 
-    </div>
+    <race-section
+      v-if="this.filterType === 'all' || this.filterType === 'harness'"
+      v-bind:racedate="this.filterDate"
+      racetype='harness'
+      v-bind:racelocal="true">
+    </race-section>
+
+    <race-section
+      v-if="this.filterType === 'all' || this.filterType === 'harness'"
+      v-bind:racedate="this.filterDate"
+      racetype='harness'
+      v-bind:racelocal="false">
+    </race-section>
+
+    <race-section
+      v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
+      v-bind:racedate="this.filterDate"
+      racetype='greyhounds'
+      v-bind:racelocal="true">
+    </race-section>
+
+    <race-section
+      v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
+      v-bind:racedate="this.filterDate"
+      racetype='greyhounds'
+      v-bind:racelocal="false">
+    </race-section>
 
   </div>
 </template>
 
 <script>
-import date from '../api/date-helper';
+import RaceSection from '../components/RaceSection.vue';
+import DateHelper from '../api/date-helper';
 
 export default {
+  name: 'Racing',
+  components: {
+    RaceSection,
+  },
+  data() {
+    return {
+      filterType: 'all',
+      filterDate: this.$route.params.date || this.getToday(),
+      lastUpdate: 0,
+    };
+  },
+
+  computed: {
+    loading() {
+      return this.$store.state.racing.loadingStatus !== 'successful';
+    },
+  },
+
   created() {
-    // if last update > 1 minute ago then update racing schedule
-    console.log(this.$route);
     this.$store.dispatch('racing/getRacingSchedule', this.$route.params.date || this.getToday());
   },
   watch: {
     $route() {
-      this.$store.dispatch('racing/getRacingSchedule', this.$route.params.date || this.getToday());
+      this.filterDate = this.$route.params.date || this.getToday();
+      this.$store.dispatch('racing/getRacingSchedule', this.filterDate);
     },
   },
 
   methods: {
+
     getToday() {
-      return date.formatDate(date.todayDate());
+      return DateHelper.formatDate(DateHelper.todayDate());
     },
     getTomorrow() {
-      return date.formatDate(date.tomorrowDate());
+      return DateHelper.formatDate(DateHelper.tomorrowDate());
     },
     getOvermorrow() {
-      return date.formatDate(date.overmorrowDate());
+      return DateHelper.formatDate(DateHelper.overmorrowDate());
     },
     getOvermorrowDay() {
-      return date.getDayString(date.overmorrowDate().getDay());
-    },
-
-    dateToday() {
-      this.filterDate = 'today';
-    },
-    dateTomorrow() {
-      this.filterDate = 'tomorrow';
-    },
-    dateOvermorrow() {
-      this.filterDate = 'overmorrow';
-    },
-    dateCustom() {
-      // todo
+      return DateHelper.getDayString(DateHelper.overmorrowDate().getDay());
     },
 
     filterAll() {
@@ -224,14 +162,6 @@ export default {
     filterGreyhounds() {
       this.filterType = 'greyhounds';
     },
-  },
-
-  data() {
-    return {
-      filterType: 'all',
-      filterDate: 'today',
-      lastUpdate: 0,
-    };
   },
 };
 </script>

@@ -1,9 +1,10 @@
+import Vue from 'vue';
 import api from '../../api/racing';
 
 const SCHEDULE_CACHE_TIME = 10 * 1000; // 10 seconds
 
 const getters = {
-
+  filterMeetings: state => (type, date, local) => Object.values(state.meetings).filter(m => m.race_type === type && m.date === date && m.local === local),
 };
 
 const actions = {
@@ -27,14 +28,16 @@ const mutations = {
 
   updateRaceSchedule(state, { data, date }) {
     Object.values(data.meetings).forEach((m) => {
-      state.meetings[m.meeting_id] = { ...m, date: data.date };
+      const local = m.country === 'Australia' || m.country === 'New Zealand';
+
+      Vue.set(state.meetings, m.meeting_id, { ...m, date: data.date, local });
     });
 
     Object.values(data.races).forEach((r) => {
-      state.races[r.race_id] = r;
+      Vue.set(state.races, r.race_id, r);
     });
 
-    state.scheduleAges[date] = new Date().getTime();
+    Vue.set(state.scheduleAges, date, new Date().getTime());
   },
 
   setLoadingStatus(state, status) {
