@@ -6,47 +6,17 @@
         </div>
       </div>
 
-      <div class="columns race-catagory ">
+      <div :key="index"  v-for="(m, index) in meetings()" class="columns race-catagory ">
         <div class="column race-location is-one-fifth">
-          Flemington
+          {{ m.name }}
         </div>
         <div class="column race-list">
           <div class="columns">
-            <div class="column race-item">
-              Race 1
+            <div :key="index" v-for="(r, index) in getRaces(m.meeting_id)" class="column race-item">
+              Race {{r.number}}
             </div>
-            <div class="column race-item">
-              Race 2
-            </div>
-            <div class="column race-item">
-              Race 3
-            </div>
-            <div class="column race-item">
-              Race 4
-            </div>
-            <div class="column race-item">
-              Race 5
-            </div>
-            <div class="column race-item">
-              Race 6
-            </div>
-            <div class="column race-item">
-              Race 7
-            </div>
-            <div class="column race-item">
-              Race 8
-            </div>
-            <div class="column race-item">
-              Race 9
-            </div>
-            <div class="column race-item">
-              Race 10
-            </div>
-            <div class="column race-item">
-              Race 11
-            </div>
-            <div class="column race-item">
-              Race 12
+            <div :key="'empty-'+ i" v-for="i in maxRaces() - getRaces(m.meeting_id).length" class="column race-item">
+
             </div>
           </div>
         </div>
@@ -56,10 +26,19 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   props: ['racedate', 'racetype', 'racelocal'],
-
+  data() {
+    return {
+    };
+  },
   computed: {
+    ...mapGetters({
+      getMeetings: 'racing/filterMeetings',
+      getRaces: 'racing/getRacesForMeeting',
+    }),
     raceTypeDisplay() {
       if (this.racetype === 'horse-racing') {
         return 'Horse Racing';
@@ -74,9 +53,28 @@ export default {
     raceLocalDisplay() {
       return this.racelocal ? 'Australia & New Zealand' : 'International';
     },
+
     display() {
-      const meetings = this.$store.getters['racing/filterMeetings'](this.racetype, this.racedate, this.racelocal);
-      return meetings.length > 0;
+      return this.getMeetings(this.racetype, this.racedate, this.racelocal).length > 0;
+    },
+  },
+  methods: {
+    maxRaces() {
+      console.debug('calculating max races');
+      let max = 0;
+      const meetings = this.meetings();
+      meetings.forEach((m) => {
+        if (m.race_ids.length > max) {
+          max = m.race_ids.length;
+        }
+      });
+      return max;
+    },
+    meetings() {
+      return this.getMeetings(this.racetype, this.racedate, this.racelocal);
+    },
+    races(meetingId) {
+      return this.getRaces(meetingId);
     },
   },
 };

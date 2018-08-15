@@ -57,48 +57,49 @@
       Loading
     </div>
 
-    <race-section
-      v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
-      v-bind:racedate="this.filterDate"
-      racetype='horse-racing'
-      v-bind:racelocal="true">
-    </race-section>
+    <div v-if="!loading">
+      <race-section
+        v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
+        v-bind:racedate="this.filterDate"
+        racetype='horse-racing'
+        v-bind:racelocal="true">
+      </race-section>
 
-    <race-section
-      v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
-      v-bind:racedate="this.filterDate"
-      racetype='horse-racing'
-      v-bind:racelocal="false">
-    </race-section>
+      <race-section
+        v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
+        v-bind:racedate="this.filterDate"
+        racetype='horse-racing'
+        v-bind:racelocal="false">
+      </race-section>
 
-    <race-section
-      v-if="this.filterType === 'all' || this.filterType === 'harness'"
-      v-bind:racedate="this.filterDate"
-      racetype='harness'
-      v-bind:racelocal="true">
-    </race-section>
+      <race-section
+        v-if="this.filterType === 'all' || this.filterType === 'harness'"
+        v-bind:racedate="this.filterDate"
+        racetype='harness'
+        v-bind:racelocal="true">
+      </race-section>
 
-    <race-section
-      v-if="this.filterType === 'all' || this.filterType === 'harness'"
-      v-bind:racedate="this.filterDate"
-      racetype='harness'
-      v-bind:racelocal="false">
-    </race-section>
+      <race-section
+        v-if="this.filterType === 'all' || this.filterType === 'harness'"
+        v-bind:racedate="this.filterDate"
+        racetype='harness'
+        v-bind:racelocal="false">
+      </race-section>
 
-    <race-section
-      v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
-      v-bind:racedate="this.filterDate"
-      racetype='greyhounds'
-      v-bind:racelocal="true">
-    </race-section>
+      <race-section
+        v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
+        v-bind:racedate="this.filterDate"
+        racetype='greyhounds'
+        v-bind:racelocal="true">
+      </race-section>
 
-    <race-section
-      v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
-      v-bind:racedate="this.filterDate"
-      racetype='greyhounds'
-      v-bind:racelocal="false">
-    </race-section>
-
+      <race-section
+        v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
+        v-bind:racedate="this.filterDate"
+        racetype='greyhounds'
+        v-bind:racelocal="false">
+      </race-section>
+    </div>
   </div>
 </template>
 

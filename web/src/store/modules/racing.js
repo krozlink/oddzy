@@ -1,10 +1,17 @@
 import Vue from 'vue';
 import api from '../../api/racing';
 
-const SCHEDULE_CACHE_TIME = 10 * 1000; // 10 seconds
+const SCHEDULE_CACHE_TIME = 30 * 1000; // 10 seconds
 
 const getters = {
-  filterMeetings: state => (type, date, local) => Object.values(state.meetings).filter(m => m.race_type === type && m.date === date && m.local === local),
+  filterMeetings: state => (type, date, local) => {
+    console.debug('Filtering meetings');
+    return Object.values(state.meetings).filter(m => m.race_type === type && m.date === date && m.local === local);
+  },
+  getRacesForMeeting: state => (meetingId) => {
+    const ids = state.meetings[meetingId].race_ids;
+    return ids.map(id => state.races[id]);
+  },
 };
 
 const actions = {
