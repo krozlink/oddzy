@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Home from './views/Home.vue';
 import Racing from './views/Racing.vue';
+import RaceCard from './views/RaceCard.vue';
 
 Vue.use(Router);
 
@@ -22,6 +23,11 @@ export default new Router({
       path: '/racing/:date',
       name: 'racing-date',
       component: Racing,
+    },
+    {
+      path: '/racing/:location/:id',
+      name: 'race-card',
+      component: RaceCard,
     },
   ],
 });
