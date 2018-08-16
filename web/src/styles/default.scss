@@ -2,5 +2,7 @@ $navbar-height: 5rem;
 
 $primary: #0E86E2;
 
-@import "../../node_modules/bulma/bulma.sass";
+$body-family: "Nunito", sans-serif;
+$body-color: hsl(0, 0%, 29%);
 
+@import "../../node_modules/bulma/bulma.sass";

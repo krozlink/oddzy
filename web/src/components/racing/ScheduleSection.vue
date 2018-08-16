@@ -13,10 +13,10 @@
         <div class="column race-list">
           <div class="columns">
             <div :key="index" v-for="(r, index) in getRaces(m.meeting_id)" class="column race-item">
-              Race {{r.number}}
+              <schedule-item :race="r"> </schedule-item>
             </div>
             <div :key="'empty-'+ i" v-for="i in maxRaces() - getRaces(m.meeting_id).length" class="column race-item">
-
+              <schedule-item :race="{}" :empty="true"> </schedule-item>
             </div>
           </div>
         </div>
@@ -27,8 +27,13 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import ScheduleItem from './ScheduleItem.vue';
 
 export default {
+  name: 'ScheduleSection',
+  components: {
+    ScheduleItem,
+  },
   props: ['racedate', 'racetype', 'racelocal'],
   data() {
     return {
@@ -60,7 +65,7 @@ export default {
   },
   methods: {
     maxRaces() {
-      console.debug('calculating max races');
+      // console.debug('calculating max races');
       let max = 0;
       const meetings = this.meetings();
       meetings.forEach((m) => {

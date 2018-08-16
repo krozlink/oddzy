@@ -58,59 +58,59 @@
     </div>
 
     <div v-if="!loading">
-      <race-section
+      <schedule-section
         v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
         v-bind:racedate="this.filterDate"
         racetype='horse-racing'
         v-bind:racelocal="true">
-      </race-section>
+      </schedule-section>
 
-      <race-section
+      <schedule-section
         v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
         v-bind:racedate="this.filterDate"
         racetype='horse-racing'
         v-bind:racelocal="false">
-      </race-section>
+      </schedule-section>
 
-      <race-section
+      <schedule-section
         v-if="this.filterType === 'all' || this.filterType === 'harness'"
         v-bind:racedate="this.filterDate"
         racetype='harness'
         v-bind:racelocal="true">
-      </race-section>
+      </schedule-section>
 
-      <race-section
+      <schedule-section
         v-if="this.filterType === 'all' || this.filterType === 'harness'"
         v-bind:racedate="this.filterDate"
         racetype='harness'
         v-bind:racelocal="false">
-      </race-section>
+      </schedule-section>
 
-      <race-section
+      <schedule-section
         v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
         v-bind:racedate="this.filterDate"
         racetype='greyhounds'
         v-bind:racelocal="true">
-      </race-section>
+      </schedule-section>
 
-      <race-section
+      <schedule-section
         v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
         v-bind:racedate="this.filterDate"
         racetype='greyhounds'
         v-bind:racelocal="false">
-      </race-section>
+      </schedule-section>
     </div>
   </div>
 </template>
 
 <script>
-import RaceSection from '../components/RaceSection.vue';
+import ScheduleSection from '../components/racing/ScheduleSection.vue';
 import DateHelper from '../api/date-helper';
 
 export default {
   name: 'Racing',
   components: {
-    RaceSection,
+    ScheduleSection,
   },
   data() {
     return {
