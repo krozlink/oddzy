@@ -2,7 +2,7 @@
   <div id="racing" class="container">
     <div class="section columns header">
       <div class="column is-one-third">
-        <h4 class="title is-4">Today's Racing</h4>
+        <h4 class="title is-4">{{ racingTitle() }}</h4>
       </div>
       <div class="column">
         <nav class="level">
@@ -22,7 +22,7 @@
                   <span class="icon is-large">
                     <i class="fas fa-lg fa-calendar-alt"></i>
                   </span>
-                  <span>Select Date</span>
+                  <span>Date</span>
                 </span>
               </div>
             </div>
@@ -114,6 +114,7 @@ export default {
   },
   data() {
     return {
+      title: "Today's Racing",
       filterType: 'all',
       filterDate: this.$route.params.date || this.getToday(),
       lastUpdate: 0,
@@ -163,6 +164,18 @@ export default {
     filterGreyhounds() {
       this.filterType = 'greyhounds';
     },
+
+    racingTitle() {
+      if (this.filterDate === this.getToday()) {
+        return "Today's Racing";
+      } else if (this.filterDate === this.getTomorrow()) {
+        return "Tomorrow's Racing";
+      } else if (this.filterDate === this.getOvermorrow()) {
+        return `${this.getOvermorrowDay()}'s Racing`;
+      }
+
+      return 'Racing';
+    },
   },
 };
 </script>
@@ -173,7 +186,7 @@ export default {
 }
 
 .racetype-icons .icon {
-  padding-top: 5px;
+  padding-top: 15px;
 }
 
 #racing .section {

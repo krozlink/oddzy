@@ -12,12 +12,8 @@
         </div>
         <div class="column race-list">
           <div class="columns">
-            <div :key="index" v-for="(r, index) in getRaces(m.meeting_id)" class="column race-item">
-              <schedule-item :race="r"> </schedule-item>
-            </div>
-            <div :key="'empty-'+ i" v-for="i in maxRaces() - getRaces(m.meeting_id).length" class="column race-item">
-              <schedule-item :race="{}" :empty="true"> </schedule-item>
-            </div>
+              <schedule-item :key="index" v-for="(r, index) in getRaces(m.meeting_id)" :race="r" :meeting="m" :empty="false"> </schedule-item>
+              <schedule-item :key="'empty-'+ i" v-for="i in maxRaces() - getRaces(m.meeting_id).length" :race="{}" :meeting="m" :empty="true"> </schedule-item>
           </div>
         </div>
       </div>
@@ -86,6 +82,21 @@ export default {
 </script>
 
 
-<style lang="sass" scoped>
+<style lang="scss" scoped>
+  .race-catagory .column {
+    // border-style: solid;
+    // border-width: 1px;
+    // border-color: black;
+    padding: 0px;
+    // height: 60px;
+  }
 
+  .race-catagory .race-location {
+    padding-left: 12px;
+    padding-top: 12px;
+  }
+
+  .race-list .columns {
+    margin: 0px;
+  }
 </style>
