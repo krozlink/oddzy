@@ -12,7 +12,7 @@
         </div>
         <div class="column race-list">
           <div class="columns">
-              <schedule-item :key="index" v-for="(r, index) in getRaces(m.meeting_id)" :race="r" :meeting="m" :empty="false"> </schedule-item>
+              <schedule-item :time="time" :key="index" v-for="(r, index) in getRaces(m.meeting_id)" :race="r" :meeting="m" :empty="false"> </schedule-item>
               <schedule-item :key="'empty-'+ i" v-for="i in maxRaces() - getRaces(m.meeting_id).length" :race="{}" :meeting="m" :empty="true"> </schedule-item>
           </div>
         </div>
@@ -30,7 +30,7 @@ export default {
   components: {
     ScheduleItem,
   },
-  props: ['racedate', 'racetype', 'racelocal'],
+  props: ['racedate', 'racetype', 'racelocal', 'time'],
   data() {
     return {
     };

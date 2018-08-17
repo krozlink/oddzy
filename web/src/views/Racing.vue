@@ -62,6 +62,7 @@
         v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
         v-bind:racedate="this.filterDate"
         racetype='horse-racing'
+        :time="time"
         v-bind:racelocal="true">
       </schedule-section>
 
@@ -69,6 +70,7 @@
         v-if="this.filterType === 'all' || this.filterType === 'horse-racing'"
         v-bind:racedate="this.filterDate"
         racetype='horse-racing'
+        :time="time"
         v-bind:racelocal="false">
       </schedule-section>
 
@@ -76,6 +78,7 @@
         v-if="this.filterType === 'all' || this.filterType === 'harness'"
         v-bind:racedate="this.filterDate"
         racetype='harness'
+        :time="time"
         v-bind:racelocal="true">
       </schedule-section>
 
@@ -83,6 +86,7 @@
         v-if="this.filterType === 'all' || this.filterType === 'harness'"
         v-bind:racedate="this.filterDate"
         racetype='harness'
+        :time="time"
         v-bind:racelocal="false">
       </schedule-section>
 
@@ -90,6 +94,7 @@
         v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
         v-bind:racedate="this.filterDate"
         racetype='greyhounds'
+        :time="time"
         v-bind:racelocal="true">
       </schedule-section>
 
@@ -97,6 +102,7 @@
         v-if="this.filterType === 'all' || this.filterType === 'greyhounds'"
         v-bind:racedate="this.filterDate"
         racetype='greyhounds'
+        :time="time"
         v-bind:racelocal="false">
       </schedule-section>
     </div>
@@ -118,6 +124,8 @@ export default {
       filterType: 'all',
       filterDate: this.$route.params.date || this.getToday(),
       lastUpdate: 0,
+      interval: {},
+      time: 0,
     };
   },
 
@@ -127,7 +135,15 @@ export default {
     },
   },
 
+  beforeDestroy() {
+    clearInterval(this.interval);
+  },
+
   created() {
+    this.interval = setInterval(() => {
+      this.time = new Date().getTime() / 1000;
+    }, 1000);
+
     this.$store.dispatch('racing/getRacingSchedule', this.$route.params.date || this.getToday());
   },
   watch: {
