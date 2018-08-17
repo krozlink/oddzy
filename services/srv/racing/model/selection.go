@@ -21,6 +21,9 @@ type Selection struct {
 	DateCreated        time.Time `bson:"date_created"`
 	LastUpdated        time.Time `bson:"last_updated"`
 	Scratched          bool      `bson:"scratched"`
+	Weight             string    `bson:"weight"`
+	JockeyWeight       string    `bson:"jockey_weight"`
+	ImageURL           string    `bson:"image_url"`
 }
 
 // SelectionProtoToModel converts a Selection protobuf object used in service communication
@@ -39,6 +42,9 @@ func SelectionProtoToModel(p *proto.Selection) *Selection {
 		Scratched:          p.Scratched,
 		DateCreated:        time.Unix(p.DateCreated, 0),
 		LastUpdated:        time.Unix(p.LastUpdated, 0),
+		Weight:             p.Weight,
+		JockeyWeight:       p.JockeyWeight,
+		ImageURL:           p.ImageUrl,
 	}
 }
 
@@ -58,6 +64,9 @@ func SelectionModelToProto(s *Selection) *proto.Selection {
 		Scratched:          s.Scratched,
 		DateCreated:        s.DateCreated.Unix(),
 		LastUpdated:        s.LastUpdated.Unix(),
+		Weight:             s.Weight,
+		JockeyWeight:       s.JockeyWeight,
+		ImageUrl:           s.ImageURL,
 	}
 }
 
