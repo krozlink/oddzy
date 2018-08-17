@@ -38,7 +38,7 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
   associate_public_ip_address = false
   key_name                    = "${var.ec2_key_pair}"
 
-  depends_on = ["aws_efs_mount_target.container", "aws_s3_bucket_object.website"]
+  depends_on = ["aws_efs_mount_target.container"]
 
   user_data = <<EOF
 #cloud-config
@@ -83,9 +83,7 @@ runcmd:
   - aws ssm get-parameter --name ${var.internal_password_parameter} --with-decryption --output text --region ${var.region} | awk '{print $4}' | sudo tee /etc/nginx/.htpasswd > /dev/null
 
   # Update the website volume with the latest version from s3
-  - rm -rf $${efs_directory}/website/oddzy/*
-  - aws s3 cp s3://oddzy/web/dist.zip /tmp/website.zip
-  - unzip /tmp/website.zip -d $${efs_directory}/website/oddzy
+  - aws s3 sync s3://oddzy/web/dist /mnt/efs/website/oddzy --delete
 EOF
 }
 
