@@ -18,7 +18,7 @@ internal_password_parameter = "oddzy-internal-passwd"
 
 run_ec2_instance = true
 
-run_test_instance = true
+run_test_instance = false
 
 run_core_tasks = true
 

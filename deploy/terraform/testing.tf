@@ -47,3 +47,24 @@ resource aws_security_group testing {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+resource "aws_ssm_document" "delete_race_data" {
+  name          = "${var.application_name}-${var.application_stage}-delete-racing-db"
+  document_type = "Command"
+
+  content = <<DOC
+  {
+    "schemaVersion": "2.2",
+    "description": "Delete the mongo DB volume",
+    "mainSteps": [
+    {
+        "action":"aws:runShellScript",
+         "name":"deleteDBData",
+         "inputs":{
+            "runCommand":[
+              "rm -rf /mnt/efs/volumes/srv-racing/db-mongo/data/*"
+            ]
+         }
+    }]
+  }
+DOC
+}
