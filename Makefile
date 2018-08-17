@@ -54,10 +54,8 @@ destroy:
 # Build the website, upload it to s3 and trigger the remote update script
 webupdate:
 	cd ./web; npm run build
-	@eval $$(powershell Compress-Archive -Path .\web\dist\* -DestinationPath .\tmp\dist.zip -Force)
-	aws s3 cp ./tmp/dist.zip s3://oddzy/web/dist.zip 
+	aws s3 sync ./web/dist s3://oddzy/web/dist --delete
 	aws ssm send-command --document-name oddzy-test-update-website --targets Key=tag:name,Values=oddzy
-	rm ./tmp/dist.zip
 
 make webserve:
 	cd ./web; npm run serve

@@ -31,8 +31,7 @@ resource "aws_ssm_document" "update_website" {
          "inputs":{
             "runCommand":[
               "rm -rf /mnt/efs/website/oddzy/*",
-              "aws s3 cp s3://oddzy/web/dist.zip /tmp/website.zip",
-              "unzip /tmp/website.zip -d /mnt/efs/website/oddzy" 
+              "aws s3 sync s3://oddzy/web/dist /mnt/efs/website/oddzy --delete"
             ]
          }
     }]
