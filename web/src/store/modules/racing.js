@@ -5,10 +5,7 @@ const SCHEDULE_CACHE_TIME = 30 * 1000; // 10 seconds
 const RACECARD_CACHE_TIME = 30 * 1000; // 10 seconds
 
 const getters = {
-  filterMeetings: state => (type, date, local) => {
-    console.debug('Filtering meetings');
-    return Object.values(state.meetings).filter(m => m.race_type === type && m.date === date && m.local === local);
-  },
+  filterMeetings: state => (type, date, local) => Object.values(state.meetings).filter(m => m.race_type === type && m.date === date && m.local === local),
   getRacesForMeeting: state => (meetingId) => {
     const ids = state.meetings[meetingId].race_ids;
     return ids.map(id => state.races[id]);
@@ -34,6 +31,7 @@ const actions = {
     if (state.races[raceId] && state.races[raceId].lastRead > new Date(new Date() - RACECARD_CACHE_TIME).getTime()) {
       commit('setLoadingStatus', 'successful');
     } else {
+      commit('setLoadingStatus', null);
       api.readRaceCard(raceId)
         .then((result) => {
           commit('updateRaceCard', { data: result.data, raceId });

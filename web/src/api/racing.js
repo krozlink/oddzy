@@ -10,7 +10,12 @@ function readRaceCard(raceId) {
   return axios.get(`${process.env.VUE_APP_API}/racing/racecard?race_id=${raceId}`);
 }
 
+function raceNameURL(name) {
+  return name.toLowerCase().replace(' ', '-');
+}
+
 export default {
   readSchedule,
   readRaceCard,
+  raceNameURL,
 };

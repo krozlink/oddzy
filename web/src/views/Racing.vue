@@ -140,6 +140,7 @@ export default {
   },
 
   created() {
+    this.time = new Date().getTime() / 1000;
     this.interval = setInterval(() => {
       this.time = new Date().getTime() / 1000;
     }, 1000);
@@ -202,7 +203,7 @@ export default {
 }
 
 .racetype-icons .icon {
-  padding-top: 15px;
+  padding-top: 12px;
 }
 
 #racing .section {

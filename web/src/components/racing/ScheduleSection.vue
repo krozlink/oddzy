@@ -1,18 +1,18 @@
 <template>
     <div class="section race-section" v-if="display">
-      <div class="columns">
+      <div class="columns race-section-title">
         <div class="column">
           <h6 class="title is-6">{{ raceTypeDisplay }} - {{ raceLocalDisplay }}</h6>
         </div>
       </div>
 
       <div :key="index"  v-for="(m, index) in meetings()" class="columns race-catagory ">
-        <div class="column race-location is-one-fifth">
+        <router-link :to="nextRaceLink(m)" class="column race-location is-one-fifth">
           {{ m.name }}
-        </div>
+        </router-link>
         <div class="column race-list">
           <div class="columns">
-              <schedule-item :time="time" :key="index" v-for="(r, index) in getRaces(m.meeting_id)" :race="r" :meeting="m" :empty="false"> </schedule-item>
+              <schedule-item :time="time" :key="ri" v-for="(r, ri) in getRaces(m.meeting_id)" :next="isNextRace(ri, m.meeting_id)" :race="r" :meeting="m" :empty="false"> </schedule-item>
               <schedule-item :key="'empty-'+ i" v-for="i in maxRaces() - getRaces(m.meeting_id).length" :race="{}" :meeting="m" :empty="true"> </schedule-item>
           </div>
         </div>
@@ -23,6 +23,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import racing from '../../api/racing';
 import ScheduleItem from './ScheduleItem.vue';
 
 export default {
@@ -60,6 +61,31 @@ export default {
     },
   },
   methods: {
+    nextRaceLink(meeting) {
+      return `/racing/${racing.raceNameURL(meeting.name)}/${this.getNextRace(meeting.meeting_id)}`;
+    },
+    getNextRace(meetingId) {
+      const races = this.getRaces(meetingId);
+      for (let i = 0; i < races.length; i += 1) {
+        if (races[i].status !== 'CLOSED' && races[i].status !== 'ABANDONED') {
+          return races[i].race_id;
+        }
+      }
+
+      return races[races.length - 1].race_id;
+    },
+    isNextRace(index, meetingId) {
+      const races = this.getRaces(meetingId);
+
+      const { status } = races[index];
+      if (status === 'CLOSED' || status === 'ABANDONED') {
+        return false;
+      }
+
+      if (index === 0) return true;
+
+      return races[index - 1].status === 'CLOSED' || races[index - 1].status === 'ABANDONED';
+    },
     maxRaces() {
       // console.debug('calculating max races');
       let max = 0;
@@ -84,19 +110,56 @@ export default {
 
 <style lang="scss" scoped>
   .race-catagory .column {
-    // border-style: solid;
-    // border-width: 1px;
-    // border-color: black;
     padding: 0px;
-    // height: 60px;
+    font-size: 0.95em;
+  }
+
+  .section.race-section {
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 24px;
+    margin-right: 24px;
   }
 
   .race-catagory .race-location {
     padding-left: 12px;
     padding-top: 12px;
+    height: 50px;
   }
 
   .race-list .columns {
     margin: 0px;
+  }
+
+  .race-section-title {
+    background-color: $primary;
+    // margin-left: -24px;
+    // margin-right: -24px;
+  }
+
+  .race-section-title .title {
+    color: #F7F7F7;
+    font-weight: 500;
+  }
+
+  .race-catagory:hover>div  {
+    opacity: 0.85;
+  }
+
+  .race-section .race-location {
+    font-size: 0.85em;
+  }
+
+  .race-section .race-location:hover {
+    background-color: #EFEFEF;
+  }
+
+  a {
+    color: $body-color;
+  }
+
+
+  .race-section {
+    background-color: #F7F7F7;
   }
 </style>
