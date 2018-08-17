@@ -6,6 +6,11 @@ function readSchedule(scheduleDate) {
   return axios.get(`${process.env.VUE_APP_API}/racing/schedule?date=${param}`);
 }
 
+function readRaceCard(raceId) {
+  return axios.get(`${process.env.VUE_APP_API}/racing/racecard?race_id=${raceId}`);
+}
+
 export default {
   readSchedule,
+  readRaceCard,
 };

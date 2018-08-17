@@ -2,6 +2,7 @@ import Vue from 'vue';
 import api from '../../api/racing';
 
 const SCHEDULE_CACHE_TIME = 30 * 1000; // 10 seconds
+const RACECARD_CACHE_TIME = 30 * 1000; // 10 seconds
 
 const getters = {
   filterMeetings: state => (type, date, local) => {
@@ -29,9 +30,24 @@ const actions = {
         .catch(() => commit('setLoadingStatus', 'failed'));
     }
   },
+  getRaceCard({ commit, state }, raceId) {
+    if (state.races[raceId] && state.races[raceId].lastRead > new Date(new Date() - RACECARD_CACHE_TIME).getTime()) {
+      commit('setLoadingStatus', 'successful');
+    } else {
+      api.readRaceCard(raceId)
+        .then((result) => {
+          commit('updateRaceCard', { data: result.data, raceId });
+          commit('setLoadingStatus', 'successful');
+        })
+        .catch(() => commit('setLoadingStatus', 'failed'));
+    }
+  },
 };
 
 const mutations = {
+  updateRaceCard(state, { data, raceId }) {
+    Vue.set(state.races, raceId, { ...data, lastRead: new Date().getTime() });
+  },
 
   updateRaceSchedule(state, { data, date }) {
     Object.values(data.meetings).forEach((m) => {
