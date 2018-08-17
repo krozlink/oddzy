@@ -462,6 +462,9 @@ func parseRaceCard(c *RaceCard) []*racing.Selection {
 			Jockey:             v.JockeyName,
 			Number:             int32(number),
 			SourceCompetitorId: v.CompetitorID,
+			Weight:             v.Weight,
+			JockeyWeight:       v.JockeyWeight,
+			ImageUrl:           v.ImageURL,
 		}
 
 		selections[i] = s

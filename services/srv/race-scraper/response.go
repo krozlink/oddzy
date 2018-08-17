@@ -130,6 +130,8 @@ type RaceSelection struct {
 	ImageURL         string      `json:"imageUrl"`
 	JockeyName       string      `json:"jockeyName"`
 	Prices           []RacePrice `json:"prices"`
+	Weight           string      `json:"weight"`
+	JockeyWeight     string      `json:"jockeyWeight"`
 }
 
 // RacePrice is the format odds.com.au uses to represent the price for a market offered by a particular bookmaker

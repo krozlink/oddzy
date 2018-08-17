@@ -17,10 +17,16 @@ It has these top-level messages:
 	AddRacesResponse
 	AddMeetingsRequest
 	AddMeetingsResponse
+	GetMeetingRequest
+	GetMeetingResponse
 	UpdateRaceRequest
 	UpdateRaceResponse
 	GetNextRaceRequest
 	GetNextRaceResponse
+	GetRaceRequest
+	GetRaceResponse
+	ListSelectionsRequest
+	ListSelectionsResponse
 	Meeting
 	Competitor
 	Selection
@@ -60,9 +66,12 @@ type RacingService interface {
 	ListMeetingsByDate(ctx context.Context, in *ListMeetingsByDateRequest, opts ...client.CallOption) (*ListMeetingsByDateResponse, error)
 	ListRacesByMeetingDate(ctx context.Context, in *ListRacesByMeetingDateRequest, opts ...client.CallOption) (*ListRacesByMeetingDateResponse, error)
 	AddMeetings(ctx context.Context, in *AddMeetingsRequest, opts ...client.CallOption) (*AddMeetingsResponse, error)
+	GetMeeting(ctx context.Context, in *GetMeetingRequest, opts ...client.CallOption) (*GetMeetingResponse, error)
 	AddRaces(ctx context.Context, in *AddRacesRequest, opts ...client.CallOption) (*AddRacesResponse, error)
 	UpdateRace(ctx context.Context, in *UpdateRaceRequest, opts ...client.CallOption) (*UpdateRaceResponse, error)
 	GetNextRace(ctx context.Context, in *GetNextRaceRequest, opts ...client.CallOption) (*GetNextRaceResponse, error)
+	GetRace(ctx context.Context, in *GetRaceRequest, opts ...client.CallOption) (*GetRaceResponse, error)
+	ListSelections(ctx context.Context, in *ListSelectionsRequest, opts ...client.CallOption) (*ListSelectionsResponse, error)
 }
 
 type racingService struct {
@@ -113,6 +122,16 @@ func (c *racingService) AddMeetings(ctx context.Context, in *AddMeetingsRequest,
 	return out, nil
 }
 
+func (c *racingService) GetMeeting(ctx context.Context, in *GetMeetingRequest, opts ...client.CallOption) (*GetMeetingResponse, error) {
+	req := c.c.NewRequest(c.name, "RacingService.GetMeeting", in)
+	out := new(GetMeetingResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *racingService) AddRaces(ctx context.Context, in *AddRacesRequest, opts ...client.CallOption) (*AddRacesResponse, error) {
 	req := c.c.NewRequest(c.name, "RacingService.AddRaces", in)
 	out := new(AddRacesResponse)
@@ -143,15 +162,38 @@ func (c *racingService) GetNextRace(ctx context.Context, in *GetNextRaceRequest,
 	return out, nil
 }
 
+func (c *racingService) GetRace(ctx context.Context, in *GetRaceRequest, opts ...client.CallOption) (*GetRaceResponse, error) {
+	req := c.c.NewRequest(c.name, "RacingService.GetRace", in)
+	out := new(GetRaceResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *racingService) ListSelections(ctx context.Context, in *ListSelectionsRequest, opts ...client.CallOption) (*ListSelectionsResponse, error) {
+	req := c.c.NewRequest(c.name, "RacingService.ListSelections", in)
+	out := new(ListSelectionsResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for RacingService service
 
 type RacingServiceHandler interface {
 	ListMeetingsByDate(context.Context, *ListMeetingsByDateRequest, *ListMeetingsByDateResponse) error
 	ListRacesByMeetingDate(context.Context, *ListRacesByMeetingDateRequest, *ListRacesByMeetingDateResponse) error
 	AddMeetings(context.Context, *AddMeetingsRequest, *AddMeetingsResponse) error
+	GetMeeting(context.Context, *GetMeetingRequest, *GetMeetingResponse) error
 	AddRaces(context.Context, *AddRacesRequest, *AddRacesResponse) error
 	UpdateRace(context.Context, *UpdateRaceRequest, *UpdateRaceResponse) error
 	GetNextRace(context.Context, *GetNextRaceRequest, *GetNextRaceResponse) error
+	GetRace(context.Context, *GetRaceRequest, *GetRaceResponse) error
+	ListSelections(context.Context, *ListSelectionsRequest, *ListSelectionsResponse) error
 }
 
 func RegisterRacingServiceHandler(s server.Server, hdlr RacingServiceHandler, opts ...server.HandlerOption) {
@@ -159,9 +201,12 @@ func RegisterRacingServiceHandler(s server.Server, hdlr RacingServiceHandler, op
 		ListMeetingsByDate(ctx context.Context, in *ListMeetingsByDateRequest, out *ListMeetingsByDateResponse) error
 		ListRacesByMeetingDate(ctx context.Context, in *ListRacesByMeetingDateRequest, out *ListRacesByMeetingDateResponse) error
 		AddMeetings(ctx context.Context, in *AddMeetingsRequest, out *AddMeetingsResponse) error
+		GetMeeting(ctx context.Context, in *GetMeetingRequest, out *GetMeetingResponse) error
 		AddRaces(ctx context.Context, in *AddRacesRequest, out *AddRacesResponse) error
 		UpdateRace(ctx context.Context, in *UpdateRaceRequest, out *UpdateRaceResponse) error
 		GetNextRace(ctx context.Context, in *GetNextRaceRequest, out *GetNextRaceResponse) error
+		GetRace(ctx context.Context, in *GetRaceRequest, out *GetRaceResponse) error
+		ListSelections(ctx context.Context, in *ListSelectionsRequest, out *ListSelectionsResponse) error
 	}
 	type RacingService struct {
 		racingService
@@ -186,6 +231,10 @@ func (h *racingServiceHandler) AddMeetings(ctx context.Context, in *AddMeetingsR
 	return h.RacingServiceHandler.AddMeetings(ctx, in, out)
 }
 
+func (h *racingServiceHandler) GetMeeting(ctx context.Context, in *GetMeetingRequest, out *GetMeetingResponse) error {
+	return h.RacingServiceHandler.GetMeeting(ctx, in, out)
+}
+
 func (h *racingServiceHandler) AddRaces(ctx context.Context, in *AddRacesRequest, out *AddRacesResponse) error {
 	return h.RacingServiceHandler.AddRaces(ctx, in, out)
 }
@@ -196,4 +245,12 @@ func (h *racingServiceHandler) UpdateRace(ctx context.Context, in *UpdateRaceReq
 
 func (h *racingServiceHandler) GetNextRace(ctx context.Context, in *GetNextRaceRequest, out *GetNextRaceResponse) error {
 	return h.RacingServiceHandler.GetNextRace(ctx, in, out)
+}
+
+func (h *racingServiceHandler) GetRace(ctx context.Context, in *GetRaceRequest, out *GetRaceResponse) error {
+	return h.RacingServiceHandler.GetRace(ctx, in, out)
+}
+
+func (h *racingServiceHandler) ListSelections(ctx context.Context, in *ListSelectionsRequest, out *ListSelectionsResponse) error {
+	return h.RacingServiceHandler.ListSelections(ctx, in, out)
 }

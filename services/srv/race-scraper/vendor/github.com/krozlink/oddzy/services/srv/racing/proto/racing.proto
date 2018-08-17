@@ -6,9 +6,12 @@ service RacingService {
     rpc ListMeetingsByDate (ListMeetingsByDateRequest) returns (ListMeetingsByDateResponse) {}
     rpc ListRacesByMeetingDate (ListRacesByMeetingDateRequest) returns (ListRacesByMeetingDateResponse) {}
     rpc AddMeetings (AddMeetingsRequest) returns (AddMeetingsResponse);
+    rpc GetMeeting (GetMeetingRequest) returns (GetMeetingResponse);
     rpc AddRaces (AddRacesRequest) returns (AddRacesResponse);
     rpc UpdateRace (UpdateRaceRequest) returns (UpdateRaceResponse);
     rpc GetNextRace (GetNextRaceRequest) returns (GetNextRaceResponse);
+    rpc GetRace (GetRaceRequest) returns (GetRaceResponse);
+    rpc ListSelections (ListSelectionsRequest) returns (ListSelectionsResponse);
 }
 
 message RaceUpdatedMessage {
@@ -54,6 +57,15 @@ message AddMeetingsResponse {
     bool created = 1;
 }
 
+message GetMeetingRequest {
+    string meeting_id = 1;
+}
+
+message GetMeetingResponse {
+    Meeting meeting = 1;
+}
+
+
 message UpdateRaceRequest {
     string race_id = 1;
     int64 scheduled_start = 2;
@@ -73,6 +85,22 @@ message GetNextRaceRequest {
 
 message GetNextRaceResponse {
     Race race = 1;
+}
+
+message GetRaceRequest {
+    string race_id = 1;
+}
+
+message GetRaceResponse {
+    Race race = 1;
+}
+
+message ListSelectionsRequest {
+    string race_id = 1;
+}
+
+message ListSelectionsResponse {
+    repeated Selection selections = 1;
 }
 
 message Meeting {
@@ -111,6 +139,9 @@ message Selection {
     bool scratched = 10;
     int64 date_created = 11;
     int64 last_updated = 12;
+    string weight = 13;
+    string jockey_weight = 14;
+    string image_url = 15;
 }
 
 message Race {
