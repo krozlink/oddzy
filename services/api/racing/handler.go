@@ -199,6 +199,8 @@ func createRacecard(meeting *racing.Meeting, race *racing.Race, selections []*ra
 	m := response.RaceCardMeeting{
 		MeetingID: meeting.MeetingId,
 		Name:      meeting.Name,
+		Country:   meeting.Country,
+		RaceType:  meeting.RaceType,
 		RaceIds:   meeting.RaceIds,
 	}
 

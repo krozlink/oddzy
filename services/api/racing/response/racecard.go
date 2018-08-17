@@ -17,6 +17,8 @@ type RaceCard struct {
 type RaceCardMeeting struct {
 	MeetingID string   `json:"meeting_id"`
 	Name      string   `json:"name"`
+	Country   string   `json:"country"`
+	RaceType  string   `json:"race_type"`
 	RaceIds   []string `json:"race_ids"`
 }
 
