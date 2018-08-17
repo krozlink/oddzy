@@ -139,6 +139,9 @@ message Selection {
     bool scratched = 10;
     int64 date_created = 11;
     int64 last_updated = 12;
+    string weight = 13;
+    string jockey_weight = 14;
+    string image_url = 15;
 }
 
 message Race {

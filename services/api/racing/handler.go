@@ -207,12 +207,15 @@ func createRacecard(meeting *racing.Meeting, race *racing.Race, selections []*ra
 	s := make([]response.RaceCardSelection, len(selections))
 	for i, v := range selections {
 		s[i] = response.RaceCardSelection{
-			Barrier:     v.BarrierNumber,
-			IsScratched: v.Scratched,
-			Jockey:      v.Jockey,
-			Name:        v.Name,
-			Number:      v.Number,
-			SelectionID: v.SelectionId,
+			Barrier:      v.BarrierNumber,
+			IsScratched:  v.Scratched,
+			Jockey:       v.Jockey,
+			Name:         v.Name,
+			Number:       v.Number,
+			SelectionID:  v.SelectionId,
+			Weight:       v.Weight,
+			JockeyWeight: v.JockeyWeight,
+			ImageURL:     v.ImageUrl,
 		}
 	}
 

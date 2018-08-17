@@ -24,10 +24,13 @@ type RaceCardMeeting struct {
 
 // RaceCardSelection contains the selection data shown on a race card
 type RaceCardSelection struct {
-	SelectionID string `json:"selection_id"`
-	Name        string `json:"name"`
-	Barrier     int32  `json:"barrier"`
-	Number      int32  `json:"number"`
-	Jockey      string `json:"jockey"`
-	IsScratched bool   `json:"is_scratched"`
+	SelectionID  string `json:"selection_id"`
+	Name         string `json:"name"`
+	Barrier      int32  `json:"barrier"`
+	Number       int32  `json:"number"`
+	Jockey       string `json:"jockey"`
+	IsScratched  bool   `json:"is_scratched"`
+	Weight       string `json:"weight"`
+	JockeyWeight string `json:"jockey_weight"`
+	ImageURL     string `json:"image_url"`
 }
