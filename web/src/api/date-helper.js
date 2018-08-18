@@ -39,6 +39,15 @@ function getMonthString(month) {
   return MONTHS[month];
 }
 
+function pad(n, width) {
+  return n.length >= width ? n : new Array((width - n.length) + 1).join('0') + n;
+}
+
+function formatTime(unix) {
+  const d = new Date(unix);
+  return `${d.getHours()}:${pad(d.getMinutes().toString(), 2)}`;
+}
+
 function formatTimeRemaining(totalSeconds) {
   const remaining = totalSeconds;
   const isNegative = remaining < 0;
@@ -74,4 +83,5 @@ export default {
   getDayString,
   getMonthString,
   formatTimeRemaining,
+  formatTime,
 };
