@@ -142,12 +142,8 @@ export default {
     font-weight: 500;
   }
 
-  .race-catagory:hover>div  {
-    opacity: 0.85;
-  }
-
   .race-section .race-location {
-    font-size: 0.85em;
+    font-size: 0.95em;
   }
 
   .race-section .race-location:hover {

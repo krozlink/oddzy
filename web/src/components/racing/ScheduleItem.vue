@@ -101,7 +101,7 @@ export default {
   border-color: $body-background-color;
   height: 50px;
 
-  font-size: 0.85em;
+  font-size: 0.95em;
 
   display:flex;
   align-items: center; /* Vertical center alignment */
@@ -109,7 +109,9 @@ export default {
 }
 
 .has-race:hover {
-  background-color: #EFEFEF;
+  // background-color: #EFEFEF;
+  background-color: #3599E5;
+  color: #F7F7F7;
 }
 
 a {

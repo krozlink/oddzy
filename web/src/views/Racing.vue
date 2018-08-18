@@ -214,4 +214,10 @@ export default {
   padding-bottom: 0px;
 }
 
+#racing.container{
+  @media screen and (min-width: 1472px) {
+    width:1100px;
+  }
+}
+
 </style>

@@ -1,28 +1,28 @@
 .PHONY: build deploy web
 
 # Create/Destroy core images
-cup:
+core-up:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.core.yml up -d --build
 
-cdown:
+core-down:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.core.yml down
 
 
 
 # Create/Destroy app images
-up:
+app-up:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.app.yml up -d --build
 
-down:
+app-down:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.app.yml down
 
 
 
 # Create/Destroy web images
-wup:
+web-up:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.web.yml up -d --build
 
-wdown:
+web-down:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.web.yml down
 
 
@@ -35,27 +35,19 @@ deploy: build
 build:
 	OD_DEPLOY=remote docker-compose -f ./build/docker-compose.core.yml -f ./build/docker-compose.app.yml -f ./build/docker-compose.web.yml build
 
-# Must be run the first time doing local dev on a machine.
-init:
-	docker network create oddzy
-
 # Updates remote deployment
 apply:
 	cd ./deploy/terraform; terraform apply -auto-approve
-
-# Determine changes to remote deployment
-plan:
-	cd ./deploy/terraform; terraform plan
 
 # Destroy remote deployment
 destroy:
 	cd ./deploy/terraform; terraform destroy -auto-approve
 
 # Build the website, upload it to s3 and trigger the remote update script
-webupdate:
+web-update:
 	cd ./web; npm run build
 	aws s3 sync ./web/dist s3://oddzy/web/dist --delete
 	aws ssm send-command --document-name oddzy-test-update-website --targets Key=tag:name,Values=oddzy
 
-make webserve:
+make web-serve:
 	cd ./web; npm run serve
