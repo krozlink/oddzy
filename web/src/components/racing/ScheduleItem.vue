@@ -4,8 +4,8 @@
       v-if="!empty"
       :to="raceLink"
       :class="{
-        'closed': race.status === 'CLOSED',
-        'imminent': (race.status === 'OPEN' && secondsRemaining<300),
+        'closed': race.status === 'CLOSED' || secondsRemaining < -600,
+        'imminent': (race.status === 'OPEN' && secondsRemaining > -600 && secondsRemaining<300),
         'interim': race.status === 'INTERIM',
         'abandoned': race.status === 'ABANDONED',
         'open': race.status === 'OPEN',

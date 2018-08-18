@@ -6,6 +6,18 @@
         </div>
       </div>
 
+      <!-- <div id="location-header" class="columns race-catagory ">
+        <div class="column loc-title is-one-fifth">
+
+        </div>
+        <div class="column location-numbers">
+          <div class="columns">
+              <div :key="ri" v-for="(r, ri) in maxRaces()" v-html="r" class="column race-header"></div>
+          </div>
+        </div>
+      </div> -->
+
+
       <div :key="index"  v-for="(m, index) in meetings()" class="columns race-catagory ">
         <router-link :to="nextRaceLink(m)" class="column race-location is-one-fifth">
           {{ m.name }}
@@ -109,6 +121,43 @@ export default {
 
 
 <style lang="scss" scoped>
+
+  #location-header>.loc-title {
+    padding-left: 12px;
+  }
+
+  #location-header {
+    // margin-top:10px;
+    display: none;
+    color: $body-color;
+    font-size: 0.9em;
+    height: 20px;
+  }
+
+  #location-header .race-header{
+    background-color: rgb(211, 211, 211);
+
+    border-bottom-color: $grey-lighter;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+  }
+
+  @media screen and (min-width: 768px) {
+    #location-header {
+        display: flex;
+    }
+  }
+
+  .location-numbers {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .race-header {
+    text-align: center;
+    margin-top: 12px;
+  }
+
   .race-catagory .column {
     padding: 0px;
     font-size: 0.95em;
