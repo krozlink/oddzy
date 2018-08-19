@@ -8,6 +8,7 @@
               Featured Events
             </div>
             <ul>
+              <li>List Events Here</li>
               <li>Today's Racing</li>
               <li>AFL Matches</li>
               <li>NRL Matches</li>
@@ -20,29 +21,27 @@
               Next To Jump
             </div>
             <div>
-              Race goes here
-            </div>
-            <div>
-              And another race here
+              List Races
             </div>
           </article>
         </div>
         <div class="tile is-7 is-parent is-vertical">
           <article class="tile is-child  notification is-primary">
             <div class="title">
-              Some Big Promotion
+              Promotion Banner
             </div>
             <div class="subtitle">
-              It's really awesome
+              Subtitle
             </div>
-            <div class="subtitle">
-              Click here
+            <div class="subtitle is-6">
+              More details
             </div>
           </article>
 
           <article class="tile is-child  notification is-primary">
             <div class="subtitle">Live Events</div>
             <ul>
+              <li>Sample Live Events</li>
               <li>Chelsea vs Manchester United</li>
               <li>Leicester v Wolverhampton</li>
               <li>3rd Test England v India</li>
@@ -51,18 +50,18 @@
         </div>
         <div class="tile is-parent is-vertical">
             <article class="tile is-child  notification is-primary">
-              <div class="subtitle">
+              <div class="subtitle is-6">
                 Rewards Program
               </div>
             </article>
             <article class="tile is-child  notification is-primary">
-              <div class="subtitle">
+              <div class="subtitle is-6">
                 Download App
               </div>
             </article>
             <article class="tile is-child  notification is-primary">
-              <div class="subtitle">
-                Gamble Responsibly
+              <div class="subtitle is-6">
+                Invite Friends
               </div>
             </article>
         </div>
