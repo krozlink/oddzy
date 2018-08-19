@@ -26,7 +26,7 @@
                 button: true,
                 'is-disable': race.status !== 'OPEN'
                 }">
-                4.00
+                {{ price }}
             </div>
         </td>
         <td class="price fixed place">
@@ -34,7 +34,7 @@
                 button: true,
                 'is-disable': race.status !== 'OPEN'
                 }">
-                1.15
+                {{ price }}
             </div>
         </td>
         <td class="price tote win">
@@ -42,7 +42,7 @@
                 button: true,
                 'is-disable': race.status !== 'OPEN'
                 }">
-                6.80
+                {{ price }}
             </div>
         </td>
         <td class="price tote place">
@@ -50,7 +50,7 @@
                 button: true,
                 'is-disable': race.status !== 'OPEN'
                 }">
-                1.10
+                {{ price }}
             </div>
         </td>
     </tr>
@@ -78,6 +78,12 @@ export default {
     },
     resultOrdinal() {
       return this.getOrdinal(this.result);
+    },
+    price() {
+      if (this.race.status !== 'OPEN') {
+        return 'SUSP';
+      }
+      return '4.00';
     },
   },
   methods: {
