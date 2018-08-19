@@ -10,11 +10,13 @@ import (
 )
 
 const (
-	meetingDataURL          = "uggcf://jjj.bqqf.pbz.nh/ncv/jro/choyvp/Enpvat/trgHcpbzvatEnprf/?fcbeg=%f&qngr=%f"
-	raceDataURL             = "uggcf://jjj.bqqf.pbz.nh/ncv/jro/choyvp/Bqqf/trgBqqfPbzcnevfbaPnpurnoyr/?riragVq=%f&vapyhqrGNO=1&vapyhqrBqqf=1&neenatrBqqf=0&orgGlcr=SvkrqJva&vapyhqrGbgr=gehr&nyybjTrg=gehr"
-	defaultInterval         = 1000
-	oddsComAuRequestSuccess = "race-scraper.service.odds-request.success"
-	oddsComAuRequestFailed  = "race-scraper.service.odds-request.failed"
+	meetingDataURL                  = "uggcf://jjj.bqqf.pbz.nh/ncv/jro/choyvp/Enpvat/trgHcpbzvatEnprf/?fcbeg=%f&qngr=%f"
+	raceDataURL                     = "uggcf://jjj.bqqf.pbz.nh/ncv/jro/choyvp/Bqqf/trgBqqfPbzcnevfbaPnpurnoyr/?riragVq=%f&vapyhqrGNO=1&vapyhqrBqqf=1&neenatrBqqf=0&orgGlcr=SvkrqJva&vapyhqrGbgr=gehr&nyybjTrg=gehr"
+	defaultInterval                 = 1000
+	oddsComAuScheduleRequestSuccess = "oddzy.race-scraper.service.scraper.schedule.success"
+	oddsComAuScheduleRequestFailed  = "oddzy.race-scraper.service.scraper.schedule.failed"
+	oddsComAuRacecardRequestSuccess = "oddzy.race-scraper.service.scraper.racecard.success"
+	oddsComAuRacecardRequestFailed  = "oddzy.race-scraper.service.scraper.racecard.failed"
 )
 
 // Scraper reads racing data from a source
@@ -55,12 +57,12 @@ func (o *OddsScraper) ScrapeRaceSchedule(ctx context.Context, eventType string, 
 	logContext.Debugf("Requesting race schedule from %v", url)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
-		stats.Increment(oddsComAuRequestFailed)
+		stats.Increment(oddsComAuScheduleRequestFailed)
 		msg := fmt.Sprintf("error retrieving race calenscheduledar response - %v", err)
 		logContext.Errorf(msg)
 		return nil, fmt.Errorf(msg)
 	}
-	stats.Increment(oddsComAuRequestSuccess)
+	stats.Increment(oddsComAuScheduleRequestSuccess)
 
 	if len(encodedResponse) == 0 {
 		msg := fmt.Sprintf("No response retrieved")
@@ -108,12 +110,12 @@ func (o *OddsScraper) ScrapeRaceCard(ctx context.Context, eventID string) (*Race
 	url := fmt.Sprintf(rot13String(raceDataURL), eventID)
 	encodedResponse, err := o.http.getResponse(url)
 	if err != nil {
-		stats.Increment(oddsComAuRequestFailed)
+		stats.Increment(oddsComAuRacecardRequestFailed)
 		msg := fmt.Sprintf("error retrieving race card response - %v", err)
 		logContext.Errorf(msg)
 		return nil, fmt.Errorf(msg)
 	}
-	stats.Increment(oddsComAuRequestSuccess)
+	stats.Increment(oddsComAuRacecardRequestSuccess)
 
 	odds := &response{}
 	err = json.Unmarshal(encodedResponse, odds)
