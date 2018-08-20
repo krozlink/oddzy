@@ -78,13 +78,15 @@ Granfana can be externally via internal.example.com/grafana although this is pas
 ## Deployment
 For development the entire application can be run locally using docker compose.
 
-For remote deployment terraform is used to create the stack on AWS. This includes:
+For remote deployment Terraform is used to create the stack on AWS. This includes:
+* ECS cluster and tasks
 * Route53 records
 * Network resources - VPC, subnets, security groups etc
 * Application load balancer using a HTTPS listener
-* ECS cluster and tasks
 * EFS volume for persistant storage
 * Optional EC2 jumpbox for remote debugging
+* AWS Systems Manager Document used push updates to the website remotely
 
 Both local and remote environments can be created with a single command in the makefile
 
+The terraform files can be found in the [deploy directory](/deploy/terraform)
