@@ -11,6 +11,15 @@ services:
       - ../web:/var/oddzy
     networks:
       - oddzy
+
+  price-updater:
+    build:
+      context: ../services/web/price-updater
+    image: 675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/web/price-updater:latest
+    ports:
+      - 8882:8882
+    networks:
+      - oddzy
 networks:
   oddzy:
       external: true

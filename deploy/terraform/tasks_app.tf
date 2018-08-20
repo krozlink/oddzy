@@ -56,3 +56,22 @@ resource aws_ecs_service api-racing {
     type = "distinctInstance"
   }
 }
+
+
+// ------- web/price-updater --------------
+resource aws_ecs_task_definition price-updater {
+  family                = "price-updater"
+  container_definitions = "${file("task-definitions/app/price-updater.json")}"
+  network_mode          = "host"
+}
+
+resource aws_ecs_service price-updater {
+  name            = "price-updater"
+  cluster         = "${aws_ecs_cluster.main.name}"
+  task_definition = "${aws_ecs_task_definition.price-updater.arn}"
+  desired_count   = "${var.run_app_tasks ? 1 : 0}"
+
+  placement_constraints {
+    type = "distinctInstance"
+  }
+}

@@ -1,0 +1,15 @@
+[
+    {
+        "image": "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/oddzy/web/price-updater",
+        "name": "price-updater",
+        "memoryReservation": 64,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "oddzy-test",
+                "awslogs-region": "ap-southeast-2",
+                "awslogs-stream-prefix": "web-price-updater"
+            }
+        }
+    }
+]

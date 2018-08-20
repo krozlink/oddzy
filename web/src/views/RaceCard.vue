@@ -62,6 +62,14 @@ export default {
     return {
     };
   },
+  sockets: {
+    connect() {
+      console.log('socket connected');
+    },
+    updatePrice(val) {
+      console.log(val);
+    },
+  },
   computed: {
     race() {
       return this.$store.state.racing.races[this.$route.params.id];
