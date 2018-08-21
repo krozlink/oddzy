@@ -8,7 +8,7 @@ Oddzy is a partial implementation of bookmakers racing pages using live racing d
 I wanted a small project to use while learning Go and microservices. [Matched betting](https://en.wikipedia.org/wiki/Matched_betting) has been a hobby of mine for a couple of years so I decided to try and recreate something that i'm very familiar with. It also gave me an opportunity to try a number of products that I hadn't got around to using.
 
 
-<a href="docs/race_card_lg.png"><img src="docs/race_card_lg.png" width="400"></a> <a href="docs/race_schedule_lg.png"><img src="docs/race_schedule_lg.png" width="400"></a>
+<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png" width="400"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png" width="400"></a>
 
 
 ## Tech Stack
@@ -68,7 +68,7 @@ A very basic Socket IO server written in Node.js for generating test pricing dat
 The microservices use Elasticsearch, Logstash and Kibana for logging. These are deployed to their own containers on ECS.
 Kibana can be externally via internal.example.com/kibana although this is password protected.
 
-<a href="docs/kibana_lg.png"><img src="docs/kibana_lg.png" width="400"></a>
+<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/kibana.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/kibana.png"" width="400"></a>
 
 
 ## Metrics
@@ -76,7 +76,7 @@ The microservices use Prometheus, StatsD and Grafana for tracking metrics. These
 All services have their timings and success/failure tracked as well as a few other miscellaneous metrics like the frequency that races are scraped. 
 Granfana can be externally via internal.example.com/grafana although this is password protected.
 
-<a href="docs/grafana_lg.png"><img src="docs/grafana_lg.png" width="400"></a>
+<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/grafana.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/grafana.png" width="400"></a>
 
 ## Deployment
 For development the entire application can be run locally using docker compose.
