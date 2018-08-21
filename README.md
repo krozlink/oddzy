@@ -68,7 +68,7 @@ A very basic Socket IO server written in Node.js for generating test pricing dat
 The microservices use Elasticsearch, Logstash and Kibana for logging. These are deployed to their own containers on ECS.
 Kibana can be externally via internal.example.com/kibana although this is password protected.
 
-<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/kibana.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/kibana.png"" width="400"></a>
+<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/kibana.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/kibana.png" width="400"></a>
 
 
 ## Metrics
