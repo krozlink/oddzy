@@ -8,6 +8,9 @@ Oddzy is a partial implementation of bookmakers racing pages using live racing d
 I wanted a small project to use while learning Go and microservices. [Matched betting](https://en.wikipedia.org/wiki/Matched_betting) has been a hobby of mine for a couple of years so I decided to try and recreate something that i'm very familiar with. It also gave me an opportunity to try a number of products that I hadn't got around to using.
 
 
+<a href="docs/race_card_lg.png"><img src="docs/race_card_lg.png" width="400"></a> <a href="docs/race_schedule_lg.png"><img src="docs/race_schedule_lg.png" width="400"></a>
+
+
 ## Tech Stack
 Overkill for a project of this size, but this was done for the experience rather than being practical.
 * Go microservices using the [go-micro](https://micro.mu/) framework and toolkit.
@@ -65,15 +68,15 @@ A very basic Socket IO server written in Node.js for generating test pricing dat
 The microservices use Elasticsearch, Logstash and Kibana for logging. These are deployed to their own containers on ECS.
 Kibana can be externally via internal.example.com/kibana although this is password protected.
 
-<Kibana Screenshot>
+<a href="docs/kibana_lg.png"><img src="docs/kibana_lg.png" width="400"></a>
+
 
 ## Metrics
 The microservices use Prometheus, StatsD and Grafana for tracking metrics. These are deployed to their own containers on ECS.
 All services have their timings and success/failure tracked as well as a few other miscellaneous metrics like the frequency that races are scraped. 
 Granfana can be externally via internal.example.com/grafana although this is password protected.
 
-<Grafana Screenshot>
-
+<a href="docs/grafana_lg.png"><img src="docs/grafana_lg.png" width="400"></a>
 
 ## Deployment
 For development the entire application can be run locally using docker compose.
