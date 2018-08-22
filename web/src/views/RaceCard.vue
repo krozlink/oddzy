@@ -64,10 +64,9 @@ export default {
   },
   sockets: {
     connect() {
-      console.log('socket connected');
     },
     updatePrice(val) {
-      console.log(val);
+      this.$store.dispatch('racing/updatePrice', val);
     },
   },
   computed: {

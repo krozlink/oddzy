@@ -91,8 +91,9 @@ export default {
   color: #F7F7F7;
 }
 
-.abandoned {
-  color: #BB0000;
+div.race-item .abandoned {
+  color: #CC0000;
+  font-size: 0.8em;
 }
 
 .item-content {

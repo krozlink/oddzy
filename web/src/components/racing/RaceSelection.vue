@@ -24,17 +24,21 @@
         <td class="price fixed win">
             <div :class="{
                 button: true,
-                'is-disable': race.status !== 'OPEN'
+                'is-disable': race.status !== 'OPEN',
+                'odds-increased': race.status === 'OPEN' && winIncreased,
+                'odds-decreased': race.status === 'OPEN' && winDecreased,
                 }">
-                {{ price }}
+                {{ priceWin }}
             </div>
         </td>
         <td class="price fixed place">
             <div :class="{
                 button: true,
-                'is-disable': race.status !== 'OPEN'
+                'is-disable': race.status !== 'OPEN',
+                'odds-increased': race.status === 'OPEN' && placeIncreased,
+                'odds-decreased': race.status === 'OPEN' && placeDecreased,
                 }">
-                {{ price }}
+                {{ pricePlace }}
             </div>
         </td>
         <td class="price tote win">
@@ -42,7 +46,7 @@
                 button: true,
                 'is-disable': race.status !== 'OPEN'
                 }">
-                {{ price }}
+                SP
             </div>
         </td>
         <td class="price tote place">
@@ -50,13 +54,15 @@
                 button: true,
                 'is-disable': race.status !== 'OPEN'
                 }">
-                {{ price }}
+                SP
             </div>
         </td>
     </tr>
 </template>
 
 <script>
+import test from '../../api/test-prices';
+
 export default {
   name: 'RaceSelection',
   props: ['selection', 'race', 'meeting'],
@@ -85,6 +91,44 @@ export default {
       }
       return '4.00';
     },
+    priceWin() {
+      if (this.race.status !== 'OPEN') {
+        return 'SUSP';
+      }
+
+      const p = this.$store.state.racing.prices[this.selection.barrier];
+      if (p && p.win) {
+        return p.win.price;
+      }
+      return this.getTestPrice(this.selection.barrier, true);
+    },
+    pricePlace() {
+      if (this.race.status !== 'OPEN') {
+        return 'SUSP';
+      }
+
+      const p = this.$store.state.racing.prices[this.selection.barrier];
+      if (p && p.place) {
+        return p.place.price;
+      }
+      return this.getTestPrice(this.selection.barrier, false);
+    },
+    winIncreased() {
+      const p = this.$store.state.racing.prices[this.selection.barrier];
+      return p && p.win.change === 'increase';
+    },
+    winDecreased() {
+      const p = this.$store.state.racing.prices[this.selection.barrier];
+      return p && p.win.change === 'decrease';
+    },
+    placeIncreased() {
+      const p = this.$store.state.racing.prices[this.selection.barrier];
+      return p && p.place.change === 'increase';
+    },
+    placeDecreased() {
+      const p = this.$store.state.racing.prices[this.selection.barrier];
+      return p && p.place.change === 'decrease';
+    },
   },
   methods: {
     getOrdinal(result) {
@@ -97,11 +141,41 @@ export default {
       }
       return 'th';
     },
+    getTestPrice(barrier, isWin) {
+      if (barrier > 12) {
+        return isWin ? 101 : 15;
+      }
+
+      return isWin ? test.WinPrices[barrier - 1] : test.PlacePrices[barrier - 1];
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+
+@keyframes oddsincrease {
+    0% {background-color: white;}
+    50% {background-color: green;}
+    100% {background-color: white;}
+}
+
+@keyframes oddsdecrease {
+    0% {background-color: white;}
+    50% {background-color: red;}
+    100% {background-color: white;}
+}
+
+
+.odds-increased{
+  animation-name: oddsincrease;
+  animation-duration: 3s;
+}
+
+.odds-decreased{
+  animation-name: oddsdecrease;
+  animation-duration: 3s;
+}
 
 .price.fixed.place {
     border-right: 1px;
