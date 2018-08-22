@@ -8,7 +8,7 @@ Oddzy is a partial implementation of bookmakers racing pages using live racing d
 I wanted a small project to use while learning Go and microservices. [Matched betting](https://en.wikipedia.org/wiki/Matched_betting) has been a hobby of mine for a couple of years so I decided to try and recreate something that i'm very familiar with. It also gave me an opportunity to try a number of products that I hadn't got around to using.
 
 
-<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png" width="400"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png" width="400"></a>
+<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png" width="300"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png" width="300"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png" width="300"></a> 
 
 
 ## Tech Stack
@@ -22,7 +22,7 @@ Overkill for a project of this size, but this was done for the experience rather
 * NGINX to serve the website and as a reverse proxy to access Kibana & Grafana
 * Terraform for remote deployment, docker compose for local development
 * Hosted on AWS using ECS
-* Socket.IO for sending live updates to the browser
+* Socket.IO for sending live pricing updates to the browser
 * NATS as a broker for publishing changes to racing entities
 
 
@@ -30,7 +30,7 @@ Overkill for a project of this size, but this was done for the experience rather
 
 The website is a single page application using Vue 2. The CSS framework Bulma is used for styling. 
 
-Most of the data on the Racing schedule and Race pages should be kept up to date depending on the source data. As no pricing data is scraped the values shown are randomly generated placeholder values.
+Most of the data on the Racing schedule and Race pages should be kept up to date depending on the source data. The prices shown are randomly generated on the server, pushed to the client and updated in realtime.
 
 The date and race type (horse racing / harness / greyhounds) filters work. The race countdown timers are updated live and results are displayed when the races complete.
 
