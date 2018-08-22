@@ -28,7 +28,9 @@ var interval = setInterval(() => {
     price = price * (1 + changeAmount);
     
     // round the price to something that looks slightly more realistic
-    if(price > 25) {
+    if(price > 200) {
+      price = 200;
+    } else if(price > 25) {
       price = (Math.round(price / 5) * 5).toFixed(0);
     } else if(price > 10) {
       price = Math.round(price).toFixed(0);
@@ -36,8 +38,10 @@ var interval = setInterval(() => {
       price = (Math.round(price / 0.2) * 0.2).toFixed(2);
     } else if( price > 2) {
       price = (Math.round(price / 0.1) * 0.1).toFixed(2);
+    } else if(price < 1.1) {
+      price = '1.10';
     } else {
-      price = price.toFixed();
+      price = price.toFixed(2);
     }
 
     const data = {
