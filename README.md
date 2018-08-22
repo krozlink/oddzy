@@ -8,7 +8,7 @@ Oddzy is a partial implementation of bookmakers racing pages using live racing d
 I wanted a small project to use while learning Go and microservices. [Matched betting](https://en.wikipedia.org/wiki/Matched_betting) has been a hobby of mine for a couple of years so I decided to try and recreate something that i'm very familiar with. It also gave me an opportunity to try a number of products that I hadn't got around to using.
 
 
-<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png" width="300"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png" width="300"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png" width="300"></a> 
+<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png" width="30%"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png" width="30%"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png" width="30%"></a> 
 
 
 ## Tech Stack
