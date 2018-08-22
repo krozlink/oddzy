@@ -41,16 +41,16 @@ My career to date has been almost entirely back-end development and my goal with
 
 These are written in Go using the go-micro framework with Consul used for service discovery.
 
-#### Racing
+#### [Racing](/services/srv/racing)
 Backend service managing racing entites such as Meetings, Races and Selections. Uses a MongoDB database for storage.
 
-#### Race Scraper
+#### [Race Scraper](/services/srv/race-scraper)
 Backend service which periodically polls an external data source for the latest data on upcoming races.
 
 The frequency that a race is polled is determined by how close it is to starting. A race that is about to start is polled every 30 seconds, while a race that is days away might only be polled every hour. Only racing data is scraped (race status, results, scratchings etc), not pricing data.
 
 
-#### Racing API
+#### [Racing API](/services/api/racing)
 API service called by the front end. Currently only has two methods:
 * RaceCard - retrieves all of the information needed to display a single race
 * Schedule - Returns the data needed to display a race schedule
@@ -59,14 +59,14 @@ These can be accessed at \
 https://api.example.com/racing/schedule?date=yyyy-mm-dd \
 https://api.example.com/racing/racecard?race_id=id
 
-#### Price Updater
+#### [Price Updater](/services/web/price-updater)
 A very basic Socket IO server written in Node.js for generating test pricing data. 
 
 
 ## Logging
 
 The microservices use Elasticsearch, Logstash and Kibana for logging. These are deployed to their own containers on ECS.
-Kibana can be externally via internal.example.com/kibana although this is password protected.
+Kibana can be externally via http://internal.example.com/kibana although this is password protected.
 
 <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/kibana.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/kibana.png" width="400"></a>
 
@@ -74,7 +74,7 @@ Kibana can be externally via internal.example.com/kibana although this is passwo
 ## Metrics
 The microservices use Prometheus, StatsD and Grafana for tracking metrics. These are deployed to their own containers on ECS.
 All services have their timings and success/failure tracked as well as a few other miscellaneous metrics like the frequency that races are scraped. 
-Granfana can be externally via internal.example.com/grafana although this is password protected.
+Granfana can be externally via http://internal.example.com/grafana although this is password protected.
 
 <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/grafana.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/grafana.png" width="400"></a>
 
