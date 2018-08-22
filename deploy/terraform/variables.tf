@@ -14,7 +14,7 @@ variable "bucket_name" {} // Bucket used for any storage required, e.g logs
 
 variable "ec2_key_pair" {} // KeyPair to use for logging into instances
 
-variable "internal_password_parameter" {}
+variable "internal_password_parameter" {} // Name of an AWS Secure Parameter containing the htpasswd file contents allowing access to the internal subdomain
 
 variable "run_ec2_instance" {} // Set to false to deploy resources without the EC2 instance / ECS containers
 

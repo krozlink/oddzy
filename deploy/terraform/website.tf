@@ -15,7 +15,6 @@ resource "aws_ssm_document" "update_website" {
          "name":"deployWebsite",
          "inputs":{
             "runCommand":[
-              "rm -rf /mnt/efs/website/oddzy/*",
               "aws s3 sync s3://oddzy/web/dist /mnt/efs/website/oddzy --delete"
             ]
          }
