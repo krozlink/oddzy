@@ -8,8 +8,6 @@ Oddzy is a partial implementation of bookmakers racing pages using live racing d
 I wanted a small project to use while learning Go and microservices. [Matched betting](https://en.wikipedia.org/wiki/Matched_betting) has been a hobby of mine for a couple of years so I decided to try and recreate something that i'm very familiar with. It also gave me an opportunity to try a number of products that I hadn't got around to using.
 
 
-<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png" width="30%"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png" width="30%"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png" width="30%"></a> 
-
 
 ## Tech Stack
 Overkill for a project of this size, but this was done for the experience rather than being practical.
@@ -29,13 +27,31 @@ Overkill for a project of this size, but this was done for the experience rather
 ## Front End
 
 The website is a single page application using Vue 2. The CSS framework Bulma is used for styling. 
+Two main pages have been implemented for this demo. The Race Schedule and the Race Card.
 
-Most of the data on the Racing schedule and Race pages should be kept up to date depending on the source data. The prices shown are randomly generated on the server, pushed to the client and updated in realtime.
+#### Race Schedule
+Typically the main racing page found on a bookmakers website. It displays a schedule of each race meeting and their races for a single day which can be filtered by race type (horse racing / harness / greyhounds). 
 
-The date and race type (horse racing / harness / greyhounds) filters work. The race countdown timers are updated live and results are displayed when the races complete.
+Each open race displays a live countdown to its scheduled start time, while closed races display the results.
 
-My career to date has been almost entirely back-end development and my goal with this was just to make something that looked reasonable and made use of the API I had created.
+<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_schedule.png" width="400"></a> 
 
+
+#### Race Card
+Displays information about a single race, including:
+* Meeting name and race number (e.g "Flemington - Race 7")
+* Name of the race (e.g "Melbourne Cup")
+* Race status (open, closed, abandoned etc)
+* Scheduled start time
+* Each runner and some data associated with it (e.g Name of the horse, its jockey, number, and prices)
+* Results (if the race has closed and the results are known)
+
+The prices in this demo are randomly generated on the server by a test "price-updater" service which is implemented as a Socket.IO server. Calculating prices is out of the scope of this demo, but if I were to have a go at an implementation I would calculate the odds using a combination of:
+* Odds from other bookmakers and exchanges like betfair (possibly also betting behaviour from known professional gamblers?)
+* A desired margin for the given outcome. This would changed based on the type of market, and expected/actual betting patterns.
+
+
+<a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card.png" width="400"></a> <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/race_card_open.png" width="400"></a> 
 
 ## Microservices
 
