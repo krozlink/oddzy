@@ -26,7 +26,7 @@ Overkill for a project of this size, but this was done for the experience rather
 
 ## Front End
 
-The website is a single page application using Vue 2. The CSS framework Bulma is used for styling. 
+The website is a single page application using Vue 2 with Vuex and Vue Router. The CSS framework Bulma is used for styling. 
 Two main pages have been implemented for this demo. The Race Schedule and the Race Card.
 
 #### Race Schedule
@@ -90,7 +90,7 @@ Kibana can be externally via http://internal.example.com/kibana although this is
 ## Metrics
 The microservices use Prometheus, StatsD and Grafana for tracking metrics. These are deployed to their own containers on ECS.
 All services have their timings and success/failure tracked as well as a few other miscellaneous metrics like the frequency that races are scraped. 
-Granfana can be externally via http://internal.example.com/grafana although this is password protected.
+Grafana can be externally via http://internal.example.com/grafana although this is password protected.
 
 <a href="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/grafana.png"><img src="https://raw.githubusercontent.com/krozlink/oddzy/master/docs/grafana.png" width="400"></a>
 
