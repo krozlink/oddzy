@@ -1,6 +1,7 @@
 <template>
     <tr :class="{
-            'scratched': selection.is_scratched
+            'scratched': selection.is_scratched,
+            'selection-row': true,
         }">
         <th class="sel-number">
             <div>
@@ -96,37 +97,37 @@ export default {
         return 'SUSP';
       }
 
-      const p = this.$store.state.racing.prices[this.selection.barrier];
+      const p = this.$store.state.racing.prices[this.selection.number];
       if (p && p.win) {
         return p.win.price;
       }
-      return this.getTestPrice(this.selection.barrier, true);
+      return this.getTestPrice(this.selection.number, true);
     },
     pricePlace() {
       if (this.race.status !== 'OPEN') {
         return 'SUSP';
       }
 
-      const p = this.$store.state.racing.prices[this.selection.barrier];
+      const p = this.$store.state.racing.prices[this.selection.number];
       if (p && p.place) {
         return p.place.price;
       }
-      return this.getTestPrice(this.selection.barrier, false);
+      return this.getTestPrice(this.selection.number, false);
     },
     winIncreased() {
-      const p = this.$store.state.racing.prices[this.selection.barrier];
+      const p = this.$store.state.racing.prices[this.selection.number];
       return p && p.win.change === 'increase';
     },
     winDecreased() {
-      const p = this.$store.state.racing.prices[this.selection.barrier];
+      const p = this.$store.state.racing.prices[this.selection.number];
       return p && p.win.change === 'decrease';
     },
     placeIncreased() {
-      const p = this.$store.state.racing.prices[this.selection.barrier];
+      const p = this.$store.state.racing.prices[this.selection.number];
       return p && p.place.change === 'increase';
     },
     placeDecreased() {
-      const p = this.$store.state.racing.prices[this.selection.barrier];
+      const p = this.$store.state.racing.prices[this.selection.number];
       return p && p.place.change === 'decrease';
     },
   },
@@ -193,7 +194,7 @@ export default {
     border-width: 2px;
     width: 55px;
     height: 30px;
-    margin-top: 10px;
+    // margin-top: 10px;
 
     align-self: center;
     vertical-align: middle;
@@ -216,6 +217,14 @@ tr{
     height: 70px;
 }
 
+.selection-row th {
+    vertical-align: middle;
+}
+
+.selection-row td {
+    vertical-align: middle;
+}
+
 .sel-number div {
     text-align: center;
     width: 30px;
@@ -228,6 +237,10 @@ tr{
 
 .sel-img {
     min-width: 65px;
+}
+
+.sel-img img {
+  width: 40px;
 }
 
 .jockey {

@@ -6,18 +6,6 @@
         </div>
       </div>
 
-      <!-- <div id="location-header" class="columns race-catagory ">
-        <div class="column loc-title is-one-fifth">
-
-        </div>
-        <div class="column location-numbers">
-          <div class="columns">
-              <div :key="ri" v-for="(r, ri) in maxRaces()" v-html="r" class="column race-header"></div>
-          </div>
-        </div>
-      </div> -->
-
-
       <div :key="index"  v-for="(m, index) in meetings()" class="columns race-catagory ">
         <router-link :to="nextRaceLink(m)" class="column race-location is-one-fifth">
           {{ m.name }}
@@ -99,7 +87,6 @@ export default {
       return races[index - 1].status === 'CLOSED' || races[index - 1].status === 'ABANDONED';
     },
     maxRaces() {
-      // console.debug('calculating max races');
       let max = 0;
       const meetings = this.meetings();
       meetings.forEach((m) => {
@@ -127,7 +114,6 @@ export default {
   }
 
   #location-header {
-    // margin-top:10px;
     display: none;
     color: $body-color;
     font-size: 0.9em;
@@ -182,8 +168,6 @@ export default {
 
   .race-section-title {
     background-color: $primary;
-    // margin-left: -24px;
-    // margin-right: -24px;
   }
 
   .race-section-title .title {
