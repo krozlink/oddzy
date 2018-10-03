@@ -17,7 +17,8 @@ module.exports = {
   },
 
   devServer: {
-    port: 8881
+    port: 8881,
+    disableHostCheck: true
   },
 
   lintOnSave: undefined
