@@ -35,13 +35,27 @@ deploy: build
 build:
 	OD_DEPLOY=remote docker-compose -f ./build/docker-compose.core.yml -f ./build/docker-compose.app.yml -f ./build/docker-compose.web.yml build
 
+# Updates deployment
+apply: apply-base apply-remote
+
+# Destroy deployment
+destroy: destroy-base destroy-remote
+
 # Updates remote deployment
-apply:
-	cd ./deploy/terraform; terraform apply -auto-approve
+apply-remote:
+	cd ./deploy/terraform/remote_only; terraform apply -auto-approve
 
 # Destroy remote deployment
-destroy:
-	cd ./deploy/terraform; terraform destroy -auto-approve
+destroy-remote:
+	cd ./deploy/terraform/remote_only; terraform destroy -auto-approve
+
+# Updates base deployment
+apply-base:
+	cd ./deploy/terraform/base; terraform apply -auto-approve
+
+# Destroy base deployment
+destroy-base:
+	cd ./deploy/terraform/base; terraform destroy -auto-approve
 
 # Build the website, upload it to s3 and trigger the remote update script
 web-update:
