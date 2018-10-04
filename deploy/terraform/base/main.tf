@@ -12,3 +12,10 @@ terraform {
 
 // AWS Account ID
 data "aws_caller_identity" "current" {}
+
+module "users" {
+    source = "./users"
+    application_name = "${var.application_name}"
+    application_stage = "${var.application_stage}"
+    region = "${var.region}"
+}
