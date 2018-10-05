@@ -12,16 +12,4 @@ resource "aws_lambda_function" "get" {
   tags {
     Name = "${var.application_name}"
   }
-  
-  depends_on = ["null_resource.build_get"]
-}
-
-resource "null_resource" "build_get" {
-  provisioner "local-exec" {
-    command = "make -C ${var.lambda_directory} build"
-  }
-
-  triggers {
-      user_exe = "${uuid()}"
-  }
 }
