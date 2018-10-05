@@ -6,17 +6,17 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type UserRequest struct {
+type AddRequest struct {
 	Name string `json:"name"`
 }
 
-type UserResponse struct {
+type AddResponse struct {
 	Message string `json:"message"`
 }
 
-func HandleRequest(ctx context.Context, request UserRequest) (UserResponse, error) {
-	response := UserResponse{
-		Message: fmt.Sprintf("Hello %s!", request.Name),
+func HandleRequest(ctx context.Context, request AddRequest) (AddResponse, error) {
+	response := AddResponse{
+		Message: fmt.Sprintf("Greetings %s!", request.Name),
 	}
 
 	return response, nil

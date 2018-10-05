@@ -18,4 +18,6 @@ module "users" {
     application_name = "${var.application_name}"
     application_stage = "${var.application_stage}"
     region = "${var.region}"
+    lambda_directory = "${var.lambda_directory}"
+    temp_directory = "${var.temp_directory}"
 }

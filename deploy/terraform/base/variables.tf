@@ -5,3 +5,7 @@ variable "application_stage" {} // e.g test, dev, prod. Used in tags
 variable "region" {} // AWS region to deploy resources to
 
 variable "bucket_name" {} // Bucket used for any storage required, e.g logs
+
+variable lambda_directory {}
+
+variable temp_directory {}
