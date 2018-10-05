@@ -32,8 +32,13 @@ deploy: build
 	OD_DEPLOY=remote docker-compose -f ./build/docker-compose.app.yml -f ./build/docker-compose.core.yml -f ./build/docker-compose.web.yml push
 
 # build all images
-build:
+build: build-containers build-serverless
+
+build-containers:
 	OD_DEPLOY=remote docker-compose -f ./build/docker-compose.core.yml -f ./build/docker-compose.app.yml -f ./build/docker-compose.web.yml build
+
+build-serverless:
+	cd ./services/lambda; make build
 
 # Updates deployment
 apply: apply-base apply-remote

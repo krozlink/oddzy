@@ -12,6 +12,8 @@ resource "aws_lambda_function" "add" {
   tags {
     Name = "${var.application_name}"
   }
+
+  depends_on = ["null_resource.build_add"]
 }
 
 resource "null_resource" "build_add" {
@@ -20,6 +22,6 @@ resource "null_resource" "build_add" {
   }
 
   triggers {
-      user_exe = "${md5(file("${var.temp_directory}/users-add.zip"))}"
+      user_exe = "${uuid()}"
   }
 }
