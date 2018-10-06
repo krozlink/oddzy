@@ -73,10 +73,10 @@
       </div>
       <div class="navbar-end">
         <div class="navbar-item">
-          <a class="button is-outlined" disabled>Login</a>
+          <a class="button is-outlined" v-on:click="showLogin">Login</a>
         </div>
         <div class="navbar-item">
-          <a class="button is-outlined" disabled>Register</a>
+          <a class="button is-outlined" v-on:click="showRegister">Register</a>
         </div>
       </div>
     </div>
@@ -84,8 +84,20 @@
 </template>
 
 <script>
+
 export default {
   name: 'PageHeader',
+  components: {
+  },
+
+  methods: {
+    showLogin() {
+      this.$store.dispatch('account/displayLogin', true);
+    },
+    showRegister() {
+      this.$store.dispatch('account/displayRegister', true);
+    },
+  },
 };
 </script>
 
@@ -106,17 +118,8 @@ div.title {
 }
 
 a.router-link-active {
-  // background-color: #04518D;
   background-color: #0573c8;
 }
-
-// a.router-link-active .header-link {
-//   vertical-align: bottom;
-//   border-bottom-style: solid;
-//   border-bottom-width: 3px;
-//   padding-bottom: 10px;
-//   margin-top: 13px;
-// }
 
 .navbar-item span {
   padding-right: 5px;
@@ -134,7 +137,4 @@ svg {
   margin-right: 10px;
 }
 
-// a.router-link-active span.text  {
-//   text-decoration: underline;
-// }
 </style>
