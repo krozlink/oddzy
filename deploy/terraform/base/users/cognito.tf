@@ -62,13 +62,6 @@ resource "aws_cognito_user_pool" "users" {
             attribute_data_type = "String"
             developer_only_attribute = false
             mutable = true
-            name = "gender"
-            required = true
-        },
-        {
-            attribute_data_type = "String"
-            developer_only_attribute = false
-            mutable = true
             name = "address"
             required = true
         },
