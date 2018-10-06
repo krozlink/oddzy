@@ -80,3 +80,10 @@ resource "aws_cognito_user_pool" "users" {
         }
     ]
 }
+
+resource "aws_cognito_user_pool_client" "users" {
+    name = "${var.application_name}-${var.application_stage}-users"
+    user_pool_id = "${aws_cognito_user_pool.users.id}"
+    refresh_token_validity = 30
+    generate_secret = false
+}

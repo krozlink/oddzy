@@ -1,5 +1,9 @@
 .PHONY: build deploy web
 
+up: core-up app-up web-up
+
+down: core-down app-down web-down
+
 # Create/Destroy core images
 core-up:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.core.yml up -d --build
@@ -24,6 +28,7 @@ web-up:
 
 web-down:
 	OD_DEPLOY=local docker-compose -f ./build/docker-compose.web.yml down
+
 
 
 # build and deploy all images
