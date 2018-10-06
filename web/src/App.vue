@@ -1,6 +1,8 @@
 <template>
   <div id="app">
     <page-header></page-header>
+    <register></register>
+    <login></login>
 
     <div id="content" class="container">
       <router-view></router-view>
@@ -10,11 +12,15 @@
 
 <script>
 import PageHeader from './components/PageHeader.vue';
+import Register from './components/account/Register.vue';
+import Login from './components/account/Login.vue';
 
 export default {
   name: 'App',
   components: {
     PageHeader,
+    Register,
+    Login,
   },
 };
 </script>
