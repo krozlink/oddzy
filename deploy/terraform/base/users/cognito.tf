@@ -80,3 +80,19 @@ resource "aws_cognito_user_pool_client" "users" {
     refresh_token_validity = 30
     generate_secret = false
 }
+
+resource "aws_cognito_user_pool_domain" "users" {
+    domain = "oddzy"
+    user_pool_id = "${aws_cognito_user_pool.users.id}"
+}
+
+resource "aws_cognito_identity_pool" "users" {
+    identity_pool_name = "${var.application_name} ${var.application_stage}"
+    allow_unauthenticated_identities = false
+
+    cognito_identity_providers {
+        client_id = "${aws_cognito_user_pool_client.users.id}"
+        provider_name = "${aws_cognito_user_pool.users.endpoint}"
+        server_side_token_check = false
+    }
+}

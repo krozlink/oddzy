@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "amazon-cognito-identity-js": "^3.0.2",
+    "aws-sdk": "^2.329.0",
     "axios": "^0.18.0",
     "buefy": "^0.6.6",
     "socket.io-client": "^2.1.1",
