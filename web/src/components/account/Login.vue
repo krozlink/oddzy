@@ -1,5 +1,5 @@
 <template>
-    <div class="modal" :class="{'is-active': visible}">
+    <div id="login" class="modal" :class="{'is-active': visible}">
         <div class="modal-background"></div>
         <div class="modal-content">
             <header class="modal-card-head">
