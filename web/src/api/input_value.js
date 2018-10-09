@@ -1,8 +1,8 @@
 class InputValue {
-  constructor(name, validator, options) {
+  constructor(name, validators, options) {
     this.name = name;
     this.value = '';
-    this.validate = validator;
+    this.validators = validators;
     this.active = false;
     this.error = '';
 
@@ -20,6 +20,16 @@ class InputValue {
     } else {
       this.type = 'text';
     }
+  }
+
+  validate() {
+    for (let i = 0; i < this.validators.length; i += 1) {
+      this.validators[i](this);
+
+      // Only one error message can be displayed so stop validating as soon as an error is found
+      if (!this.isValid()) return false;
+    }
+    return this.isValid();
   }
 
   setError(err) {

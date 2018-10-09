@@ -6,7 +6,7 @@
         </div>
         <div class="control">
             <input class="input"
-                v-on:blur="field.validate"
+                v-on:blur="validate"
                 v-on:focus="activate"
                 :type = "field.type"
                 v-model="field.value"
@@ -31,6 +31,9 @@ export default {
 
   },
   methods: {
+    validate() {
+      this.field.validate();
+    },
     activate() {
       if (!this.readonly) {
         this.field.activate();

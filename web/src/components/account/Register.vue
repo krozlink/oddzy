@@ -77,16 +77,16 @@ export default {
   data() {
     return {
       fields: {
-        first_name: new InputValue('First Name', this.validateFirstName),
-        last_name: new InputValue('Last Name', this.validateLastName),
-        email_address: new InputValue('Email Address', this.validateEmail),
-        user_name: new InputValue('User Name', this.validateUserName),
-        password: new InputValue('Password', this.validatePassword, { type: 'password' }),
-        confirm_password: new InputValue('Confirm Password', this.validateConfirmPassword, { type: 'password' }),
-        address: new InputValue('Address', this.validateAddress),
-        date_of_birth: new InputValue('Date of Birth', this.validateDOB, { placeholder: 'DD / MM / YYYY' }),
-        mobile_number: new InputValue('Mobile Number', this.validateMobile, { placeholder: '04________' }),
-        agree: new InputValue('Agree', this.validateAgree, { type: 'checkbox' }),
+        first_name: new InputValue('First Name', [Validation.Mandatory]),
+        last_name: new InputValue('Last Name', [Validation.Mandatory]),
+        email_address: new InputValue('Email Address', [Validation.Mandatory, Validation.EmailAddress]),
+        user_name: new InputValue('User Name', [Validation.Mandatory]),
+        password: new InputValue('Password', [Validation.Mandatory, Validation.Password], { type: 'password' }),
+        confirm_password: new InputValue('Confirm Password', [this.validatePasswordsMatch], { type: 'password' }),
+        address: new InputValue('Address', [Validation.Mandatory]),
+        date_of_birth: new InputValue('Date of Birth', [this.validateDOB], { placeholder: 'DD / MM / YYYY' }),
+        mobile_number: new InputValue('Mobile Number', [Validation.Mandatory, Validation.MobileNumber], { placeholder: '04________' }),
+        agree: new InputValue('Agree', [this.validateIAgreeSelected], { type: 'checkbox' }),
       },
     };
   },
@@ -117,37 +117,11 @@ export default {
     },
 
     checkUsername() {
-
+      // TODO - ensure username is unique
     },
 
-    validateFirstName() {
-      return Validation.Mandatory(this.fields.first_name);
-    },
-
-    validateLastName() {
-      return Validation.Mandatory(this.fields.last_name);
-    },
-
-    validateEmail() {
-      return Validation.Mandatory(this.fields.email_address)
-        && Validation.EmailAddress(this.fields.email_address);
-    },
-
-    validateUserName() {
-      return Validation.Mandatory(this.fields.user_name);
-    },
-
-    validatePassword() {
-      return Validation.Mandatory(this.fields.password)
-        && Validation.Password(this.fields.password);
-    },
-
-    validateConfirmPassword() {
+    validatePasswordsMatch() {
       return Validation.Match(this.fields.password, this.fields.confirm_password);
-    },
-
-    validateAddress() {
-      return Validation.Mandatory(this.fields.address);
     },
 
     validateDOB() {
@@ -156,28 +130,21 @@ export default {
         && Validation.MinimumAge(this.fields.date_of_birth, 18);
     },
 
-    validateMobile() {
-      return Validation.Mandatory(this.fields.mobile_number)
-        && Validation.MobileNumber(this.fields.mobile_number);
-    },
-
-    validateAgree() {
+    validateIAgreeSelected() {
       return Validation.IsTrue(this.fields.agree, 'You must agree to the terms and conditions');
     },
 
-    validate() {
-      /* eslint-disable no-bitwise */
+    validateAll() {
       let isValid = true;
       Object.values(this.fields).forEach((f) => {
         f.activate();
-        isValid &= f.validate();
+        isValid = f.validate() && isValid;
       });
-      /* eslint-disable no-bitwise */
 
       return isValid;
     },
     register() {
-      if (this.validate()) {
+      if (this.validateAll()) {
         this.$store.dispatch('account/register', this.fields);
       }
     },
