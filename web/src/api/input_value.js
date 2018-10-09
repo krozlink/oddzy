@@ -5,7 +5,6 @@ class InputValue {
     this.validate = validator;
     this.active = false;
     this.error = '';
-    this.isValid = true;
 
     if (options !== undefined && options.placeholder !== undefined) {
       this.placeholder = options.placeholder;
@@ -14,21 +13,35 @@ class InputValue {
     }
 
     if (options !== undefined && options.type !== undefined) {
+      if (options.type === 'checkbox') {
+        this.value = false;
+      }
       this.type = options.type;
     } else {
       this.type = 'text';
     }
   }
 
+  setError(err) {
+    this.error = err;
+  }
+
+  clearError() {
+    this.error = '';
+  }
+
+  isValid() {
+    return this.error === '';
+  }
+
   reset() {
     this.value = '';
     this.active = false;
     this.error = '';
-    this.isValid = true;
   }
 
   showError() {
-    return this.active && this.error.trim() !== '';
+    return this.active && !this.isValid();
   }
 
   activate() {

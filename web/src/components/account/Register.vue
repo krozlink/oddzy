@@ -36,6 +36,17 @@
             <string-field :field="fields.mobile_number" :readonly="isReadonly"></string-field>
           </div>
         </div>
+
+        <div class="field">
+            <div class="control">
+                <label class="checkbox">
+                <input type="checkbox" v-model="fields.agree.value" v-on:blur="fields.agree.validate">
+                I agree to the terms and conditions
+                </label>
+                <div class="error">{{ fields.agree.error }}</div>
+            </div>
+        </div>
+
       </section>
       <footer class="modal-card-foot">
           <button class="button is-info"
@@ -52,6 +63,8 @@
 <script>
 import StringField from '../core/StringField.vue';
 import InputValue from '../../api/input_value';
+import Validation from '../../api/input_validation';
+
 
 export default {
   components: {
@@ -68,7 +81,9 @@ export default {
         address: new InputValue('Address', this.validateAddress),
         date_of_birth: new InputValue('Date of Birth', this.validateDOB, { placeholder: 'DD / MM / YYYY' }),
         mobile_number: new InputValue('Mobile', this.validateMobile, { placeholder: '04________' }),
+        agree: new InputValue('Agree', this.validateAgree, { type: 'checkbox' }),
       },
+      agree: false,
     };
   },
   computed: {
@@ -101,49 +116,41 @@ export default {
 
     },
 
-    validateMandatory(f) {
-      let isValid = false;
-      const field = f;
-      if (field.value.trim() === '') {
-        field.error = `${field.name} is mandatory`;
-      } else {
-        field.error = '';
-        isValid = true;
-      }
-      field.isValid = isValid;
-      return isValid;
-    },
-
     validateFirstName() {
-      return this.validateMandatory(this.fields.first_name);
+      return Validation.Mandatory(this.fields.first_name);
     },
 
     validateLastName() {
-      return this.validateMandatory(this.fields.last_name);
+      return Validation.Mandatory(this.fields.last_name);
     },
 
     validateEmail() {
-      return this.validateMandatory(this.fields.email_address);
+      return Validation.Mandatory(this.fields.email_address)
+        && Validation.Email(this.fields.email_address);
     },
 
     validateUserName() {
-      return this.validateMandatory(this.fields.user_name);
+      return Validation.Mandatory(this.fields.user_name);
     },
 
     validatePassword() {
-      return this.validateMandatory(this.fields.password);
+      return Validation.Mandatory(this.fields.password);
     },
 
     validateAddress() {
-      return this.validateMandatory(this.fields.address);
+      return Validation.Mandatory(this.fields.address);
     },
 
     validateDOB() {
-      return this.validateMandatory(this.fields.date_of_birth);
+      return Validation.Mandatory(this.fields.date_of_birth);
     },
 
     validateMobile() {
-      return this.validateMandatory(this.fields.mobile_number);
+      return Validation.Mandatory(this.fields.mobile_number);
+    },
+
+    validateAgree() {
+      return Validation.IsTrue(this.fields.agree, 'You must agree to the terms and conditions');
     },
 
     validate() {
@@ -175,9 +182,14 @@ header.modal-card-head {
     color: white;
 }
 
-// div.field {
-//   width: 295px;
-// }
+.field .error {
+  display: inline-block;
+  margin-left: 10px;
+  margin-bottom: 3px;
+  vertical-align: bottom;
+  font-size: 0.7em;
+  color: red;
+}
 
 
 </style>
