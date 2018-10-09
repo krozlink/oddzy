@@ -11,9 +11,10 @@ resource "aws_cognito_user_pool" "users" {
 
     password_policy {
         minimum_length = 8
-        require_lowercase = true
-        require_numbers = true
-        require_uppercase = true
+        require_lowercase = false
+        require_numbers = false
+        require_uppercase = false
+        require_symbols = false
     }
 
     verification_message_template {
@@ -79,4 +80,20 @@ resource "aws_cognito_user_pool_client" "users" {
     user_pool_id = "${aws_cognito_user_pool.users.id}"
     refresh_token_validity = 30
     generate_secret = false
+}
+
+resource "aws_cognito_user_pool_domain" "users" {
+    domain = "oddzy"
+    user_pool_id = "${aws_cognito_user_pool.users.id}"
+}
+
+resource "aws_cognito_identity_pool" "users" {
+    identity_pool_name = "${var.application_name} ${var.application_stage}"
+    allow_unauthenticated_identities = false
+
+    cognito_identity_providers {
+        client_id = "${aws_cognito_user_pool_client.users.id}"
+        provider_name = "${aws_cognito_user_pool.users.endpoint}"
+        server_side_token_check = false
+    }
 }
