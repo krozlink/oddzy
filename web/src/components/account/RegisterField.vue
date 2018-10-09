@@ -20,7 +20,7 @@
 
 <script>
 export default {
-  name: 'StringField',
+  name: 'RegisterField',
   props: ['field', 'readonly'],
   data() {
     return {
@@ -49,9 +49,12 @@ export default {
   display: inline-block;
   margin-left: 10px;
   margin-bottom: 3px;
-  width: 150px;
   vertical-align: bottom;
   font-size: 0.7em;
   color: red;
+}
+
+input.input {
+  width: 290px;
 }
 </style>

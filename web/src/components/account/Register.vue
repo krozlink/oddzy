@@ -9,31 +9,35 @@
       <section class="modal-card-body">
         <div class="field is-horizontal">
           <div class="field-body">
-            <string-field :field="fields.first_name" :readonly="isReadonly">
-            </string-field>
-            <string-field :field="fields.last_name" :readonly="isReadonly"></string-field>
+            <register-field :field="fields.first_name" :readonly="isReadonly"></register-field>
+            <register-field :field="fields.last_name" :readonly="isReadonly"></register-field>
           </div>
         </div>
 
         <div class="field is-horizontal">
             <div class="field-body">
-              <string-field :field="fields.email_address" :readonly="isReadonly"></string-field>
+              <register-field :field="fields.email_address" :readonly="isReadonly"></register-field>
+              <register-field :field="fields.user_name" :readonly="isReadonly"></register-field>
             </div>
         </div>
 
         <div class="field is-horizontal">
             <div class="field-body">
-              <string-field :field="fields.user_name" :readonly="isReadonly"></string-field>
-              <string-field :field="fields.password" :readonly="isReadonly"></string-field>
+              <register-field :field="fields.password" :readonly="isReadonly"></register-field>
+              <register-field :field="fields.confirm_password" :readonly="isReadonly"></register-field>
             </div>
         </div>
 
-        <string-field :field="fields.address" :readonly="isReadonly"></string-field>
+        <div class="field is-horizontal">
+            <div class="field-body">
+              <register-field :field="fields.address" :readonly="isReadonly"></register-field>
+              <register-field :field="fields.mobile_number" :readonly="isReadonly"></register-field>
+            </div>
+        </div>
 
         <div class="field is-horizontal">
           <div class="field-body">
-            <string-field :field="fields.date_of_birth" :readonly="isReadonly"></string-field>
-            <string-field :field="fields.mobile_number" :readonly="isReadonly"></string-field>
+            <register-field :field="fields.date_of_birth" :readonly="isReadonly"></register-field>
           </div>
         </div>
 
@@ -61,14 +65,14 @@
 </template>
 
 <script>
-import StringField from '../core/StringField.vue';
+import RegisterField from './RegisterField.vue';
 import InputValue from '../../api/input_value';
 import Validation from '../../api/input_validation';
 
 
 export default {
   components: {
-    StringField,
+    RegisterField,
   },
   data() {
     return {
@@ -78,12 +82,12 @@ export default {
         email_address: new InputValue('Email Address', this.validateEmail),
         user_name: new InputValue('User Name', this.validateUserName),
         password: new InputValue('Password', this.validatePassword, { type: 'password' }),
+        confirm_password: new InputValue('Confirm Password', this.validateConfirmPassword, { type: 'password' }),
         address: new InputValue('Address', this.validateAddress),
         date_of_birth: new InputValue('Date of Birth', this.validateDOB, { placeholder: 'DD / MM / YYYY' }),
-        mobile_number: new InputValue('Mobile', this.validateMobile, { placeholder: '04________' }),
+        mobile_number: new InputValue('Mobile Number', this.validateMobile, { placeholder: '04________' }),
         agree: new InputValue('Agree', this.validateAgree, { type: 'checkbox' }),
       },
-      agree: false,
     };
   },
   computed: {
@@ -126,7 +130,7 @@ export default {
 
     validateEmail() {
       return Validation.Mandatory(this.fields.email_address)
-        && Validation.Email(this.fields.email_address);
+        && Validation.EmailAddress(this.fields.email_address);
     },
 
     validateUserName() {
@@ -134,7 +138,12 @@ export default {
     },
 
     validatePassword() {
-      return Validation.Mandatory(this.fields.password);
+      return Validation.Mandatory(this.fields.password)
+        && Validation.Password(this.fields.password);
+    },
+
+    validateConfirmPassword() {
+      return Validation.Match(this.fields.password, this.fields.confirm_password);
     },
 
     validateAddress() {
@@ -142,11 +151,14 @@ export default {
     },
 
     validateDOB() {
-      return Validation.Mandatory(this.fields.date_of_birth);
+      return Validation.Mandatory(this.fields.date_of_birth)
+        && Validation.Date(this.fields.date_of_birth)
+        && Validation.MinimumAge(this.fields.date_of_birth, 18);
     },
 
     validateMobile() {
-      return Validation.Mandatory(this.fields.mobile_number);
+      return Validation.Mandatory(this.fields.mobile_number)
+        && Validation.MobileNumber(this.fields.mobile_number);
     },
 
     validateAgree() {
@@ -189,6 +201,18 @@ header.modal-card-head {
   vertical-align: bottom;
   font-size: 0.7em;
   color: red;
+}
+
+.password-instruction {
+  font-size: 0.7em;
+  // line-height: 16px;
+  // flex-grow: 1;
+  // flex-shrink: 1;
+  // margin-bottom: 0px;
+  // position: relative;
+  // max-width: 100%;
+  width: 290px;
+  align-items: flex-start;
 }
 
 
