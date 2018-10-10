@@ -126,7 +126,7 @@ export default {
 
     validateDOB() {
       return Validation.Mandatory(this.fields.date_of_birth)
-        && Validation.Date(this.fields.date_of_birth)
+        && Validation.IsDate(this.fields.date_of_birth)
         && Validation.MinimumAge(this.fields.date_of_birth, 18);
     },
 
