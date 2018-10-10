@@ -46,11 +46,41 @@ function MobileNumber(field) {
   return field.isValid();
 }
 
-function Date(field) {
+function parseDate(value) {
+  // format D(D)/M(M)/(YY)YY
+  const dateFormat = /^\d{1,4}[.|/|-]\d{1,2}[.|/|-]\d{1,4}$/;
+
+  if (dateFormat.test(value)) {
+    // remove any leading zeros from date values
+    const s = value.replace(/0*(\d*)/gi, '$1');
+    const dateArray = s.split(/[.|/|-]/);
+
+    // correct month value
+    dateArray[1] = parseInt(dateArray[1], 10) - 1;
+
+    // convert day / year to integers
+    dateArray[0] = parseInt(dateArray[0], 10);
+    dateArray[2] = parseInt(dateArray[2], 10);
+
+    // correct year value
+    if (dateArray[2].length < 4) {
+      // correct year value
+      dateArray[2] = (parseInt(dateArray[2], 10) < 50) ? 2000 + parseInt(dateArray[2], 10) : 1900 + parseInt(dateArray[2], 10);
+    }
+
+    const testDate = new Date(dateArray[2], dateArray[1], dateArray[0]);
+    if (testDate.getDate() !== dateArray[0] || testDate.getMonth() !== dateArray[1] || testDate.getFullYear() !== dateArray[2]) {
+      return null;
+    }
+    return testDate;
+  }
+  return null;
+}
+
+function IsDate(field) {
   field.clearError();
 
-  const re = /^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/;
-  if (!re.test(field.value.trim())) {
+  if (parseDate(field.value) == null) {
     field.setError('Invalid date (DD/MM/YYYY)');
   }
 
@@ -60,7 +90,13 @@ function Date(field) {
 function MinimumAge(field, age) {
   field.clearError();
 
-  field.setError('Must be at least 18 years old');
+  const date = parseDate(field.value);
+  const now = new Date();
+  const minAge = new Date().setFullYear(now.getFullYear() - age);
+
+  if (date > minAge) {
+    field.setError('Must be at least 18 years old');
+  }
 
   return field.isValid();
 }
@@ -81,7 +117,7 @@ export default {
   EmailAddress,
   MobileNumber,
   IsTrue,
-  Date,
+  IsDate,
   Password,
   MinimumAge,
 };
