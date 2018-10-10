@@ -2,28 +2,18 @@ package main
 
 import (
 	"context"
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type Request struct {
-}
+func handler(ctx context.Context, event events.CognitoEventUserPoolsPreSignup) (events.CognitoEventUserPoolsPreSignup, error) {
+	event.Response.AutoConfirmUser = true
+	event.Response.AutoVerifyEmail = false
+	event.Response.AutoVerifyPhone = false
 
-type Response struct {
-	AutoConfirmUser string `json:"autoConfirmUser"`
-	AutoVerifyPhone string `json:"autoVerifyUser"`
-	AutoVerifyEmail string `json:"autoVerifyEmail"`
-}
-
-func HandleRequest(ctx context.Context, request Request) (Response, error) {
-	response := Response{
-		AutoConfirmUser: "true",
-		AutoVerifyEmail: "false",
-		AutoVerifyPhone: "false",
-	}
-
-	return response, nil
+	return event, nil
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	lambda.Start(handler)
 }

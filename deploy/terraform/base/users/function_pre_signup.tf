@@ -13,3 +13,9 @@ resource "aws_lambda_function" "pre_signup" {
     Name = "${var.application_name}"
   }
 }
+
+resource "aws_lambda_permission" "pre_signup" {
+  action = "lambda:InvokeFunction"
+  function_name = "${var.application_name}-${var.application_stage}-users-pre-signup"
+  principal = "cognito-idp.amazonaws.com"
+}
