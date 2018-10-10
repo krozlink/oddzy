@@ -9,7 +9,7 @@
                 v-on:blur="validate"
                 v-on:focus="activate"
                 :type = "field.type"
-                v-model="field.value"
+                v-model="field.raw_value"
                 :placeholder="field.placeholder"
                 v-bind:class="{'is-danger': field.showError()}"
                 :readonly="readonly"
