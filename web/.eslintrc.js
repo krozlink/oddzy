@@ -6,6 +6,7 @@ module.exports = {
   ],
   rules: {
     'max-len': ["off"],
+    'no-console': 'off',
     'linebreak-style': ["error", "windows"],
     'no-param-reassign': ['error', {
       props: true,

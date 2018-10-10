@@ -2,6 +2,11 @@ import { Config, CognitoIdentityCredentials } from 'aws-sdk';
 import { CognitoUser, CognitoUserPool, AuthenticationDetails, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 import AWSConfig from '../config/cognito';
 
+const PoolData = {
+  UserPoolId: AWSConfig.UserPoolId,
+  ClientId: AWSConfig.ClientId,
+};
+
 // isAuthenticated
 // getCurrentUser
 // logout
@@ -9,20 +14,17 @@ import AWSConfig from '../config/cognito';
 // register
 // forgotPassword
 
-function Register(fields) {
-  return new Promise((resolve, reject) => {
-    const poolData = {
-      UserPoolId: AWSConfig.UserPoolId,
-      ClientId: AWSConfig.ClientId,
-    };
-    const userPool = new CognitoUserPool(poolData);
 
-    const attributes = Object.values(fields).filter(f => f.attribute_name !== null && f.attribute_name !== 'preferred_username').map(f => ({
+function Register(user, password, fields) {
+  return new Promise((resolve, reject) => {
+    const userPool = new CognitoUserPool(PoolData);
+
+    const attributes = Object.values(fields).filter(f => f.attribute_name !== null).map(f => ({
       Name: f.attribute_name,
       Value: f.getValue(),
     }));
 
-    userPool.signUp(fields.user_name.getValue(), fields.password.getValue(), attributes, null, (err, result) => {
+    userPool.signUp(user, password, attributes, null, (err, result) => {
       if (err) {
         reject(err);
       } else {
@@ -32,6 +34,32 @@ function Register(fields) {
   });
 }
 
+function Authenticate(user, password) {
+  return new Promise((resolve, reject) => {
+    const authData = new AuthenticationDetails({
+      Username: user,
+      Password: password,
+    });
+
+    const userPool = new CognitoUserPool(PoolData);
+
+    const cognitoUser = new CognitoUser({
+      Username: user,
+      Pool: userPool,
+    });
+
+    cognitoUser.authenticateUser(authData, {
+      onSuccess: (result) => {
+        resolve(result);
+      },
+      onFailure: (err) => {
+        reject(err);
+      },
+    });
+  });
+}
+
 export default {
   Register,
+  Authenticate,
 };

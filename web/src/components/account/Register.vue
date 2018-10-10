@@ -64,7 +64,7 @@
             :class="{'is-loading': isReadonly}"
             :disabled="isReadonly">Register</button>
             <button class="button" v-on:click="close" :disabled="isReadonly">Cancel</button>
-            <label>{{registerStatus}}</label>
+            <label>{{message}}</label>
         </footer>
       </form>
     </div>
@@ -105,11 +105,8 @@ export default {
     isReadonly() {
       return this.$store.state.account.register_status === 'registering';
     },
-    registerStatus() {
-      if (this.$store.state.account.register_status === 'registering') {
-        return 'Registering...';
-      }
-      return '';
+    message() {
+      return this.$store.state.account.register_message;
     },
   },
   methods: {
