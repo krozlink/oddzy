@@ -1,28 +1,33 @@
 class InputValue {
-  constructor(name, validators, options) {
+  constructor(name, attributeName, validators, options) {
     this.name = name;
-    this.value = '';
+    this.attribute_name = attributeName;
+    this.raw_value = '';
     this.validators = validators;
     this.active = false;
     this.error = '';
+    this.parser = null;
+    this.placeholder = name;
+    this.type = 'text';
+
+    if (options !== undefined && options.parser !== undefined) {
+      this.parser = options.parser;
+    }
 
     if (options !== undefined && options.placeholder !== undefined) {
       this.placeholder = options.placeholder;
-    } else {
-      this.placeholder = name;
     }
 
     if (options !== undefined && options.type !== undefined) {
       if (options.type === 'checkbox') {
-        this.value = false;
+        this.raw_value = false;
       }
       this.type = options.type;
-    } else {
-      this.type = 'text';
     }
   }
 
   validate() {
+    if (!this.validators) return true;
     for (let i = 0; i < this.validators.length; i += 1) {
       this.validators[i](this);
 
@@ -30,6 +35,14 @@ class InputValue {
       if (!this.isValid()) return false;
     }
     return this.isValid();
+  }
+
+  getValue() {
+    if (!this.parser) {
+      return this.raw_value;
+    }
+
+    return this.parser(this.raw_value);
   }
 
   setError(err) {
@@ -45,7 +58,7 @@ class InputValue {
   }
 
   reset() {
-    this.value = '';
+    this.raw_value = '';
     this.active = false;
     this.error = '';
   }

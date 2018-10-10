@@ -1,3 +1,5 @@
+import Auth from '../../api/auth';
+
 const getters = {
 
 };
@@ -10,8 +12,15 @@ const actions = {
     commit('displayRegister', display);
   },
 
-  register({ commit }) {
-    commit('setRegisterStatus', 'registering');
+  register({ commit }, fields) {
+    // commit('setRegisterStatus', 'registering');
+    Auth.Register(fields)
+      .then((result) => {
+        alert(`user name is ${result.user.getUsername()}`);
+      })
+      .catch((err) => {
+        alert(JSON.stringify(err));
+      });
   },
 };
 
