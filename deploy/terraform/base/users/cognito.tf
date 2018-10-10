@@ -3,6 +3,10 @@ resource "aws_cognito_user_pool" "users" {
 
     alias_attributes = ["email", "preferred_username"]
     auto_verified_attributes = ["email"]
+    
+    lifecycle {
+        prevent_destroy = true
+    }
 
     admin_create_user_config {
         allow_admin_create_user_only = false
@@ -17,6 +21,10 @@ resource "aws_cognito_user_pool" "users" {
         require_symbols = false
     }
 
+    lambda_config { 
+        pre_sign_up = "${aws_lambda_function.pre_signup.arn}"
+    }
+
     verification_message_template {
         default_email_option = "CONFIRM_WITH_LINK"
         email_message_by_link = "Please click the link below to verify your email address. {##Verify Email##}"
@@ -24,19 +32,29 @@ resource "aws_cognito_user_pool" "users" {
     }
 
     schema = [
-        {
-            attribute_data_type = "String"
-            developer_only_attribute = false
-            mutable = true
-            name = "email"
-            required = true
-        },
+         {
+             attribute_data_type = "String"
+             developer_only_attribute = false
+             mutable = true
+             name = "email"
+             required = true
+ 
+            string_attribute_constraints {
+                min_length = 1
+                max_length = 255
+            }
+         },
         {
             attribute_data_type = "String"
             developer_only_attribute = false
             mutable = true
             name = "given_name"
             required = true
+ 
+            string_attribute_constraints {
+                min_length = 1
+                max_length = 255
+            }
         },
         {
             attribute_data_type = "String"
@@ -44,6 +62,11 @@ resource "aws_cognito_user_pool" "users" {
             mutable = true
             name = "family_name"
             required = true
+ 
+            string_attribute_constraints {
+                min_length = 1
+                max_length = 255
+            }
         },
         {
             attribute_data_type = "String"
@@ -51,6 +74,11 @@ resource "aws_cognito_user_pool" "users" {
             mutable = true
             name = "preferred_username"
             required = false
+ 
+            string_attribute_constraints {
+                min_length = 1
+                max_length = 255
+            }
         },
         {
             attribute_data_type = "String"
@@ -58,6 +86,11 @@ resource "aws_cognito_user_pool" "users" {
             mutable = true
             name = "phone_number"
             required = true
+ 
+            string_attribute_constraints {
+                min_length = 1
+                max_length = 255
+            }
         },
         {
             attribute_data_type = "String"
@@ -65,12 +98,22 @@ resource "aws_cognito_user_pool" "users" {
             mutable = true
             name = "address"
             required = true
+ 
+            string_attribute_constraints {
+                min_length = 1
+                max_length = 255
+            }
         },
         {
             attribute_data_type = "String"
             mutable = true
             name = "birthdate"
             required = true
+ 
+            string_attribute_constraints {
+                min_length = 1
+                max_length = 255
+            }
         }
     ]
 }
@@ -80,6 +123,10 @@ resource "aws_cognito_user_pool_client" "users" {
     user_pool_id = "${aws_cognito_user_pool.users.id}"
     refresh_token_validity = 30
     generate_secret = false
+
+    lifecycle {
+        prevent_destroy = true
+    }
 }
 
 resource "aws_cognito_user_pool_domain" "users" {
