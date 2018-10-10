@@ -88,7 +88,7 @@ export default {
         first_name: new InputValue('First Name', 'given_name', [Validation.Mandatory]),
         last_name: new InputValue('Last Name', 'family_name', [Validation.Mandatory]),
         email_address: new InputValue('Email Address', 'email', [Validation.Mandatory, Validation.EmailAddress]),
-        user_name: new InputValue('User Name', 'preferred_username', [Validation.Mandatory]),
+        user_name: new InputValue('User Name', null, [Validation.Mandatory]),
         password: new InputValue('Password', null, [Validation.Mandatory, Validation.Password], { type: 'password' }),
         confirm_password: new InputValue('Confirm Password', null, [this.validatePasswordsMatch], { type: 'password' }),
         address: new InputValue('Address', 'address', [Validation.Mandatory]),
