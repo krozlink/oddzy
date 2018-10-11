@@ -20,7 +20,7 @@ const actions = {
 
       const register = await Auth.Register(user, password, fields);
       console.log(register);
-      const auth = await Auth.Authenticate(user, password);
+      const auth = await Auth.Login(user, password);
       console.log(auth);
       commit('registrationSuccessful');
     } catch (ex) {
@@ -29,10 +29,10 @@ const actions = {
     }
   },
 
-  async authenticate({ commit }, user, password) {
+  async login({ commit }, user, password) {
     try {
       commit('loginSubmitted');
-      const auth = await Auth.Authenticate(user, password);
+      const auth = await Auth.Login(user, password);
       console.log(auth);
       commit('loginSuccessful');
     } catch (ex) {

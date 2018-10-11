@@ -1,4 +1,3 @@
-import { Config, CognitoIdentityCredentials } from 'aws-sdk';
 import { CognitoUser, CognitoUserPool, AuthenticationDetails, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 import AWSConfig from '../config/cognito';
 
@@ -7,19 +6,11 @@ const PoolData = {
   ClientId: AWSConfig.ClientId,
 };
 
-// isAuthenticated
-// getCurrentUser
-// logout
-// authenticate
-// register
-// forgotPassword
-
-
 function Register(user, password, fields) {
   return new Promise((resolve, reject) => {
     const userPool = new CognitoUserPool(PoolData);
 
-    const attributes = Object.values(fields).filter(f => f.attribute_name !== null).map(f => ({
+    const attributes = Object.values(fields).filter(f => f.attribute_name !== null).map(f => new CognitoUserAttribute({
       Name: f.attribute_name,
       Value: f.getValue(),
     }));
@@ -34,7 +25,7 @@ function Register(user, password, fields) {
   });
 }
 
-function Authenticate(user, password) {
+function Login(user, password) {
   return new Promise((resolve, reject) => {
     const authData = new AuthenticationDetails({
       Username: user,
@@ -59,7 +50,70 @@ function Authenticate(user, password) {
   });
 }
 
+function GetCurrentUser() {
+  return new Promise((resolve, reject) => {
+    const userPool = new CognitoUserPool(PoolData);
+    const cognitoUser = userPool.getCurrentUser();
+
+    if (cognitoUser !== null) {
+      cognitoUser.getSession((sessionErr, session) => {
+        if (sessionErr) {
+          reject(sessionErr);
+          return;
+        }
+
+        console.log(`session validity: ${session.isValid()}`);
+
+        cognitoUser.getUserData((err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({
+              ...data.Username,
+              ...data.UserAttributes,
+            });
+          }
+        });
+      });
+    } else {
+      reject(new Error('No current user'));
+    }
+  });
+}
+
+function Logout() {
+  const userPool = new CognitoUserPool(PoolData);
+  const cognitoUser = userPool.getCurrentUser();
+
+  if (cognitoUser != null) {
+    cognitoUser.signOut();
+  }
+}
+
+function IsLoggedIn() {
+  return new Promise((resolve, reject) => {
+    const userPool = new CognitoUserPool(PoolData);
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser === null) {
+      resolve(false);
+      return;
+    }
+
+    cognitoUser.getSession((err, session) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve(session.isValid());
+    });
+  });
+}
+
 export default {
   Register,
-  Authenticate,
+  Login,
+  Logout,
+  GetCurrentUser,
+  IsLoggedIn,
 };
