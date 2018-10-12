@@ -1,5 +1,6 @@
 import { CognitoUser, CognitoUserPool, AuthenticationDetails, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 import AWSConfig from '../config/cognito';
+import User from './user';
 
 const PoolData = {
   UserPoolId: AWSConfig.UserPoolId,
@@ -46,6 +47,22 @@ function Login(user, password) {
       onFailure: (err) => {
         reject(err);
       },
+      mfaSetup(challengeName, challengeParameters) {
+        console.log('mfaSetup');
+      },
+      // @ts-ignore
+      associateSecretCode(secretCode) {
+        console.log('associateSecretCode');
+      },
+      selectMFAType(challengeName, challengeParameters) {
+        console.log('selectMFAType');
+      },
+      totpRequired(secretCode) {
+        console.log('totpRequired');
+      },
+      mfaRequired(codeDeliveryDetails) {
+        console.log('mfaRequired');
+      },
     });
   });
 }
@@ -68,10 +85,7 @@ function GetCurrentUser() {
           if (err) {
             reject(err);
           } else {
-            resolve({
-              ...data.Username,
-              ...data.UserAttributes,
-            });
+            resolve(new User(data.Username, data.UserAttributes));
           }
         });
       });

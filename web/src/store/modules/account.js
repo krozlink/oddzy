@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import Auth from '../../api/auth';
 
 const getters = {
@@ -15,26 +16,33 @@ const actions = {
   async register({ commit }, fields) {
     commit('registrationSubmitted');
     try {
-      const user = fields.user_name.getValue();
+      const username = fields.user_name.getValue();
       const password = fields.password.getValue();
 
-      const register = await Auth.Register(user, password, fields);
+      const register = await Auth.Register(username, password, fields);
       console.log(register);
-      const auth = await Auth.Login(user, password);
+
+      const auth = await Auth.Login(username, password);
       console.log(auth);
-      commit('registrationSuccessful');
+
+      const user = await Auth.GetCurrentUser();
+      console.log(user);
+
+      commit('registrationSuccessful', user);
     } catch (ex) {
       console.log(ex);
-      commit('registrationFailed');
+      commit('registrationFailed', 'An unexpected error occurred');
     }
   },
 
-  async login({ commit }, user, password) {
+  async login({ commit }, username, password) {
     try {
       commit('loginSubmitted');
-      const auth = await Auth.Login(user, password);
+      const auth = await Auth.Login(username, password);
       console.log(auth);
-      commit('loginSuccessful');
+
+      const user = await Auth.GetCurrentUser();
+      commit('loginSuccessful', user);
     } catch (ex) {
       console.log(ex);
       let message = '';
@@ -49,16 +57,25 @@ const actions = {
 };
 
 const mutations = {
-  registrationSuccessful(state) {
+  userLoggedIn(state, user) {
+    state.authenticated = true;
+    state.login_status = '';
+    state.login_message = '';
+    Vue.set(state.user_details, 'username', user.username);
+    Vue.set(state.user_details, 'first_name', user.first_name);
+    Vue.set(state.user_details, 'last_name', user.last_name);
+    Vue.set(state.user_details, 'email_address', user.email_address);
+  },
+  registrationSuccessful(state, user) {
     state.display_register = false;
     state.registation_status = '';
     state.registration_message = '';
-    state.authenticated = true;
+    this.userLoggedIn(user);
   },
-  registrationFailed(state) {
+  registrationFailed(state, message) {
     state.authenticated = false;
     state.registation_status = 'failed';
-    state.registration_message = 'An unexpected error occurred';
+    state.registration_message = message;
   },
   registrationSubmitted(state) {
     state.registation_status = 'submitted';
@@ -68,11 +85,9 @@ const mutations = {
     state.display_register = display;
   },
 
-  loginSuccessful(state) {
+  loginSuccessful(state, user) {
     state.display_login = false;
-    state.login_status = '';
-    state.login_message = '';
-    state.authenticated = true;
+    this.userLoggedIn(user);
   },
   loginFailed(state, message) {
     state.authenticated = false;
@@ -96,8 +111,9 @@ const state = {
   authenticated: false,
 
   user_details: {
-    given_name: '',
-    family_name: '',
+    username: '',
+    first_name: '',
+    last_name: '',
     email_address: '',
   },
 
