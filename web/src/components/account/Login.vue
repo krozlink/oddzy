@@ -15,6 +15,7 @@
                 <div class="field">
                     <p class="control has-icons-left">
                         <input
+                            id="login-user"
                             class="input"
                             type="text"
                             placeholder="User Name"
@@ -30,6 +31,7 @@
                 <div class="field">
                     <p class="control has-icons-left">
                         <input
+                            id="login-password"
                             class="input"
                             type="password"
                             placeholder="Password"
@@ -49,7 +51,7 @@
                 </div>
             </section>
             <footer class="modal-card-foot">
-                <button class="button is-info" :readonly="isReadonly" v-on:click="login">Login</button>
+                <button class="button is-info" :readonly="isReadonly" v-on:click="login" :class="{'is-loading': isReadonly}">Login</button>
                 <button class="button" v-on:click="close" :readonly="isReadonly">Cancel</button>
                 <button class="button is-text" disabled>Forgot Password?</button>
             </footer>

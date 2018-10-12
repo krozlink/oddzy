@@ -114,6 +114,7 @@ export default {
     },
     showLogin() {
       this.$store.dispatch('account/displayLogin', true);
+      this.$nextTick(() => document.getElementById('login-user').focus());
     },
     showRegister() {
       this.$store.dispatch('account/displayRegister', true);
