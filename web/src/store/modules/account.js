@@ -1,9 +1,20 @@
 import Vue from 'vue';
 import Auth from '../../api/auth';
 
+function userLoggedIn(state, user) {
+  state.authenticated = true;
+  state.status = 'login_true';
+  state.status_message = '';
+  Vue.set(state.user_details, 'username', user.username);
+  Vue.set(state.user_details, 'first_name', user.firstName);
+  Vue.set(state.user_details, 'last_name', user.lastName);
+  Vue.set(state.user_details, 'email_address', user.email);
+}
+
 const getters = {
 
 };
+
 
 const actions = {
   displayLogin({ commit }, display) {
@@ -11,6 +22,11 @@ const actions = {
   },
   displayRegister({ commit }, display) {
     commit('displayRegistrationScreen', display);
+  },
+
+  async logout({ commit }) {
+    Auth.Logout();
+    commit('logout');
   },
 
   async register({ commit }, fields) {
@@ -35,74 +51,84 @@ const actions = {
     }
   },
 
-  async login({ commit }, username, password) {
+  async userLogin({ commit }, { username, password }) {
     try {
-      commit('loginSubmitted');
+      commit('userLoginSubmitted');
       const auth = await Auth.Login(username, password);
       console.log(auth);
 
       const user = await Auth.GetCurrentUser();
-      commit('loginSuccessful', user);
+      commit('userLoginSuccessful', user);
     } catch (ex) {
       console.log(ex);
       let message = '';
-      if (ex.message === 'Invalid password') {
+      if (ex.code === 'UserNotFoundException' || ex.code === 'NotAuthorizedException') {
         message = 'Incorrect username or password';
       } else {
         message = 'Unexpected error occurred';
       }
-      commit('loginFailed', message);
+      commit('userLoginFailed', message);
+    }
+  },
+
+  async autoLogin({ commit }) {
+    try {
+      const user = await Auth.GetCurrentUser();
+      commit('autoLoginSuccessful', user);
+    } catch (ex) {
+      commit('autoLoginFailed');
     }
   },
 };
 
 const mutations = {
-  userLoggedIn(state, user) {
-    state.authenticated = true;
-    state.login_status = '';
-    state.login_message = '';
-    Vue.set(state.user_details, 'username', user.username);
-    Vue.set(state.user_details, 'first_name', user.first_name);
-    Vue.set(state.user_details, 'last_name', user.last_name);
-    Vue.set(state.user_details, 'email_address', user.email_address);
-  },
   registrationSuccessful(state, user) {
     state.display_register = false;
-    state.registation_status = '';
-    state.registration_message = '';
-    this.userLoggedIn(user);
+    userLoggedIn(state, user);
   },
   registrationFailed(state, message) {
     state.authenticated = false;
-    state.registation_status = 'failed';
+    state.status = 'registration_failed';
     state.registration_message = message;
   },
   registrationSubmitted(state) {
-    state.registation_status = 'submitted';
-    state.registration_message = 'Registering...';
+    state.status = 'registration_submitted';
+    state.status_message = 'Registering...';
   },
   displayRegistrationScreen(state, display) {
     state.display_register = display;
   },
-
-  loginSuccessful(state, user) {
-    state.display_login = false;
-    this.userLoggedIn(user);
-  },
-  loginFailed(state, message) {
+  logout(state) {
     state.authenticated = false;
-    state.login_status = 'failed';
-    state.login_message = message;
+    state.status = '';
+    state.status_message = '';
   },
-  loginSubmitted(state) {
-    state.login_status = 'submitted';
-    state.login_message = 'Logging in...';
+  autoLoginFailed(state) {
+    state.authenticated = false;
+    state.status = 'login_false';
+    state.status_message = '';
+  },
+  autoLoginSuccessful(state, user) {
+    userLoggedIn(state, user);
+  },
+
+  userLoginSuccessful(state, user) {
+    state.display_login = false;
+    userLoggedIn(state, user);
+  },
+  userLoginFailed(state, message) {
+    state.authenticated = false;
+    state.status = 'login_failed';
+    state.status_message = message;
+  },
+  userLoginSubmitted(state) {
+    state.status = 'login_submitted';
+    state.status_message = '';
   },
   displayLoginScreen(state, display) {
     state.display_login = display;
   },
 };
-
 
 const state = {
   display_login: false,
@@ -117,11 +143,8 @@ const state = {
     email_address: '',
   },
 
-  registation_status: '',
-  registration_message: '',
-
-  login_status: '',
-  login_message: '',
+  status: 'login_checking',
+  status_message: '',
 };
 
 export default {

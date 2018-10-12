@@ -64,7 +64,7 @@
             :class="{'is-loading': isReadonly}"
             :disabled="isReadonly">Register</button>
             <button class="button" v-on:click="close" :disabled="isReadonly">Cancel</button>
-            <label>{{message}}</label>
+            <label>{{this.$store.state.account.status_message}}</label>
         </footer>
       </form>
     </div>
@@ -103,10 +103,7 @@ export default {
       return this.$store.state.account.display_register;
     },
     isReadonly() {
-      return this.$store.state.account.register_status === 'registering';
-    },
-    message() {
-      return this.$store.state.account.register_message;
+      return this.$store.state.account.status === 'registration_submitted';
     },
   },
   methods: {
@@ -139,7 +136,7 @@ export default {
           const date = DateHelper.parseDateString(val);
           const year = date.getFullYear().toString();
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
-          const day = (date.getDay()).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
           return `${year}-${month}-${day}`;
         },
       };

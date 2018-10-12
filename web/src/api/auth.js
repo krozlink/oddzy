@@ -47,22 +47,6 @@ function Login(user, password) {
       onFailure: (err) => {
         reject(err);
       },
-      mfaSetup(challengeName, challengeParameters) {
-        console.log('mfaSetup');
-      },
-      // @ts-ignore
-      associateSecretCode(secretCode) {
-        console.log('associateSecretCode');
-      },
-      selectMFAType(challengeName, challengeParameters) {
-        console.log('selectMFAType');
-      },
-      totpRequired(secretCode) {
-        console.log('totpRequired');
-      },
-      mfaRequired(codeDeliveryDetails) {
-        console.log('mfaRequired');
-      },
     });
   });
 }

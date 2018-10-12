@@ -72,12 +72,21 @@
         </a>
       </div>
       <div class="navbar-end">
-        <div class="navbar-item">
-          <a class="button is-outlined" v-on:click="showLogin">Login</a>
-        </div>
-        <div class="navbar-item">
-          <a class="button is-outlined" v-on:click="showRegister">Register</a>
-        </div>
+          <div id="account-menu" class="navbar-item has-dropdown"
+            v-if="this.$store.state.account.authenticated"
+            v-on:click="toggleDropdown"
+            :class="{'is-active': showDropdown}">
+            <a class="navbar-link">Welcome {{this.$store.state.account.user_details.first_name}}</a>
+            <div class="navbar-dropdown">
+              <a class="navbar-item" v-on:click="signOut">Sign Out</a>
+            </div>
+          </div>
+          <div class="navbar-item" v-if="!this.$store.state.account.authenticated">
+            <a class="button is-outlined" v-on:click="showLogin">Login</a>
+          </div>
+          <div class="navbar-item" v-if="!this.$store.state.account.authenticated">
+            <a class="button is-outlined" v-on:click="showRegister">Register</a>
+          </div>
       </div>
     </div>
   </nav>
@@ -89,14 +98,33 @@ export default {
   name: 'PageHeader',
   components: {
   },
-
+  data() {
+    return {
+      account_dropdown: false,
+    };
+  },
+  computed: {
+    showDropdown() {
+      return this.account_dropdown;
+    },
+  },
   methods: {
+    toggleDropdown() {
+      this.account_dropdown = !this.account_dropdown;
+    },
     showLogin() {
       this.$store.dispatch('account/displayLogin', true);
     },
     showRegister() {
       this.$store.dispatch('account/displayRegister', true);
     },
+    signOut() {
+      this.$store.dispatch('account/logout');
+    },
+  },
+
+  created() {
+    this.$store.dispatch('account/autoLogin');
   },
 };
 </script>
@@ -127,6 +155,21 @@ a.router-link-active {
 
 .navbar-start .navbar-item {
   padding: 0px 10px 0px 10px;
+}
+
+#account-menu .navbar-dropdown {
+  background-color: $primary;
+  border-top-width: 0px;
+}
+
+#account-menu .navbar-dropdown a {
+  color: white;
+  background-color: $primary;
+}
+
+#account-menu .navbar-item:hover {
+  color: white;
+  background-color: #0573c8;
 }
 
 svg {

@@ -4,38 +4,54 @@
         <div class="modal-content">
             <header class="modal-card-head">
                 <p class="modal-card-title">Login</p>
-                <button v-on:click="close" class="delete" aria-label="close"></button>
+                <button
+                    v-on:click="close"
+                    class="delete"
+                    aria-label="close"
+                    :readonly="isReadonly">
+                </button>
             </header>
             <section class="modal-card-body">
                 <div class="field">
                     <p class="control has-icons-left">
-                        <input class="input" type="text" placeholder="User Name">
-                        <span class="icon is-small is-left">
-                        <i class="fas fa-user"></i>
+                        <input
+                            class="input"
+                            type="text"
+                            placeholder="User Name"
+                            :readonly="isReadonly"
+                            v-model="username"
+                            v-on:keyup.enter="login"
+                        >
+                            <span class="icon is-small is-left">
+                            <i class="fas fa-user"></i>
                         </span>
                     </p>
                 </div>
                 <div class="field">
                     <p class="control has-icons-left">
-                        <input class="input" type="password" placeholder="Password">
-                        <span class="icon is-small is-left">
-                        <i class="fas fa-lock"></i>
+                        <input
+                            class="input"
+                            type="password"
+                            placeholder="Password"
+                            :readonly="isReadonly"
+                            v-model="password"
+                            v-on:keyup.enter="login"
+                        >
+                            <span class="icon is-small is-left">
+                            <i class="fas fa-lock"></i>
                         </span>
                     </p>
                 </div>
                 <div class="field">
                     <div class="control">
-                        <label class="checkbox">
-                        <input type="checkbox">
-                        Remember Me
-                        </label>
+                        <div id="status" class="label">{{this.$store.state.account.status_message}}</div>
                     </div>
                 </div>
             </section>
             <footer class="modal-card-foot">
-                <button class="button is-info">Login</button>
-                <button class="button" v-on:click="close">Cancel</button>
-                <button class="button is-text">Forgot Password?</button>
+                <button class="button is-info" :readonly="isReadonly" v-on:click="login">Login</button>
+                <button class="button" v-on:click="close" :readonly="isReadonly">Cancel</button>
+                <button class="button is-text" disabled>Forgot Password?</button>
             </footer>
         </div>
     </div>
@@ -45,16 +61,33 @@
 export default {
   data() {
     return {
+      username: '',
+      password: '',
     };
   },
   computed: {
     visible() {
       return this.$store.state.account.display_login;
     },
+    isReadonly() {
+      return this.$store.state.account.status === 'login_submitted';
+    },
   },
   methods: {
     close() {
       this.$store.dispatch('account/displayLogin', false);
+    },
+    login() {
+      this.$store.dispatch('account/userLogin', {
+        username: this.username,
+        password: this.password,
+      })
+        .then(() => {
+          if (this.$store.state.account.status === 'login_true') {
+            this.username = '';
+            this.password = '';
+          }
+        });
     },
   },
 };
@@ -71,5 +104,10 @@ header.modal-card-head {
 
 div.modal-content {
     width: 400px;
+}
+
+#status {
+    font-size: 0.9em;
+    color: red;
 }
 </style>
