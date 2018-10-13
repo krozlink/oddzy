@@ -58,12 +58,14 @@
           </span>
           <span class="text">Promotions</span>
         </a>
-        <a class="is-disable navbar-item">
-          <span class="icon">
-            <i class="fas fa-user"></i>
-          </span>
-          <span class="text">My Account</span>
-        </a>
+        <router-link to="/account" class="navbar-item">
+          <div class="header-link">
+            <span class="icon">
+              <i class="fas fa-user"></i>
+            </span>
+            <span class="text">My Account</span>
+          </div>
+        </router-link>
         <a class="is-disable navbar-item">
           <span class="icon">
             <i class="fas fa-search"></i>

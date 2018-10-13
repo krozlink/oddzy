@@ -63,7 +63,7 @@
             type="button"
             :class="{'is-loading': isReadonly}"
             :disabled="isReadonly">Register</button>
-            <button class="button" v-on:click="close" :disabled="isReadonly">Cancel</button>
+            <button type="button" class="button" v-on:click="close" :disabled="isReadonly">Cancel</button>
             <label>{{this.$store.state.account.status_message}}</label>
         </footer>
       </form>
