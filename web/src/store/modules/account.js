@@ -7,7 +7,6 @@ function userLoggedIn(state, user) {
   state.status_message = '';
 
   Vue.set(state.user_details, 'username', user.username);
-  Vue.set(state.user_details, 'username', user.username);
   Vue.set(state.user_details, 'first_name', user.first_name);
   Vue.set(state.user_details, 'last_name', user.last_name);
   Vue.set(state.user_details, 'address', user.address);
@@ -16,6 +15,21 @@ function userLoggedIn(state, user) {
   Vue.set(state.user_details, 'email_verified', user.email_verified);
   Vue.set(state.user_details, 'phone_number', user.mobile);
   Vue.set(state.user_details, 'phone_verified', user.mobile_verified);
+}
+function userLoggedOut(state) {
+  state.authenticated = false;
+  state.status = 'login_false';
+  state.status_message = '';
+
+  Vue.set(state.user_details, 'username', '');
+  Vue.set(state.user_details, 'first_name', '');
+  Vue.set(state.user_details, 'last_name', '');
+  Vue.set(state.user_details, 'address', '');
+  Vue.set(state.user_details, 'date_of_birth', '');
+  Vue.set(state.user_details, 'email_address', '');
+  Vue.set(state.user_details, 'email_verified', false);
+  Vue.set(state.user_details, 'phone_number', '');
+  Vue.set(state.user_details, 'phone_verified', false);
 }
 
 const getters = {
@@ -106,9 +120,7 @@ const mutations = {
     state.display_register = display;
   },
   logout(state) {
-    state.authenticated = false;
-    state.status = '';
-    state.status_message = '';
+    userLoggedOut(state);
   },
   autoLoginFailed(state) {
     state.authenticated = false;

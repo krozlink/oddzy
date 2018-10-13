@@ -6,46 +6,51 @@
       </div>
     </div>
     <div>
-      <div class="field">
-        <label class="label">Name</label>
-        <div class="control">
-          <input class="input" type="text" disabled :value="this.name">
+      <div v-if="this.$store.state.account.authenticated" class="section">
+        <div class="field">
+          <label class="label">Name</label>
+          <div class="control">
+            <input class="input" type="text" disabled :value="this.name">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Username</label>
+          <div class="control">
+            <input class="input" type="text" disabled :value="this.$store.state.account.user_details.username">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Email Address</label>
+          <div class="control">
+            <input class="input" type="text" disabled :value="this.$store.state.account.user_details.email_address">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Mobile Number</label>
+          <div class="control">
+            <input class="input" type="text" disabled :value="this.mobileNumber">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Date Of Birth</label>
+          <div class="control">
+            <input class="input" type="text" disabled :value="this.dateOfBirth">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Address</label>
+          <div class="control">
+            <input class="input" type="text" disabled :value="this.$store.state.account.user_details.address">
+          </div>
         </div>
       </div>
-
-      <div class="field">
-        <label class="label">Username</label>
-        <div class="control">
-          <input class="input" type="text" disabled :value="this.$store.state.account.user_details.username">
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Email Address</label>
-        <div class="control">
-          <input class="input" type="text" disabled :value="this.$store.state.account.user_details.email_address">
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Mobile Number</label>
-        <div class="control">
-          <input class="input" type="text" disabled :value="this.mobileNumber">
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Date Of Birth</label>
-        <div class="control">
-          <input class="input" type="text" disabled :value="this.dateOfBirth">
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Address</label>
-        <div class="control">
-          <input class="input" type="text" disabled :value="this.$store.state.account.user_details.address">
-        </div>
+      <div v-else  class="section">
+        Login to view your account details
       </div>
     </div>
   </div>
@@ -63,15 +68,18 @@ export default {
 
   computed: {
     name() {
+      if (!this.$store.state.account.authenticated) return '';
       return `${this.$store.state.account.user_details.first_name} ${this.$store.state.account.user_details.last_name}`;
     },
 
     dateOfBirth() {
+      if (!this.$store.state.account.authenticated) return '';
       const [year, month, day] = this.$store.state.account.user_details.date_of_birth.split('-');
       return `${day}/${month}/${year}`;
     },
 
     mobileNumber() {
+      if (!this.$store.state.account.authenticated) return '';
       return `0${this.$store.state.account.user_details.phone_number.substring(3)}`;
     },
   },
