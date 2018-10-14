@@ -3,6 +3,7 @@
     <page-header></page-header>
     <register></register>
     <login></login>
+    <betslip></betslip>
 
     <div id="content" class="container">
       <router-view></router-view>
@@ -14,6 +15,7 @@
 import PageHeader from './components/PageHeader.vue';
 import Register from './components/account/Register.vue';
 import Login from './components/account/Login.vue';
+import Betslip from './components/betslip/Betslip.vue';
 
 export default {
   name: 'App',
@@ -21,6 +23,7 @@ export default {
     PageHeader,
     Register,
     Login,
+    Betslip,
   },
 };
 </script>

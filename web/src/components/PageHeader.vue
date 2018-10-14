@@ -72,23 +72,31 @@
           </span>
           <span class="text">Search</span>
         </a>
+        <div id="account-menu" class="navbar-item has-dropdown middle"
+          v-if="this.$store.state.account.authenticated"
+          v-on:click="toggleDropdown"
+          :class="{'is-active': showDropdown}">
+          <a class="navbar-link">Welcome {{this.$store.state.account.user_details.first_name}}</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" v-on:click="signOut">Sign Out</a>
+          </div>
+        </div>
+        <div class="navbar-item middle" v-if="!this.$store.state.account.authenticated">
+          <a class="button is-outlined" v-on:click="showLogin">Login</a>
+        </div>
+        <div class="navbar-item" v-if="!this.$store.state.account.authenticated">
+          <a class="button is-outlined" v-on:click="showRegister">Register</a>
+        </div>
       </div>
       <div class="navbar-end">
-          <div id="account-menu" class="navbar-item has-dropdown"
-            v-if="this.$store.state.account.authenticated"
-            v-on:click="toggleDropdown"
-            :class="{'is-active': showDropdown}">
-            <a class="navbar-link">Welcome {{this.$store.state.account.user_details.first_name}}</a>
-            <div class="navbar-dropdown">
-              <a class="navbar-item" v-on:click="signOut">Sign Out</a>
-            </div>
-          </div>
-          <div class="navbar-item" v-if="!this.$store.state.account.authenticated">
-            <a class="button is-outlined" v-on:click="showLogin">Login</a>
-          </div>
-          <div class="navbar-item" v-if="!this.$store.state.account.authenticated">
-            <a class="button is-outlined" v-on:click="showRegister">Register</a>
-          </div>
+        <div id="betslip-section" class="navbar-item" :class="{'betslip-active': showBetslip}">
+          <a id="betslip-link" v-on:click="toggleBetslip">
+            <span class="icon">
+              <i class="fas fa-file-invoice"></i>
+            </span>
+            <span class="text">Betslip</span>
+          </a>
+        </div>
       </div>
     </div>
   </nav>
@@ -109,10 +117,16 @@ export default {
     showDropdown() {
       return this.account_dropdown;
     },
+    showBetslip() {
+      return this.$store.state.betslip.show;
+    },
   },
   methods: {
     toggleDropdown() {
       this.account_dropdown = !this.account_dropdown;
+    },
+    toggleBetslip() {
+      this.$store.dispatch('betslip/toggle');
     },
     showLogin() {
       this.$store.dispatch('account/displayLogin', true);
@@ -149,7 +163,7 @@ div.title {
 }
 
 a.router-link-active {
-  background-color: #0573c8;
+  background-color: $primary-dark;
 }
 
 .navbar-item span {
@@ -160,19 +174,42 @@ a.router-link-active {
   padding: 0px 10px 0px 10px;
 }
 
-#account-menu .navbar-dropdown {
-  background-color: $primary;
-  border-top-width: 0px;
+.middle {
+  margin-left: 100px;
 }
 
-#account-menu .navbar-dropdown a {
-  color: white;
-  background-color: $primary;
+#account-menu {
+  .navbar-dropdown {
+    background-color: $primary;
+    border-top-width: 0px;
+
+    a {
+      color: white;
+      background-color: $primary;
+    }
+  }
+
+  .is-active {
+    background-color: $primary-hover;
+  }
+
+  .navbar-item:hover {
+    color: white;
+    background-color: $primary-hover;
+  }
+
 }
 
-#account-menu .navbar-item:hover {
-  color: white;
-  background-color: #0573c8;
+#account-menu:hover,.is-active {
+  background-color: $primary-hover;
+}
+
+#account-menu.is-active a.navbar-link {
+  background-color: $primary-hover;
+}
+
+#account-menu:hover a.navbar-link {
+  background-color: $primary-hover;
 }
 
 svg {
@@ -181,6 +218,32 @@ svg {
   border-style: solid;
   padding: 3px;
   margin-right: 10px;
+  background-color: $primary-dark;
+}
+
+#betslip-section {
+  width: 300px;
+  margin-right: 10px;
+  align-items: center;
+  background-color: $primary;
+  align: right;
+}
+
+#betslip-link {
+  margin-left: auto;
+  margin-right: 20px;
+  border: 2px;
+  border-style: solid;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: $primary-dark;
+
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+
+  color: white;
 }
 
 </style>
