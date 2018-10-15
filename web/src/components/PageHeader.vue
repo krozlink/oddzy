@@ -72,11 +72,10 @@
           </span>
           <span class="text">Search</span>
         </a>
-        
       </div>
       <div class="navbar-end">
 
-        <div id="account-menu" class="navbar-item has-dropdown middle"
+        <div id="account-menu" class="navbar-item has-dropdown"
           v-if="this.$store.state.account.authenticated"
           v-on:click="toggleDropdown"
           :class="{'is-active': showDropdown}">
@@ -85,7 +84,7 @@
             <a class="navbar-item" v-on:click="signOut">Sign Out</a>
           </div>
         </div>
-        <div class="navbar-item middle" v-if="!this.$store.state.account.authenticated">
+        <div class="navbar-item" v-if="!this.$store.state.account.authenticated">
           <a class="button is-outlined" v-on:click="showLogin">Login</a>
         </div>
         <div class="navbar-item" v-if="!this.$store.state.account.authenticated">
@@ -186,10 +185,6 @@ a.router-link-active {
 
 .navbar-start .navbar-item {
   padding: 0px 10px 0px 10px;
-}
-
-.middle {
-  // margin-left: 100px;
 }
 
 #account-menu {

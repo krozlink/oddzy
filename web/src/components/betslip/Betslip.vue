@@ -4,19 +4,17 @@
           'betslip-active': showBetslip,
           'betslip-disabled': !showBetslip,
           }">
-      <div class="card">
-        <div class="card-header-title">
-          Redzel (win fixed)
-        </div>
-        <div class="card-content">
-          something
-        </div>
-      </div>
+      <betslip-item></betslip-item>
     </div>
 </template>
 
 <script>
+import BetslipItem from './BetslipItem.vue';
+
 export default {
+  components: {
+    BetslipItem,
+  },
   computed: {
     showBetslip() {
       return this.$store.state.betslip.show;

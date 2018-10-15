@@ -9,11 +9,23 @@ const actions = {
   toggle({ commit }) {
     commit('toggle');
   },
+  addToBetslip({ commit }, bet) {
+    commit('addToBetslip', bet);
+  },
+  removeFromBetslip({ commit }, betId) {
+    commit('removeFromBetslip', betId);
+  },
 };
 
 const mutations = {
   toggle(state) {
     state.show = !state.show;
+  },
+  addToBetslip(state, bet) {
+    state.bets.append(bet);
+  },
+  removeFromBetslip(state, betId) {
+    state.bets = state.bets.filter(b => b.bet_id !== betId);
   },
 };
 
