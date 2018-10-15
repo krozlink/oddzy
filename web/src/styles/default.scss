@@ -6,5 +6,7 @@ $primary-light: #3599E5;
 $primary-dark: #04518D;
 $body-family: 'Open Sans';
 $body-color: hsl(0, 0%, 29%);
+$bs-width: 350px;
+$nav-height: 85px;
 
 @import "../../node_modules/bulma/bulma.sass";

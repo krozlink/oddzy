@@ -3,9 +3,9 @@
     <page-header></page-header>
     <register></register>
     <login></login>
-    <betslip></betslip>
 
-    <div id="content" class="container">
+    <div id="content" class="">
+      <betslip></betslip>
       <router-view></router-view>
     </div>
   </div>
@@ -59,5 +59,9 @@ export default {
 .icon-greyhound:before{content:'\0041';}
 .icon-harness:before{content:'\0042';}
 .icon-thoroughbred:before{content:'\0043';}
+
+html, body {
+  height: 100%;
+}
 
 </style>

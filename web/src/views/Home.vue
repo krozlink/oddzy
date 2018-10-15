@@ -85,7 +85,7 @@ export default {
   }
 
   #home .section {
-    padding-top: 20px;
+    padding-top: 16px;
   }
 </style>
 

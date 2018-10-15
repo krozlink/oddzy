@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar is-primary">
+  <nav id="page-header" class="navbar is-primary">
     <div class="navbar-brand">
       <div class="navbar-item title">
         <svg height="50" width="80" viewBox="0 0 550 300" xmlns="http://www.w3.org/2000/svg">
@@ -72,6 +72,10 @@
           </span>
           <span class="text">Search</span>
         </a>
+        
+      </div>
+      <div class="navbar-end">
+
         <div id="account-menu" class="navbar-item has-dropdown middle"
           v-if="this.$store.state.account.authenticated"
           v-on:click="toggleDropdown"
@@ -87,15 +91,20 @@
         <div class="navbar-item" v-if="!this.$store.state.account.authenticated">
           <a class="button is-outlined" v-on:click="showRegister">Register</a>
         </div>
-      </div>
-      <div class="navbar-end">
-        <div id="betslip-section" class="navbar-item" :class="{'betslip-active': showBetslip}">
-          <a id="betslip-link" v-on:click="toggleBetslip">
+
+
+        <div id="bs-section" class="navbar-item"
+         :class="{
+          'active': showBetslip,
+          'disabled': !showBetslip,
+          }">
+          <a id="bs-link" v-on:click="toggleBetslip">
             <span class="icon">
               <i class="fas fa-file-invoice"></i>
             </span>
             <span class="text">Betslip</span>
           </a>
+          <a class="delete is-medium" v-on:click="toggleBetslip"></a>
         </div>
       </div>
     </div>
@@ -114,11 +123,11 @@ export default {
     };
   },
   computed: {
-    showDropdown() {
-      return this.account_dropdown;
-    },
     showBetslip() {
       return this.$store.state.betslip.show;
+    },
+    showDropdown() {
+      return this.account_dropdown;
     },
   },
   methods: {
@@ -147,6 +156,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+
+#page-header {
+  height: $nav-height;
+}
+
 div.title {
   min-width: 200px;
   padding-right: 50px;
@@ -175,7 +189,7 @@ a.router-link-active {
 }
 
 .middle {
-  margin-left: 100px;
+  // margin-left: 100px;
 }
 
 #account-menu {
@@ -221,19 +235,34 @@ svg {
   background-color: $primary-dark;
 }
 
-#betslip-section {
-  width: 300px;
-  margin-right: 10px;
+#bs-section {
+  width: $bs-width;
+  margin-right: 0px;
   align-items: center;
-  background-color: $primary;
-  align: right;
+
 }
 
-#betslip-link {
+#bs-section.active {
+    background-color: $primary-dark;
+}
+
+#bs-section.disabled {
+    background-color: $primary;
+}
+
+#bs-section.active #bs-link{
+  margin-left: 20px;
+  // font-size: 1.4em;
+}
+
+#bs-section.disabled #bs-link{
   margin-left: auto;
   margin-right: 20px;
   border: 2px;
   border-style: solid;
+}
+
+#bs-link {
   padding: 10px;
   border-radius: 10px;
   background-color: $primary-dark;
@@ -244,6 +273,16 @@ svg {
   user-select: none; /* Standard */
 
   color: white;
+}
+
+#bs-section.disabled a.delete{
+  display:none;
+}
+
+#bs-section.active a.delete {
+  margin-left: auto;
+  // margin-right: 0px;
+  // float:right;
 }
 
 </style>
