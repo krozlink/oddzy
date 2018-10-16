@@ -23,50 +23,30 @@
             <div v-if="selection.jockey" class="jockey"><span class="j-icon">J</span>{{selection.jockey}} {{selection.jockey_weight}}</div>
         </td>
         <td class="price fixed win">
-            <div :class="{
-                button: true,
-                'is-disable': race.status !== 'OPEN',
-                'odds-increased': race.status === 'OPEN' && winIncreased,
-                'odds-decreased': race.status === 'OPEN' && winDecreased,
-                }">
-                {{ priceWin }}
-            </div>
+            <price-button :selection="selection" :race="race" :meeting="meeting" :betType="'fixed'" :winType="'win'" :price="priceWin"></price-button>
         </td>
         <td class="price fixed place">
-            <div :class="{
-                button: true,
-                'is-disable': race.status !== 'OPEN',
-                'odds-increased': race.status === 'OPEN' && placeIncreased,
-                'odds-decreased': race.status === 'OPEN' && placeDecreased,
-                }">
-                {{ pricePlace }}
-            </div>
+            <price-button :selection="selection" :race="race" :meeting="meeting" :betType="'fixed'" :winType="'place'" :price="pricePlace"></price-button>
         </td>
         <td class="price tote win">
-            <div :class="{
-                button: true,
-                'is-disable': race.status !== 'OPEN'
-                }">
-                SP
-            </div>
+            <price-button :selection="selection" :race="race" :meeting="meeting" :betType="'tote'" :winType="'win'" :price="'SP'"></price-button>
         </td>
         <td class="price tote place">
-            <div :class="{
-                button: true,
-                'is-disable': race.status !== 'OPEN'
-                }">
-                SP
-            </div>
+            <price-button :selection="selection" :race="race" :meeting="meeting" :betType="'tote'" :winType="'place'" :price="'SP'"></price-button>
         </td>
     </tr>
 </template>
 
 <script>
 import test from '../../api/test-prices';
+import PriceButton from '../prices/PriceButton.vue';
 
 export default {
   name: 'RaceSelection',
   props: ['selection', 'race', 'meeting'],
+  components: {
+    PriceButton,
+  },
   computed: {
     open() {
       return this.race.status === 'OPEN';
@@ -113,22 +93,6 @@ export default {
         return p.place.price;
       }
       return this.getTestPrice(this.selection.number, false);
-    },
-    winIncreased() {
-      const p = this.$store.state.racing.prices[this.selection.number];
-      return p && p.win.change === 'increase';
-    },
-    winDecreased() {
-      const p = this.$store.state.racing.prices[this.selection.number];
-      return p && p.win.change === 'decrease';
-    },
-    placeIncreased() {
-      const p = this.$store.state.racing.prices[this.selection.number];
-      return p && p.place.change === 'increase';
-    },
-    placeDecreased() {
-      const p = this.$store.state.racing.prices[this.selection.number];
-      return p && p.place.change === 'decrease';
     },
   },
   methods: {

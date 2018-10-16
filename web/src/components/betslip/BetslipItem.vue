@@ -1,30 +1,48 @@
 <template>
-    <div class="card">
+    <div class="card" :class="{'readonly': readonly}">
       <div class="card-header-title">
         <div class="bsi-header">
           <div class="bsi-row">
             <div class="entrant">
               <div class="runner">
-                Redzel
+                {{this.bet.runner_name}}
               </div>
               <div class="meeting">
-                Flemington R6
+                {{this.bet.meeting_name}} R{{this.bet.meeting_number}}
               </div>
             </div>
             <div class="odds">
               <div class="price">
-                8.40
+                {{formatPrice}}
               </div>
               <div class="bet-type">
-                Win Fixed
+                {{ this.bet.win_type}} {{this.bet.bet_type}}
               </div>
             </div>
-            <button class="delete is-small"></button>
+            <button class="delete is-small" v-on:click="removeFromBetslip"></button>
           </div>
         </div>
       </div>
       <div class="card-content">
-        something
+        <div class="field has-addons">
+          <p class="control">
+            <a class="button is-static">$</a>
+          </p>
+          <p class="control">
+            <input
+              type="number"
+              v-model="amount"
+              class="input" min="0"
+              :class="{'is-danger': error}"
+              v-on:blur="validateError"
+              step="1"
+              placeholder="Amount"
+              :readonly="readonly"
+            >
+          </p>
+        </div>
+        <p class="help is-danger" v-if="error">{{this.bet.message}}</p>
+        <p class="help is-success" v-if="!error">Estimated Payout: ${{payout}}</p>
       </div>
     </div>
 </template>
@@ -32,15 +50,48 @@
 <script>
 export default {
   name: 'BetslipItem',
-  props: 'bet',
+  props: ['bet', 'readonly'],
   data() {
-    return {};
+    return {
+      valid: true,
+      message: '',
+    };
   },
   computed: {
+    error() {
+      return this.bet.message !== '';
+    },
+    amount: {
+      get() {
+        return this.$store.state.betslip.bets[this.bet.bet_id].amount;
+      },
+      set(value) {
+        this.$store.dispatch('betslip/updateBetAmount', {
+          betId: this.bet.bet_id,
+          amount: value,
+        });
+      },
+    },
+    formatPrice() {
+      if (this.bet.price < 10) {
+        return this.bet.price.toFixed(2);
+      }
 
+      return this.bet.price;
+    },
+    payout() {
+      return (this.amount * this.bet.price).toFixed(2);
+    },
   },
   methods: {
-
+    validateError() {
+      if (this.bet.message !== '') {
+        this.bet.validate();
+      }
+    },
+    removeFromBetslip() {
+      this.$store.dispatch('betslip/removeFromBetslip', this.bet.bet_id);
+    },
   },
 };
 </script>
@@ -51,6 +102,24 @@ export default {
   margin-left: 1px;
   margin-right: 1px;
 }
+
+.card.readonly {
+  background-color: #EEE;
+
+  input {
+    background-color: #E7E7E7;
+  }
+}
+
+.card-content {
+  padding: 10px;
+}
+
+.card-content p.help {
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
 .bsi-header {
   display:table;
   width: 100%;
@@ -62,6 +131,11 @@ export default {
 
 .bsi-row .delete {
   float:right;
+}
+
+.bsi-delete {
+  width: 16px;
+  height: 16px;
 }
 
 .entrant, .odds {
