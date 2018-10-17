@@ -73,5 +73,13 @@ web-update:
 	aws s3 sync ./web/dist s3://oddzy/web/dist --delete
 	aws ssm send-command --document-name oddzy-test-update-website --targets Key=tag:name,Values=oddzy
 
-make web-serve:
+web-serve:
 	cd ./web; npm run serve
+
+
+sl-update:
+	cd ./web; npm run build-sl
+	aws s3 sync ./web/dist s3://www.oddzy.xyz --delete
+
+sl-serve:
+	cd ./web; npm run serve-sl

@@ -52,13 +52,14 @@ const mutations = {
     state.show = !state.show;
   },
   addToBetslip(state, bet) {
-    // prevent duplicates
+    state.show = true;
     if (state.status === 'submitting') return;
+
+    // prevent duplicates
     if (state.bets[bet.bet_id]) return;
     Vue.set(state.bets, bet.bet_id, bet);
     Vue.set(state.message, 'type', '');
     Vue.set(state.message, 'lines', []);
-    state.show = true;
   },
   removeFromBetslip(state, betId) {
     if (state.status === 'submitting') return;

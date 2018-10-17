@@ -73,6 +73,9 @@ export default {
       },
     },
     formatPrice() {
+      if (this.bet.bet_type === 'tote') {
+        return 'SP';
+      }
       if (this.bet.price < 10) {
         return this.bet.price.toFixed(2);
       }

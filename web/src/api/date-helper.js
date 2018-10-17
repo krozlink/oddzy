@@ -93,7 +93,7 @@ function formatTimeRemaining(totalSeconds) {
 
   if (days > 0) {
     return `${prefix}${days}d ${hours}h`;
-  } else if (hours > 1) {
+  } else if (hours >= 1) {
     return `${prefix}${hours}h ${minutes}m`;
   } else if (minutes > 5) {
     return `${prefix}${minutes}m`;

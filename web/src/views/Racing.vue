@@ -4,6 +4,7 @@
       <div class="column is-one-third">
         <h4 class="title is-4">{{ racingTitle() }}</h4>
       </div>
+
       <div class="column">
         <nav class="level">
           <div class="level-left">
@@ -56,6 +57,21 @@
     <div v-if="loading">
       Loading
     </div>
+
+    <article id="test-notification" class="message is-warning" v-if="showTestNotification">
+      <div class="message-header">
+        <p>Live updates disabled</p>
+        <button class="delete" aria-label="delete" v-on:click="disableNotification"></button>
+      </div>
+      <div class="message-body">
+        <p>
+        Live racing data has been temporarily disabled.
+        </p>
+        <p>
+        Currently displaying sample test data.
+        </p>
+      </div>
+    </article>
 
     <div v-if="!loading">
       <schedule-section
@@ -126,12 +142,17 @@ export default {
       lastUpdate: 0,
       interval: {},
       time: 0,
+
+      firstTime: true,
     };
   },
 
   computed: {
     loading() {
       return this.$store.state.racing.loadingStatus !== 'successful';
+    },
+    showTestNotification() {
+      return this.firstTime && process.env.VUE_APP_SERVERLESS_ONLY;
     },
   },
 
@@ -155,7 +176,9 @@ export default {
   },
 
   methods: {
-
+    disableNotification() {
+      this.firstTime = false;
+    },
     getToday() {
       return DateHelper.formatDate(DateHelper.todayDate());
     },
@@ -218,6 +241,12 @@ export default {
   @media screen and (min-width: 1472px) {
     width:1100px;
   }
+}
+
+#test-notification{
+  float: left;
+  position: fixed;
+  left: 10px;
 }
 
 </style>

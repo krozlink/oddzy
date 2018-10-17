@@ -94,7 +94,7 @@ export default {
           max = m.race_ids.length;
         }
       });
-      return max;
+      return Math.max(8, max);
     },
     meetings() {
       return this.getMeetings(this.racetype, this.racedate, this.racelocal);
