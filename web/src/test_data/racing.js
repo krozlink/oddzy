@@ -34,8 +34,8 @@ function Today() {
         'race_id': '9baa715e-d57e-4ee5-885c-f23b09a7ac30',
         name: 'bet365 SV 3YO Fillies Maiden Plate',
         'number': 1,
-        'status': 'OPEN',
-        results: '',
+        'status': 'CLOSED',
+        'results': '3,4,8',
         scheduled_start: past(30),
         last_update: now(),
       }, {
