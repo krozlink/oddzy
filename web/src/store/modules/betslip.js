@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Util from '../../api/util';
+import Betslip from '../../api/betslip';
 
 const getters = {
 
@@ -19,17 +20,24 @@ const actions = {
   updateBetAmount({ commit }, data) {
     commit('updateBetAmount', data);
   },
-  submit({ commit, state }) {
+  submit({ commit, state, rootState }) {
     let isValid = true;
+
+    const error = Betslip.Validate(rootState);
+    if (error !== '') {
+      isValid = false;
+      commit('setMessage', {
+        lines: [error],
+        type: 'error',
+      });
+    }
+
     Object.values(state.bets).forEach((b) => {
       const msg = b.validate();
-      if (msg !== '') {
-        isValid = false;
-        commit('updateBetMessage', {
-          betId: b.bet_id,
-          message: msg,
-        });
-      }
+      commit('updateBetMessage', {
+        betId: b.bet_id,
+        message: msg,
+      });
     });
 
     if (!isValid) return;

@@ -7,9 +7,10 @@
 
       <article
         v-if="$store.state.betslip.message.type !== ''"
-        class="message is-success is-small"
+        class="message is-small"
         :class="{
           'is-success': $store.state.betslip.message.type === 'success',
+          'is-danger': $store.state.betslip.message.type === 'error',
         }"
       >
         <div class="message-body">
@@ -82,7 +83,6 @@ export default {
 
     p {
       font-size: 1.2em;
-      color: green;
     }
   }
 }
