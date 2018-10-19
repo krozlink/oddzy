@@ -8,6 +8,7 @@
                     <button
                         v-on:click="close"
                         class="delete"
+                        type="button"
                         aria-label="close"
                         :readonly="isReadonly">
                     </button>
