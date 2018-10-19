@@ -5,7 +5,7 @@
       <form>
         <header class="modal-card-head">
             <p class="modal-card-title">Create New Account</p>
-            <button v-on:click="close" :disabled="isReadonly" class="delete" aria-label="close"></button>
+            <button v-on:click="close" type="button" :disabled="isReadonly" class="delete" aria-label="close"></button>
         </header>
         <section class="modal-card-body">
           <div class="field is-horizontal">
@@ -88,7 +88,7 @@ export default {
         first_name: new InputValue('First Name', 'given_name', [Validation.Mandatory]),
         last_name: new InputValue('Last Name', 'family_name', [Validation.Mandatory]),
         email_address: new InputValue('Email Address', 'email', [Validation.Mandatory, Validation.EmailAddress]),
-        user_name: new InputValue('User Name', null, [Validation.Mandatory]),
+        user_name: new InputValue('User Name', null, []),
         password: new InputValue('Password', null, [Validation.Mandatory, Validation.Password], { type: 'password' }),
         confirm_password: new InputValue('Confirm Password', null, [this.validatePasswordsMatch], { type: 'password' }),
         address: new InputValue('Address', 'address', [Validation.Mandatory]),
@@ -152,6 +152,10 @@ export default {
         && Validation.MinimumAge(this.fields.date_of_birth, 18);
     },
 
+    validateUsername() {
+      console.log('custom username validation');
+    },
+
     validateAgree() {
       this.fields.agree.validate();
     },
@@ -161,18 +165,25 @@ export default {
     },
 
     validateAll() {
-      let isValid = true;
-      Object.values(this.fields).forEach((f) => {
+      return Promise.all(Object.values(this.fields).map((f) => {
         f.activate();
-        isValid = f.validate() && isValid;
-      });
-
-      return isValid;
+        return f.validate();
+      }));
     },
     register() {
-      if (this.validateAll()) {
-        this.$store.dispatch('account/register', this.fields);
-      }
+      this.validateAll()
+        .then((result) => {
+          let isValid = true;
+          result.forEach((r) => {
+            isValid = isValid && r;
+          });
+          if (isValid) {
+            this.$store.dispatch('account/register', this.fields);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     },
   },
 };

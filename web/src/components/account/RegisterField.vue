@@ -32,7 +32,7 @@ export default {
   },
   methods: {
     validate() {
-      this.field.validate();
+      return this.field.validate();
     },
     activate() {
       if (!this.readonly) {
