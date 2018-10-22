@@ -20,6 +20,8 @@
                                 id="login-user"
                                 class="input"
                                 type="text"
+                                name="username"
+                                autocomplete="username"
                                 placeholder="User Name"
                                 :readonly="isReadonly"
                                 v-model="username"
@@ -35,6 +37,8 @@
                             <input
                                 id="login-password"
                                 class="input"
+                                name="password"
+                                autocomplete="current-password"
                                 type="password"
                                 placeholder="Password"
                                 :readonly="isReadonly"

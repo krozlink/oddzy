@@ -1,13 +1,15 @@
 class InputValue {
-  constructor(name, attributeName, validators, options) {
+  constructor(description, name, autocomplete, attributeName, validators, options) {
     this.name = name;
+    this.autocomplete = autocomplete;
+    this.description = description;
     this.attribute_name = attributeName;
     this.raw_value = '';
     this.validators = validators;
     this.active = false;
     this.error = '';
     this.parser = null;
-    this.placeholder = name;
+    this.placeholder = description;
     this.type = 'text';
 
     if (options !== undefined && options.parser !== undefined) {

@@ -1,13 +1,15 @@
 <template>
     <div class="field">
         <div class="label-container">
-            <label class="label">{{ field.name }}</label>
+            <label class="label">{{ field.description }}</label>
             <div class="error">{{ field.error }}</div>
         </div>
         <div class="control">
             <input class="input"
                 v-on:blur="validate"
                 v-on:focus="activate"
+                :name="field.name"
+                :autocomplete="field.autocomplete"
                 :type = "field.type"
                 v-model="field.raw_value"
                 :placeholder="field.placeholder"

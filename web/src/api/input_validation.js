@@ -3,10 +3,10 @@ import DateHelper from './date-helper';
 function Mandatory(field) {
   field.clearError();
   if (field.raw_value.trim() === '') {
-    field.setError(`${field.name} is mandatory`);
+    field.setError(`${field.description} is mandatory`);
   }
 
-  return Promise.resolve(field.isValid());
+  return field.isValid();
 }
 
 function Match(password, confirm) {
@@ -15,7 +15,7 @@ function Match(password, confirm) {
     confirm.setError('Passwords do not match');
   }
 
-  return Promise.resolve(confirm.isValid());
+  return confirm.isValid();
 }
 
 function IsTrue(field, message) {
@@ -23,7 +23,7 @@ function IsTrue(field, message) {
   if (!field.raw_value) {
     field.setError(message);
   }
-  return Promise.resolve(field.isValid());
+  return field.isValid();
 }
 
 function EmailAddress(field) {
@@ -34,7 +34,7 @@ function EmailAddress(field) {
     field.setError('Not a valid email address');
   }
 
-  return Promise.resolve(field.isValid());
+  return field.isValid();
 }
 
 function MobileNumber(field) {
@@ -45,7 +45,7 @@ function MobileNumber(field) {
     field.setError('Invalid mobile (04xxxxxxxx)');
   }
 
-  return Promise.resolve(field.isValid());
+  return field.isValid();
 }
 
 
@@ -56,7 +56,7 @@ function IsDate(field) {
     field.setError('Invalid date (DD/MM/YYYY)');
   }
 
-  return Promise.resolve(field.isValid());
+  return field.isValid();
 }
 
 function MinimumAge(field, age) {
@@ -70,7 +70,7 @@ function MinimumAge(field, age) {
     field.setError('Must be at least 18 years old');
   }
 
-  return Promise.resolve(field.isValid());
+  return field.isValid();
 }
 
 function Password(field) {
@@ -80,7 +80,7 @@ function Password(field) {
     field.setError('Must be at least 8 letters');
   }
 
-  return Promise.resolve(field.isValid());
+  return field.isValid();
 }
 
 export default {

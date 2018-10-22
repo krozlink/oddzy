@@ -85,15 +85,15 @@ export default {
   data() {
     return {
       fields: {
-        first_name: new InputValue('First Name', 'given_name', [Validation.Mandatory]),
-        last_name: new InputValue('Last Name', 'family_name', [Validation.Mandatory]),
-        email_address: new InputValue('Email Address', 'email', [Validation.Mandatory, Validation.EmailAddress]),
-        user_name: new InputValue('User Name', null, []),
-        password: new InputValue('Password', null, [Validation.Mandatory, Validation.Password], { type: 'password' }),
-        confirm_password: new InputValue('Confirm Password', null, [this.validatePasswordsMatch], { type: 'password' }),
-        address: new InputValue('Address', 'address', [Validation.Mandatory]),
-        date_of_birth: new InputValue('Date of Birth', 'birthdate', [this.validateDOB], this.dobOptions()),
-        mobile_number: new InputValue('Mobile Number', 'phone_number', [Validation.Mandatory, Validation.MobileNumber], this.mobileOptions()),
+        first_name: new InputValue('First Name', 'fname', 'given-name', 'given_name', [Validation.Mandatory]),
+        last_name: new InputValue('Last Name', 'lname', 'family-name', 'family_name', [Validation.Mandatory]),
+        email_address: new InputValue('Email Address', 'email', 'email', 'email', [Validation.Mandatory, Validation.EmailAddress]),
+        user_name: new InputValue('User Name', 'username', 'username', null, [Validation.Mandatory]),
+        password: new InputValue('Password', 'password', 'new-password', null, [Validation.Mandatory, Validation.Password], { type: 'password' }),
+        confirm_password: new InputValue('Confirm Password', '', '', null, [this.validatePasswordsMatch], { type: 'password' }),
+        address: new InputValue('Address', 'address', 'street-address', 'address', [Validation.Mandatory]),
+        date_of_birth: new InputValue('Date of Birth', 'dob', 'bday', 'birthdate', [this.validateDOB], this.dobOptions()),
+        mobile_number: new InputValue('Mobile Number', 'mobile', 'tel', 'phone_number', [Validation.Mandatory, Validation.MobileNumber], this.mobileOptions()),
         agree: new InputValue('Agree', null, [this.validateIAgreeSelected], { type: 'checkbox' }),
       },
     };
@@ -116,10 +116,6 @@ export default {
       Object.values(this.fields).forEach((f) => {
         f.reset();
       });
-    },
-
-    checkUsername() {
-      // TODO - ensure username is unique
     },
 
     mobileOptions() {
@@ -152,10 +148,6 @@ export default {
         && Validation.MinimumAge(this.fields.date_of_birth, 18);
     },
 
-    validateUsername() {
-      console.log('custom username validation');
-    },
-
     validateAgree() {
       this.fields.agree.validate();
     },
@@ -165,25 +157,18 @@ export default {
     },
 
     validateAll() {
-      return Promise.all(Object.values(this.fields).map((f) => {
+      let isValid = true;
+      Object.values(this.fields).forEach((f) => {
         f.activate();
-        return f.validate();
-      }));
+        isValid = f.validate() && isValid;
+      });
+
+      return isValid;
     },
     register() {
-      this.validateAll()
-        .then((result) => {
-          let isValid = true;
-          result.forEach((r) => {
-            isValid = isValid && r;
-          });
-          if (isValid) {
-            this.$store.dispatch('account/register', this.fields);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      if (this.validateAll()) {
+        this.$store.dispatch('account/register', this.fields);
+      }
     },
   },
 };
@@ -206,18 +191,5 @@ header.modal-card-head {
   font-size: 0.7em;
   color: red;
 }
-
-.password-instruction {
-  font-size: 0.7em;
-  // line-height: 16px;
-  // flex-grow: 1;
-  // flex-shrink: 1;
-  // margin-bottom: 0px;
-  // position: relative;
-  // max-width: 100%;
-  width: 290px;
-  align-items: flex-start;
-}
-
 
 </style>
