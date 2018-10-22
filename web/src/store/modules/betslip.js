@@ -20,7 +20,26 @@ const actions = {
   updateBetAmount({ commit }, data) {
     commit('updateBetAmount', data);
   },
-  submit({ commit, state, rootState }) {
+
+  confirm({ commit }) {
+    commit('updateStatus', Betslip.STATUS.SUBMITTING);
+    setTimeout(() => {
+      commit('betSuccessful');
+
+      const ref = Util.Random(100000, 999999);
+      commit('setMessage', {
+        lines: ['Bet successfully placed', `Reference No. ${ref}`],
+        type: 'success',
+      });
+    }, 1000);
+  },
+
+  cancel({ commit }) {
+    commit('updateStatus', Betslip.STATUS.UNPLACED);
+  },
+
+
+  place({ commit, state, rootState }) {
     let isValid = true;
 
     const error = Betslip.Validate(rootState);
@@ -38,20 +57,13 @@ const actions = {
         betId: b.bet_id,
         message: msg,
       });
+
+      if (msg) isValid = false;
     });
 
     if (!isValid) return;
 
-    commit('updateStatus', 'submitting');
-    setTimeout(() => {
-      commit('betSuccessful');
-
-      const ref = Util.Random(100000, 999999);
-      commit('setMessage', {
-        lines: ['Bet successfully placed', `Reference No. ${ref}`],
-        type: 'success',
-      });
-    }, 1000);
+    commit('updateStatus', Betslip.STATUS.UNCONFIRMED);
   },
 };
 
@@ -61,7 +73,7 @@ const mutations = {
   },
   addToBetslip(state, bet) {
     state.show = true;
-    if (state.status === 'submitting') return;
+    if (state.status === Betslip.STATUS.SUBMITTING) return;
 
     // prevent duplicates
     if (state.bets[bet.bet_id]) return;
@@ -70,13 +82,13 @@ const mutations = {
     Vue.set(state.message, 'lines', []);
   },
   removeFromBetslip(state, betId) {
-    if (state.status === 'submitting') return;
+    if (state.status === Betslip.STATUS.SUBMITTING) return;
     if (state.bets[betId]) {
       Vue.delete(state.bets, betId);
     }
   },
   updateBetAmount(state, { betId, amount }) {
-    if (state.status === 'submitting') return;
+    if (state.status === Betslip.STATUS.SUBMITTING) return;
     Vue.set(state.bets[betId], 'amount', amount);
   },
   updateStatus(state, status) {

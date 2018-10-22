@@ -18,7 +18,7 @@
         </div>
       </article>
 
-      <betslip-item :key="bet.bet_id" :bet="bet" v-for="bet in $store.state.betslip.bets" :readonly="readonly"></betslip-item>
+      <betslip-item :key="bet.bet_id" :bet="bet" v-for="bet in $store.state.betslip.bets"></betslip-item>
 
       <div id="bs-footer" class="card" v-if="Object.keys($store.state.betslip.bets).length > 0">
         <div id="bs-summary">
@@ -29,16 +29,30 @@
           Total Payout: <span class="bs-payout">{{totalPayout}}</span>
           </p>
         </div>
-        <a class="button is-primary"
-          :class="{'is-loading': this.$store.state.betslip.status === 'submitting'}"
+
+        <a v-if="isUnplaced" class="button is-primary"
+          :class="{'is-loading': isSubmitting}"
           v-on:click="placeBets"
         >Place Bets</a>
+
+        <div v-if="isUnconfirmed || isSubmitting" class="unconfirmed buttons has-addons" >
+          <a class="button is-primary"
+            :disabled="isSubmitting"
+            v-on:click="cancelBets"
+          >Cancel</a>
+
+          <a class="button is-primary"
+            :class="{'is-loading': isSubmitting}"
+            v-on:click="confirmBets"
+          >Confirm</a>
+        </div>
       </div>
     </div>
 </template>
 
 <script>
 import BetslipItem from './BetslipItem.vue';
+import Betslip from '../../api/betslip';
 
 export default {
   components: {
@@ -51,17 +65,32 @@ export default {
     totalPayout() {
       let total = 0;
       Object.values(this.$store.state.betslip.bets).forEach((b) => {
-        total += b.amount * b.price;
+        total += b.bet_type === 'tote' ? 0 : (b.amount * b.price);
       });
       return `$${total.toFixed(2)}`;
     },
-    readonly() {
-      return this.$store.state.betslip.status === 'submitting';
+    isSubmitting() {
+      return this.$store.state.betslip.status === Betslip.STATUS.SUBMITTING;
+    },
+    isUnconfirmed() {
+      return this.$store.state.betslip.status === Betslip.STATUS.UNCONFIRMED;
+    },
+    isConfirmed() {
+      return this.$store.state.betslip.status === Betslip.STATUS.CONFIRMED;
+    },
+    isUnplaced() {
+      return this.$store.state.betslip.status === Betslip.STATUS.UNPLACED;
     },
   },
   methods: {
     placeBets() {
-      this.$store.dispatch('betslip/submit');
+      this.$store.dispatch('betslip/place');
+    },
+    confirmBets() {
+      this.$store.dispatch('betslip/confirm');
+    },
+    cancelBets() {
+      this.$store.dispatch('betslip/cancel');
     },
   },
 };
@@ -96,6 +125,13 @@ export default {
 
   background-color: white;
 
+  .unconfirmed {
+    width: 100%;
+
+    .button {
+      width: 50%;
+    }
+  }
 
   .button {
     width: 100%;

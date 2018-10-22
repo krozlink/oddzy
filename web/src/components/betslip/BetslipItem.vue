@@ -1,5 +1,5 @@
 <template>
-    <div class="card" :class="{'readonly': readonly}">
+    <div class="card" :class="{'readonly': isReadonly}">
       <div class="card-header-title">
         <div class="bsi-header">
           <div class="bsi-row">
@@ -37,20 +37,22 @@
               v-on:blur="validateError"
               step="1"
               placeholder="Amount"
-              :readonly="readonly"
+              :readonly="isReadonly"
             >
           </p>
         </div>
         <p class="help is-danger" v-if="error">{{this.bet.message}}</p>
-        <p class="help is-success" v-if="!error">Estimated Payout: ${{payout}}</p>
+        <p class="help is-success" v-if="!error && this.bet.bet_type !== 'tote'">Estimated Payout: {{payout}}</p>
       </div>
     </div>
 </template>
 
 <script>
+import Betslip from '../../api/betslip';
+
 export default {
   name: 'BetslipItem',
-  props: ['bet', 'readonly'],
+  props: ['bet'],
   data() {
     return {
       valid: true,
@@ -84,6 +86,11 @@ export default {
     },
     payout() {
       return (this.amount * this.bet.price).toFixed(2);
+    },
+    isReadonly() {
+      const { status } = this.$store.state.betslip;
+      return status === Betslip.STATUS.UNCONFIRMED
+        || status === Betslip.STATUS.SUBMITTING;
     },
   },
   methods: {
