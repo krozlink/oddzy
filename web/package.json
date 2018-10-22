@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "serve-sl": "vue-cli-service serve --mode serverless",
+    "serve-sl": "vue-cli-service serve --mode serverless-dev",
     "build": "vue-cli-service build",
-    "build-sl": "vue-cli-service build --mode serverless",
+    "build-sl": "vue-cli-service build --mode serverless-prod",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
