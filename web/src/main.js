@@ -19,3 +19,8 @@ new Vue({
   store,
   render: h => h(App),
 }).$mount('#app');
+
+window.addEventListener('resize', () => {
+  console.log(`window dimensions: ${document.body.clientWidth}x${document.body.clientHeight}`);
+  console.log(`screen dimensions: ${window.screen.width}x${window.screen.height}`);
+});

@@ -6,8 +6,15 @@
         </div>
         <div class="control">
             <input class="input"
-                v-on:blur="validate"
-                v-on:focus="activate"
+                @blur="validate"
+                @focus="activate"
+                @paste="onEvent"
+                @animationstart="onEvent"
+                @webkitAnimationStart="onEvent"
+                @keypress="onEvent"
+                @input="onEvent"
+
+                ref="input"
                 :name="field.name"
                 :autocomplete="field.autocomplete"
                 :type = "field.type"
@@ -21,12 +28,17 @@
 </template>
 
 <script>
+import { InputTracker } from '../../api/tracking';
+
 export default {
   name: 'RegisterField',
-  props: ['field', 'readonly'],
+  props: {
+    field: Object,
+    readonly: Boolean,
+  },
   data() {
     return {
-
+      tracker: new InputTracker(this.field.name, this.onAction),
     };
   },
   computed: {
@@ -41,6 +53,19 @@ export default {
         this.field.activate();
       }
     },
+    onEvent(e) {
+      this.tracker.onEvent(e);
+    },
+    onAction(action) {
+      // console.log(tracker);
+      console.log(`${action.name} - ${action.type} action with new value '${action.value}'`);
+    },
+  },
+  mounted() {
+    this.$refs.input.addEventListener('animationend', this.animend);
+  },
+  beforeDestroy() {
+    this.$refs.input.removeEventListener('animationend', this.animend);
   },
 };
 </script>
@@ -61,5 +86,21 @@ export default {
 
 input.input {
   width: 290px;
+}
+
+@keyframes onAutoFillStart {  from {/**/}  to {/**/}}
+@keyframes onAutoFillCancel {  from {/**/}  to {/**/}}
+input:-webkit-autofill {
+    // Expose a hook for JavaScript when autofill is shown
+    // JavaScript can capture 'animationstart' events
+    animation-name: onAutoFillStart;
+
+    // Make the background color become yellow really slowly
+    transition: background-color 50000s ease-in-out 0s;
+}
+input:not(:-webkit-autofill) {
+    // Expose a hook for JS onAutoFillCancel
+    // JavaScript can capture 'animationstart' events
+    animation-name: onAutoFillCancel;
 }
 </style>
