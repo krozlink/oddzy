@@ -94,7 +94,7 @@ export default {
         address: new InputValue('Address', 'address', 'street-address', 'address', [Validation.Mandatory]),
         date_of_birth: new InputValue('Date of Birth', 'dob', 'bday', 'birthdate', [this.validateDOB], this.dobOptions()),
         mobile_number: new InputValue('Mobile Number', 'mobile', 'tel', 'phone_number', [Validation.Mandatory, Validation.MobileNumber], this.mobileOptions()),
-        agree: new InputValue('Agree', null, [this.validateIAgreeSelected], { type: 'checkbox' }),
+        agree: new InputValue('Agree', 'agree', '', null, [this.validateIAgreeSelected], { type: 'checkbox' }),
       },
     };
   },
