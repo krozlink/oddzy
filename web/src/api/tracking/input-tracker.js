@@ -3,6 +3,7 @@ const ACTION_TYPE = {
   AUTOFILL: 'autofill',
   CLEAR: 'clear',
   PASTE: 'paste',
+  UNDO: 'undo',
 };
 
 const INPUT_TIMEOUT = 10;
@@ -10,6 +11,8 @@ const INPUT_TIMEOUT = 10;
 function parseAction({ name, events }) {
   const clearEvents = events.filter(e => e.constructor.name === 'InputEvent'
     && (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteWordBackward'));
+  const undoEvents = events.filter(e => e.constructor.name === 'InputEvent'
+    && (e.inputType === 'historyUndo'));
   const pressEvents = events.filter(e => e.constructor.name === 'KeyboardEvent');
   const pasteEvents = events.filter(e => e.constructor.name === 'ClipboardEvent');
   const autoFillEvents = events.filter(e => e.constructor.name === 'Event');
@@ -29,6 +32,9 @@ function parseAction({ name, events }) {
   } else if (autoFillEvents.length > 0) {
     type = ACTION_TYPE.AUTOFILL;
     val = autoFillEvents[0].target.value;
+  } else if (undoEvents.length > 0) {
+    type = ACTION_TYPE.UNDO;
+    val = undoEvents[0].target.value;
   }
 
   if (type === '') return null;
@@ -58,9 +64,9 @@ class InputTracker {
     this.timeout = setTimeout(() => {
       context.active = false;
       context.timeout = null;
-      const action = parseAction(context);
-      if (action) {
-        context.finaliser(action);
+      const inputAction = parseAction(context);
+      if (inputAction) {
+        context.finaliser(inputAction);
       }
       context.events = [];
     }, INPUT_TIMEOUT);

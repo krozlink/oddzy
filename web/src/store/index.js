@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import racing from './modules/racing';
 import account from './modules/account';
 import betslip from './modules/betslip';
+import tracker from './modules/tracker';
 
 Vue.use(Vuex);
 
@@ -13,6 +14,7 @@ export default new Vuex.Store({
     racing,
     account,
     betslip,
+    tracker,
   },
   strict: debug,
   state: {

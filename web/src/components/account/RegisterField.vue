@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { InputTracker } from '../../api/tracking';
+import InputTracker from '../../api/tracking/input-tracker';
 
 export default {
   name: 'RegisterField',
@@ -57,6 +57,7 @@ export default {
       this.tracker.onEvent(e);
     },
     onAction(action) {
+      this.$store.dispatch('tracker/push', action);
       // console.log(tracker);
       console.log(`${action.name} - ${action.type} action with new value '${action.value}'`);
     },
