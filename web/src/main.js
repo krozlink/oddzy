@@ -8,6 +8,11 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
+import Tracker from './api/tracking';
+
+const tracker = new Tracker(store);
+tracker.Start();
+
 if (!process.env.VUE_APP_SERVERLESS_ONLY) {
   Vue.use(VueSocketio, `${process.env.VUE_APP_SOCKETIO}/prices`, store);
 }

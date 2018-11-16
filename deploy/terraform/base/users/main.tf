@@ -1,3 +1,7 @@
+// AWS Account ID
+data "aws_caller_identity" "current" {}
+
+
 resource "aws_dynamodb_table" "users" {
   name = "${var.application_name}-${var.application_stage}-users"
   hash_key = "user_id"

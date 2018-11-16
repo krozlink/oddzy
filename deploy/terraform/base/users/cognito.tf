@@ -136,11 +136,119 @@ resource "aws_cognito_user_pool_domain" "users" {
 
 resource "aws_cognito_identity_pool" "users" {
     identity_pool_name = "${var.application_name} ${var.application_stage}"
-    allow_unauthenticated_identities = false
+    allow_unauthenticated_identities = true,
 
     cognito_identity_providers {
         client_id = "${aws_cognito_user_pool_client.users.id}"
         provider_name = "${aws_cognito_user_pool.users.endpoint}"
         server_side_token_check = false
     }
+}
+
+
+resource "aws_iam_role" "authenticated" {
+  name = "cognito_authenticated"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "cognito-identity.amazonaws.com:aud": "${aws_cognito_identity_pool.users.id}"
+        },
+        "ForAnyValue:StringLike": {
+          "cognito-identity.amazonaws.com:amr": "authenticated"
+        }
+      }
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "unauthenticated" {
+  name = "cognito_unauthenticated"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+       "Principal": {
+         "Federated": "cognito-identity.amazonaws.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "cognito-identity.amazonaws.com:aud": "${aws_cognito_identity_pool.users.id}"
+        },
+        "ForAnyValue:StringLike": {
+          "cognito-identity.amazonaws.com:amr": "unauthenticated"
+        }
+      }
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "authenticated" {
+  name = "authenticated_policy"
+  role = "${aws_iam_role.authenticated.id}"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "firehose:PutRecordBatch"
+      ],
+      "Resource": [
+        "arn:aws:firehose:${var.region}:${data.aws_caller_identity.current.account_id}:deliverystream/${var.application_name}-${var.application_stage}-tracking"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "unauthenticated" {
+  name = "unauthenticated_policy"
+  role = "${aws_iam_role.unauthenticated.id}"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "firehose:PutRecordBatch"
+      ],
+      "Resource": [
+        "arn:aws:firehose:${var.region}:${data.aws_caller_identity.current.account_id}:deliverystream/${var.application_name}-${var.application_stage}-tracking"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_cognito_identity_pool_roles_attachment" "main" {
+  identity_pool_id = "${aws_cognito_identity_pool.users.id}"
+
+  roles {
+    "authenticated" = "${aws_iam_role.authenticated.arn}"
+    "unauthenticated" = "${aws_iam_role.unauthenticated.arn}"
+  }
 }

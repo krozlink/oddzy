@@ -1,10 +1,9 @@
 class Action {
-  constructor(area, type, actionData, metaData) {
-    this.timestamp = new Date();
-    this.area = area;
-    this.type = type;
+  constructor(area, type, actionData) {
+    this.timestamp = new Date().getTime();
+    this.area = area; // e.g Betslip, Register, Login
+    this.type = type; // e.g Username field
     this.data = actionData;
-    this.metadata = metaData;
   }
 }
 
