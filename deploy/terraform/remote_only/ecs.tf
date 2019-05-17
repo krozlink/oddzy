@@ -10,6 +10,7 @@ data "aws_ami" "ecs_ami" {
     values = ["amzn-ami-*-amazon-ecs-optimized"]
   }
 
+  owners = ["amazon"]
   most_recent = true
 }
 
@@ -80,7 +81,7 @@ runcmd:
   - mkdir -p /etc/nginx
 
   # Read httpasswd file contents from an encrypted KMS secret and save it to the nginx container volume
-  - aws ssm get-parameter --name ${var.internal_password_parameter} --with-decryption --output text --region ${var.region} | awk '{print $4}' | sudo tee /etc/nginx/.htpasswd > /dev/null
+  - aws ssm get-parameter --name ${var.internal_password_parameter} --with-decryption --output text --region ${var.region} | awk '{print $6}' | sudo tee /etc/nginx/.htpasswd > /dev/null
 
   # Update the website volume with the latest version from s3
   - aws s3 sync s3://oddzy/web/dist /mnt/efs/website/oddzy --delete

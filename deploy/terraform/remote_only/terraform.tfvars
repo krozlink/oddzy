@@ -6,7 +6,7 @@ region = "ap-southeast-2"
 
 repository = "675679404987.dkr.ecr.ap-southeast-2.amazonaws.com/"
 
-efs_volume = "fs-1da46724"
+efs_volume = "fs-2534471c"
 
 domain_name = "oddzy.xyz"
 

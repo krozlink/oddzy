@@ -1,6 +1,6 @@
 // EC2 instance deployed to the public subnet - used as a jump box for testing
 resource aws_instance testing {
-  ami                         = "ami-d48623b6"
+  ami                         = "ami-04c715c762e2de351"
   instance_type               = "t2.medium"
   availability_zone           = "ap-southeast-2a"
   associate_public_ip_address = true
